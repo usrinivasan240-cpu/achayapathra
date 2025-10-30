@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { UserAuthForm } from '@/components/auth/user-auth-form';
+import { UserAuthFormTabs } from '@/components/auth/user-auth-form-tabs';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function AuthenticationPage() {
@@ -17,7 +17,7 @@ export default function AuthenticationPage() {
               Sign in to share and receive with your community
             </p>
           </div>
-          <UserAuthForm />
+          <UserAuthFormTabs />
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{' '}
             <Link href="#" className="underline">

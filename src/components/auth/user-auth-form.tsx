@@ -8,9 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Github, Phone } from 'lucide-react';
 import Link from 'next/link';
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
+  role: 'donor' | 'receiver' | 'volunteer';
+}
 
-export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+export function UserAuthForm({ className, role, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   async function onSubmit(event: React.SyntheticEvent) {
@@ -71,7 +73,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                   ></path>
                 </svg>
               )}
-              Sign In with Email
+              Sign In as {role.charAt(0).toUpperCase() + role.slice(1)}
             </Button>
           </Link>
         </div>
