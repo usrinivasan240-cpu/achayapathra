@@ -15,6 +15,8 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
 export function UserAuthForm({ className, role, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
+  const redirectUrl = role === 'receiver' ? '/receiver-dashboard' : '/dashboard';
+
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
     setIsLoading(true);
@@ -49,7 +51,7 @@ export function UserAuthForm({ className, role, ...props }: UserAuthFormProps) {
               placeholder="••••••••"
             />
           </div>
-          <Link href="/dashboard">
+          <Link href={redirectUrl}>
             <Button disabled={isLoading} className="w-full" type="submit">
               {isLoading && (
                 <svg
