@@ -128,6 +128,11 @@ export default function VolunteerDashboardPage() {
     );
   };
 
+  const getDirectionsUrl = (donation: Donation) => {
+    if (!location.coords) return `https://www.google.com/maps/search/?api=1&query=${donation.lat},${donation.lng}`;
+    return `https://www.google.com/maps/dir/?api=1&origin=${location.coords.latitude},${location.coords.longitude}&destination=${donation.lat},${donation.lng}`;
+  }
+
   return (
     <>
       <Header title="Volunteer Dashboard" />
@@ -203,7 +208,7 @@ export default function VolunteerDashboardPage() {
                             {donation.distance.toFixed(2)} km away
                           </Badge>
                           <Button size="sm" asChild>
-                            <Link href={`/donations/${donation.id}`}>
+                            <Link href={getDirectionsUrl(donation)} target="_blank" rel="noopener noreferrer">
                                 <Route className='mr-2' />
                                 View Route
                             </Link>
