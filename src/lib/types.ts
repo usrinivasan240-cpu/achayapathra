@@ -7,6 +7,8 @@ export type Donation = {
   expires: Date;
   donor: User;
   location: string;
+  lat: number;
+  lng: number;
 };
 
 export type User = {
