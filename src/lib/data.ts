@@ -5,11 +5,11 @@ import { PlaceHolderImages } from './placeholder-images';
 const findImage = (id: string) => PlaceHolderImages.find((img) => img.id === id)?.imageUrl || '';
 
 export const mockUsers: User[] = [
-  { id: '1', name: 'Olivia Martin', email: 'olivia.martin@email.com', points: 1250, avatarUrl: findImage('user-avatar-1') },
-  { id: '2', name: 'Jackson Lee', email: 'jackson.lee@email.com', points: 1100, avatarUrl: findImage('user-avatar-2') },
-  { id: '3', name: 'Isabella Nguyen', email: 'isabella.nguyen@email.com', points: 980, avatarUrl: findImage('user-avatar-3') },
-  { id: '4', name: 'William Kim', email: 'william.kim@email.com', points: 950, avatarUrl: findImage('user-avatar-4') },
-  { id: '5', name: 'Sofia Davis', email: 'sofia.davis@email.com', points: 870, avatarUrl: findImage('user-avatar-5') },
+  { id: '1', name: 'Olivia Martin', email: 'olivia.martin@email.com', points: 1250, avatarUrl: findImage('user-avatar-1'), phone: '+91 98765 43210' },
+  { id: '2', name: 'Jackson Lee', email: 'jackson.lee@email.com', points: 1100, avatarUrl: findImage('user-avatar-2'), phone: '+91 98765 43211' },
+  { id: '3', name: 'Isabella Nguyen', email: 'isabella.nguyen@email.com', points: 980, avatarUrl: findImage('user-avatar-3'), phone: '+91 98765 43212' },
+  { id: '4', name: 'William Kim', email: 'william.kim@email.com', points: 950, avatarUrl: findImage('user-avatar-4'), phone: '+91 98765 43213' },
+  { id: '5', name: 'Sofia Davis', email: 'sofia.davis@email.com', points: 870, avatarUrl: findImage('user-avatar-5'), phone: '+91 98765 43214' },
 ];
 
 export const mockDonations: Donation[] = [

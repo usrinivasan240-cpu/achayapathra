@@ -1,13 +1,11 @@
+
 export type Donation = {
   id: string;
   foodName: string;
   quantity: string;
   status: 'Available' | 'Claimed' | 'Delivered' | 'Pending';
   expires: Date;
-  donor: {
-    name: string;
-    avatarUrl: string;
-  };
+  donor: User;
   location: string;
 };
 
@@ -17,4 +15,5 @@ export type User = {
   email: string;
   points: number;
   avatarUrl: string;
+  phone: string;
 };

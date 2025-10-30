@@ -1,7 +1,9 @@
+
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
+import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -76,7 +78,9 @@ export const columns: ColumnDef<Donation>[] = [
               Copy donation ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View details</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/donations/${donation.id}`}>View details</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem>Claim donation</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
