@@ -63,19 +63,19 @@
     {
       "id": "impact-gallery-1",
       "description": "A volunteer cheerfully handing a meal to a smiling recipient.",
-      "imageUrl": "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx2b2x1bnRlZXIlMjBmb29kfGVufDB8fHx8fDE3NjE4NTIzNDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1593113616828-6f22bca04804?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx2b2x1bnRlZXIlMjBmb29kfGVufDB8fHx8MTc2MTg1NTIwNXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "volunteer food"
     },
     {
       "id": "impact-gallery-2",
       "description": "A group of happy children eating together, showing the positive result of food donations.",
-      "imageUrl": "https://images.unsplash.com/photo-1517596001198-35661a7051fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjaGlsZHJlbiUyMGVhdGluZ3xlbnwwfHx8fDE3NjE4NTIzNDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1563263427-708318a97183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjaGlsZHJlbiUyMGVhdGluZ3xlbnwwfHx8fDE3NjE4NTUyMDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "children eating"
     },
     {
       "id": "impact-gallery-3",
       "description": "A large quantity of packed meals ready for distribution, illustrating the scale of impact.",
-      "imageUrl": "https://images.unsplash.com/photo-1582494115233-add35b891547?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmZWVkJTIwdGhlJTIwaG9tZWxlc3N8ZW58MHx8fHwxNzYxODUyMzQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1609915437016-85693e56470f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwYWNrZWQlMjBtZWFsc3xlbnwwfHx8fDE3NjE4NTUyMDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "packed meals"
     }
   ]
