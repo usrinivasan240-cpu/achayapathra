@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Loader2, ShieldCheck, ShieldX } from 'lucide-react';
+import { Calendar as CalendarIcon, Loader2, ShieldCheck, ShieldX, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -35,6 +35,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),
@@ -51,6 +52,8 @@ type AISafetyCheckState = 'idle' | 'checking' | 'safe' | 'unsafe';
 export default function NewDonationPage() {
   const [aiState, setAiState] = React.useState<AISafetyCheckState>('idle');
   const [progress, setProgress] = React.useState(0);
+  const [isGettingLocation, setIsGettingLocation] = React.useState(false);
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -60,6 +63,43 @@ export default function NewDonationPage() {
       location: '',
     },
   });
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        variant: 'destructive',
+        title: 'Geolocation not supported',
+        description: 'Your browser does not support geolocation.',
+      });
+      return;
+    }
+    setIsGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // In a real app, you would use a reverse geocoding service here
+        // to convert lat/lng to a human-readable address.
+        const { latitude, longitude } = position.coords;
+        const address = `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`;
+        form.setValue('location', address);
+        setIsGettingLocation(false);
+        toast({
+          title: 'Location Found',
+          description: 'Your current location has been filled in.',
+        });
+      },
+      (error) => {
+        setIsGettingLocation(false);
+        toast({
+          variant: 'destructive',
+          title: 'Geolocation Error',
+          description:
+            'Could not retrieve your location. Please ensure you have granted location permissions.',
+        });
+        console.error('Geolocation error:', error);
+      }
+    );
+  };
+
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setAiState('checking');
@@ -190,9 +230,15 @@ export default function NewDonationPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Pickup Location</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., 123 Main St, Anytown" {...field} />
-                          </FormControl>
+                           <div className="flex gap-2">
+                            <FormControl>
+                                <Input placeholder="e.g., 123 Main St, Anytown" {...field} />
+                            </FormControl>
+                            <Button type="button" variant="outline" size="icon" onClick={handleUseCurrentLocation} disabled={isGettingLocation}>
+                                {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
+                                <span className="sr-only">Use Current Location</span>
+                            </Button>
+                           </div>
                           <FormMessage />
                         </FormItem>
                       )}
