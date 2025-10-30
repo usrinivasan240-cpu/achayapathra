@@ -15,7 +15,12 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
 export function UserAuthForm({ className, role, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
-  const redirectUrl = role === 'receiver' ? '/receiver-dashboard' : '/dashboard';
+  let redirectUrl = '/dashboard';
+  if (role === 'receiver') {
+    redirectUrl = '/receiver-dashboard';
+  } else if (role === 'volunteer') {
+    redirectUrl = '/volunteer-dashboard';
+  }
 
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
