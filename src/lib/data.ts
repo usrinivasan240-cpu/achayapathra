@@ -1,3 +1,4 @@
+
 import { Donation, User } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
@@ -19,7 +20,7 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     expires: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
     donor: mockUsers[0],
-    location: 'Greenwood Community Center'
+    location: '123, Gandhi Road, T. Nagar, Chennai'
   },
   {
     id: 'DON002',
@@ -28,7 +29,7 @@ export const mockDonations: Donation[] = [
     status: 'Claimed',
     expires: new Date(new Date().getTime() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
     donor: mockUsers[1],
-    location: 'Downtown Shelter'
+    location: '45, Big Bazaar Street, Coimbatore'
   },
   {
     id: 'DON003',
@@ -37,7 +38,7 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     expires: new Date(new Date().getTime() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
     donor: mockUsers[2],
-    location: 'Eastside Clinic'
+    location: '789, West Masi Street, Madurai'
   },
   {
     id: 'DON004',
@@ -46,7 +47,7 @@ export const mockDonations: Donation[] = [
     status: 'Delivered',
     expires: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
     donor: mockUsers[3],
-    location: 'Northside Family Hub'
+    location: '10, NSB Road, Trichy'
   },
   {
     id: 'DON005',
@@ -55,6 +56,6 @@ export const mockDonations: Donation[] = [
     status: 'Pending',
     expires: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
     donor: mockUsers[4],
-    location: 'Westend Mobile Kitchen'
+    location: '22, Main Road, Salem'
   },
 ];
