@@ -58,4 +58,94 @@ export const mockDonations: Donation[] = [
     donor: mockUsers[4],
     location: '22, Main Road, Salem'
   },
+  {
+    id: 'DON006',
+    foodName: 'Rasam',
+    quantity: '60 plates',
+    status: 'Available',
+    expires: new Date(new Date().getTime() + 4 * 24 * 60 * 60 * 1000),
+    donor: mockUsers[0],
+    location: '34, Anna Salai, Erode'
+  },
+  {
+    id: 'DON007',
+    foodName: 'Masala Dosa',
+    quantity: '45 plates',
+    status: 'Available',
+    expires: new Date(new Date().getTime() + 1 * 24 * 60 * 60 * 1000),
+    donor: mockUsers[1],
+    location: '56, Cross-Cut Road, Tiruppur'
+  },
+  {
+    id: 'DON008',
+    foodName: 'Upma',
+    quantity: '25 plates',
+    status: 'Claimed',
+    expires: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000),
+    donor: mockUsers[2],
+    location: '78, VOC Street, Vellore'
+  },
+  {
+    id: 'DON009',
+    foodName: 'Medu Vada',
+    quantity: '100 plates',
+    status: 'Available',
+    expires: new Date(new Date().getTime() + 1 * 24 * 60 * 60 * 1000),
+    donor: mockUsers[3],
+    location: '90, Beach Road, Thoothukudi'
+  },
+  {
+    id: 'DON010',
+    foodName: 'Kuzhi Paniyaram',
+    quantity: '80 plates',
+    status: 'Delivered',
+    expires: new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000),
+    donor: mockUsers[4],
+    location: '12, Bypass Road, Thanjavur'
+  },
+  {
+    id: 'DON011',
+    foodName: 'Tomato Rice',
+    quantity: '35 plates',
+    status: 'Available',
+    expires: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000),
+    donor: mockUsers[0],
+    location: '34, Palayamkottai Road, Tirunelveli'
+  },
+  {
+    id: 'DON012',
+    foodName: 'Coconut Rice',
+    quantity: '40 plates',
+    status: 'Pending',
+    expires: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000),
+    donor: mockUsers[1],
+    location: '56, Railway Station Road, Dindigul'
+  },
+  {
+    id: 'DON013',
+    foodName: 'Curd Rice',
+    quantity: '70 plates',
+    status: 'Available',
+    expires: new Date(new Date().getTime() + 1 * 24 * 60 * 60 * 1000),
+    donor: mockUsers[2],
+    location: '78, Bus Stand Road, Nagercoil'
+  },
+  {
+    id: 'DON014',
+    foodName: 'Parotta with Salna',
+    quantity: '55 plates',
+    status: 'Claimed',
+    expires: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000),
+    donor: mockUsers[3],
+    location: '90, Court Road, Pollachi'
+  },
+  {
+    id: 'DON015',
+    foodName: 'Adai',
+    quantity: '30 plates',
+    status: 'Available',
+    expires: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000),
+    donor: mockUsers[4],
+    location: '12, New Scheme Road, Karaikudi'
+  }
 ];
