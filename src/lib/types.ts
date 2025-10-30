@@ -18,4 +18,5 @@ export type User = {
   points: number;
   avatarUrl: string;
   phone: string;
+  address: string;
 };

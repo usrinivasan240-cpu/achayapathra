@@ -2,7 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { HeartHandshake, LayoutGrid, Sparkles, Trophy } from 'lucide-react';
+import {
+  HeartHandshake,
+  LayoutGrid,
+  Sparkles,
+  Trophy,
+  User,
+} from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import {
@@ -22,6 +28,7 @@ const navItems = [
   { href: '/donations', icon: HeartHandshake, label: 'Donations' },
   { href: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
   { href: '/impact', icon: Sparkles, label: 'Our Impact' },
+  { href: '/profile', icon: User, label: 'Profile' },
 ];
 
 export function SidebarNav() {

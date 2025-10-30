@@ -5,11 +5,11 @@ import { PlaceHolderImages } from './placeholder-images';
 const findImage = (id: string) => PlaceHolderImages.find((img) => img.id === id)?.imageUrl || '';
 
 export const mockUsers: User[] = [
-  { id: '1', name: 'Olivia Martin', email: 'olivia.martin@email.com', points: 1250, avatarUrl: findImage('user-avatar-1'), phone: '+91 98765 43210' },
-  { id: '2', name: 'Jackson Lee', email: 'jackson.lee@email.com', points: 1100, avatarUrl: findImage('user-avatar-2'), phone: '+91 98765 43211' },
-  { id: '3', name: 'Isabella Nguyen', email: 'isabella.nguyen@email.com', points: 980, avatarUrl: findImage('user-avatar-3'), phone: '+91 98765 43212' },
-  { id: '4', name: 'William Kim', email: 'william.kim@email.com', points: 950, avatarUrl: findImage('user-avatar-4'), phone: '+91 98765 43213' },
-  { id: '5', name: 'Sofia Davis', email: 'sofia.davis@email.com', points: 870, avatarUrl: findImage('user-avatar-5'), phone: '+91 98765 43214' },
+  { id: '1', name: 'Olivia Martin', email: 'olivia.martin@email.com', points: 1250, avatarUrl: findImage('user-avatar-1'), phone: '+91 98765 43210', address: '456 Park Avenue, Chennai' },
+  { id: '2', name: 'Jackson Lee', email: 'jackson.lee@email.com', points: 1100, avatarUrl: findImage('user-avatar-2'), phone: '+91 98765 43211', address: '789 Ocean Drive, Coimbatore' },
+  { id: '3', name: 'Isabella Nguyen', email: 'isabella.nguyen@email.com', points: 980, avatarUrl: findImage('user-avatar-3'), phone: '+91 98765 43212', address: '101 Maple Street, Madurai' },
+  { id: '4', name: 'William Kim', email: 'william.kim@email.com', points: 950, avatarUrl: findImage('user-avatar-4'), phone: '+91 98765 43213', address: '212 Pine Lane, Trichy' },
+  { id: '5', name: 'Sofia Davis', email: 'sofia.davis@email.com', points: 870, avatarUrl: findImage('user-avatar-5'), phone: '+91 98765 43214', address: '313 Oak Court, Salem' },
 ];
 
 export const mockDonations: Donation[] = [
@@ -61,7 +61,7 @@ export const mockDonations: Donation[] = [
     id: 'DON005',
     foodName: 'Pongal',
     quantity: '20 plates',
-    status: 'Pending',
+    status: 'Delivered',
     expires: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
     donor: mockUsers[4],
     location: '22, Main Road, Salem',
