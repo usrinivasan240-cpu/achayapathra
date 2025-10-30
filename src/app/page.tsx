@@ -12,7 +12,7 @@ export default function AuthenticationPage() {
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold font-headline">SharePlate</h1>
+            <h1 className="text-3xl font-bold font-headline">Achayapathra</h1>
             <p className="text-balance text-muted-foreground">
               Sign in to share and receive with your community
             </p>

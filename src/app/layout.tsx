@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { FirebaseProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'SharePlate',
+  title: 'Achayapathra',
   description: 'A social-service webapp for verified food donations.',
 };
 

@@ -35,7 +35,7 @@ export function SidebarNav() {
           className="flex items-center gap-2 font-bold font-headline text-lg text-primary-foreground group-data-[collapsible=icon]:hidden"
         >
           <HeartHandshake className="text-accent" />
-          <span>SharePlate</span>
+          <span>Achayapathra</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
