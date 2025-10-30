@@ -1,14 +1,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Header } from '@/components/layout/header';
-import { DataTable } from '@/app/(app)/donations/data-table';
-import { columns } from '@/app/(app)/donations/columns';
-import { mockDonations, mockUsers } from '@/lib/data';
 import { MapPin } from 'lucide-react';
 
 export default function VolunteerDashboardPage() {
-  const availableDonations = mockDonations.filter(d => d.status === 'Available' || d.status === 'Claimed');
-  const volunteer = mockUsers.find(u => u.id === '2'); // Example volunteer
 
   return (
     <>
@@ -23,7 +18,9 @@ export default function VolunteerDashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DataTable columns={columns} data={availableDonations} />
+                <div className='flex justify-center items-center h-48'>
+                    <p className='text-muted-foreground'>No donations currently assigned.</p>
+                </div>
             </CardContent>
           </Card>
           <Card>
