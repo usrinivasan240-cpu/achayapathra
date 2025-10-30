@@ -15,7 +15,7 @@ export const mockDonations: Donation[] = [
   {
     id: 'DON001',
     foodName: 'Homemade Vegetable Soup',
-    quantity: '10 Liters',
+    quantity: '50 plates',
     status: 'Available',
     expires: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
     donor: mockUsers[0],
@@ -24,7 +24,7 @@ export const mockDonations: Donation[] = [
   {
     id: 'DON002',
     foodName: 'Assorted Sandwiches',
-    quantity: '50 units',
+    quantity: '50 plates',
     status: 'Claimed',
     expires: new Date(new Date().getTime() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
     donor: mockUsers[1],
@@ -33,7 +33,7 @@ export const mockDonations: Donation[] = [
   {
     id: 'DON003',
     foodName: 'Fresh Garden Salads',
-    quantity: '30 portions',
+    quantity: '30 plates',
     status: 'Available',
     expires: new Date(new Date().getTime() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
     donor: mockUsers[2],
@@ -42,7 +42,7 @@ export const mockDonations: Donation[] = [
   {
     id: 'DON004',
     foodName: 'Baked Pasta Casserole',
-    quantity: '5 large trays',
+    quantity: '40 plates',
     status: 'Delivered',
     expires: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
     donor: mockUsers[3],
@@ -51,7 +51,7 @@ export const mockDonations: Donation[] = [
   {
     id: 'DON005',
     foodName: 'Fruit Baskets',
-    quantity: '20 baskets',
+    quantity: '20 plates',
     status: 'Pending',
     expires: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
     donor: mockUsers[4],
