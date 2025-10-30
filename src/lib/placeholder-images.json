@@ -2,81 +2,81 @@
   "placeholderImages": [
     {
       "id": "login-image",
-      "description": "A diverse group of people sharing a meal together at a long outdoor table.",
-      "imageUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZW9wbGUlMjBlYXRpbmd8ZW58MHx8fHwxNzYxODA2MDE1fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "people eating"
+      "description": "Volunteers distributing food to people in a community setting, highlighting the act of giving.",
+      "imageUrl": "https://images.unsplash.com/photo-1599059813005-72827651c333?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb29kJTIwZG9uYXRpb258ZW58MHx8fHwxNzYxODUyMzQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "food donation"
     },
     {
       "id": "user-avatar-1",
-      "description": "Avatar for a user named Olivia Martin",
-      "imageUrl": "https://images.unsplash.com/photo-1598625873873-52f9aefd7d9d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx3b21hbiUyMHNtaWxpbmd8ZW58MHx8fHwxNzYxNzgzNzUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "woman smiling"
+      "description": "Avatar for a smiling woman, conveying warmth and friendliness.",
+      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwb3J0cmFpdCUyMHdvbWFufGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman portrait"
     },
     {
       "id": "user-avatar-2",
-      "description": "Avatar for a user named Jackson Lee",
-      "imageUrl": "https://images.unsplash.com/photo-1522556189639-b150ed9c4330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjE3NTYzNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "man portrait"
+      "description": "Avatar for a smiling man, looking approachable and kind.",
+      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBzbWlsaW5nJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzYxODUyMzQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man smiling"
     },
     {
       "id": "user-avatar-3",
-      "description": "Avatar for a user named Isabella Nguyen",
-      "imageUrl": "https://images.unsplash.com/photo-1546961329-78bef0414d7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MTgwMzQ2MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "description": "Avatar for a woman with a gentle expression.",
+      "imageUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "woman portrait"
     },
     {
       "id": "user-avatar-4",
-      "description": "Avatar for a user named William Kim",
-      "imageUrl": "https://images.unsplash.com/photo-1656337789708-cdf37b07112d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwc21pbGluZ3xlbnwwfHx8fDE3NjE3ODM1Njh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "man smiling"
+      "description": "Avatar for a man with a friendly and confident look.",
+      "imageUrl": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjE4NTIzNDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man portrait"
     },
     {
       "id": "user-avatar-5",
-      "description": "Avatar for a user named Sofia Davis",
-      "imageUrl": "https://images.unsplash.com/photo-1513673054901-2b5f51551112?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3b21hbiUyMGdsYXNzZXN8ZW58MHx8fHwxNzYxODM5MjMyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "description": "Avatar for a woman with glasses and a pleasant smile.",
+      "imageUrl": "https://images.unsplash.com/photo-1575439462433-8e1969065df7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMGdsYXNzZXMlMjBzbWlsaW5nfGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "woman glasses"
     },
     {
       "id": "donation-1",
-      "description": "Freshly baked bread loaves",
-      "imageUrl": "https://images.unsplash.com/photo-1663904460424-91895028aa9e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxicmVhZCUyMGxvYXZlc3xlbnwwfHx8fDE3NjE4NTE0NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "bread loaves"
+      "description": "A close-up of nutritious and colorful sambar rice, a staple South Indian dish.",
+      "imageUrl": "https://images.unsplash.com/photo-1628178129938-0df4b553535d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzYW1iYXIlMjByaWNlfGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sambar rice"
     },
     {
       "id": "donation-2",
-      "description": "A box of assorted fresh vegetables",
-      "imageUrl": "https://images.unsplash.com/photo-1643711038299-3a4588e2264f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx2ZWdldGFibGUlMjBib3h8ZW58MHx8fHwxNzYxODA4ODk3fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "vegetable box"
+      "description": "A warm plate of idli, a traditional South Indian breakfast food, ready to be served.",
+      "imageUrl": "https://images.unsplash.com/photo-1604537529428-15bcbeecfe4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzb3V0aCUyMGluZGlhbiUyMGZvb2R8ZW58MHx8fHwxNzYxODUyMzQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "indian food"
     },
     {
       "id": "donation-3",
-      "description": "Canned goods stacked together",
-      "imageUrl": "https://images.unsplash.com/photo-1584263347416-85a696b4eda7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjYW5uZWQlMjBmb29kfGVufDB8fHx8MTc2MTg1MTQ2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "canned food"
+      "description": "A box filled with fresh, vibrant vegetables, symbolizing healthy donations.",
+      "imageUrl": "https://images.unsplash.com/photo-1518843875459-f738682238a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx2ZWdldGFibGVzfGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vegetables fresh"
     },
     {
       "id": "impact-hero",
-      "description": "Hands holding a plant sprouting from the earth",
-      "imageUrl": "https://images.unsplash.com/photo-1589032625242-b5e27aaad77a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8aGFuZHMlMjBwbGFudHxlbnwwfHx8fDE3NjE4NTE0NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "hands plant"
+      "description": "A pair of hands carefully holding out a bowl of warm food, representing giving and sustenance.",
+      "imageUrl": "https://images.unsplash.com/photo-1593113589675-74b5c3a3ff37?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmb29kJTIwY2hhcml0eXxlbnwwfHx8fDE3NjE4NTIzNDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "food charity"
     },
     {
       "id": "impact-gallery-1",
-      "description": "A volunteer handing a bag of groceries to a person",
-      "imageUrl": "https://images.unsplash.com/photo-1587372653831-820c40aa336d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx2b2x1bnRlZXIlMjBnaXZpbmd8ZW58MHx8fHwxNzYxODUxNDYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "volunteer giving"
+      "description": "A volunteer cheerfully handing a meal to a smiling recipient.",
+      "imageUrl": "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx2b2x1bnRlZXIlMjBmb29kfGVufDB8fHx8fDE3NjE4NTIzNDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "volunteer food"
     },
     {
       "id": "impact-gallery-2",
-      "description": "A community garden with people working together",
-      "imageUrl": "https://images.unsplash.com/photo-1688176971147-80c37d48977f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjb21tdW5pdHklMjBnYXJkZW58ZW58MHx8fHwxNzYxODExNzk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "community garden"
+      "description": "A group of happy children eating together, showing the positive result of food donations.",
+      "imageUrl": "https://images.unsplash.com/photo-1517596001198-35661a7051fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjaGlsZHJlbiUyMGVhdGluZ3xlbnwwfHx8fDE3NjE4NTIzNDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "children eating"
     },
     {
       "id": "impact-gallery-3",
-      "description": "A smiling farmer holding a crate of fresh produce",
-      "imageUrl": "https://images.unsplash.com/photo-1668434484073-b3e722cb8017?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8ZmFybWVyJTIwcHJvZHVjZXxlbnwwfHx8fDE3NjE4NTE0NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "farmer produce"
+      "description": "A large quantity of packed meals ready for distribution, illustrating the scale of impact.",
+      "imageUrl": "https://images.unsplash.com/photo-1582494115233-add35b891547?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmZWVkJTIwdGhlJTIwaG9tZWxlc3N8ZW58MHx8fHwxNzYxODUyMzQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "packed meals"
     }
   ]
 }
