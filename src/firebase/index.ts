@@ -7,7 +7,7 @@ import {firebaseConfig} from './config';
 
 let firebaseApp: FirebaseApp;
 
-function initializeFirebase() {
+export function initializeFirebase() {
   if (getApps().length === 0) {
     firebaseApp = initializeApp(firebaseConfig);
   } else {
@@ -21,7 +21,6 @@ function initializeFirebase() {
 }
 
 export {
-  initializeFirebase,
   FirebaseProvider,
   FirebaseClientProvider,
   useFirebase,

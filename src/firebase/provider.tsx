@@ -6,7 +6,7 @@ import type {Auth} from 'firebase/auth';
 import type {FirebaseApp} from 'firebase/app';
 import type {Firestore} from 'firebase/firestore';
 
-import {initializeFirebase} from './index';
+import { initializeFirebase } from './';
 
 export interface FirebaseSDK {
   firebaseApp: FirebaseApp;
@@ -68,9 +68,11 @@ export function useUser() {
 
   useEffect(() => {
     if (!auth) return;
-    return auth.onAuthStateChanged(currentUser => {
+    const { onAuthStateChanged } = require('firebase/auth');
+    const unsubscribe = onAuthStateChanged(auth, currentUser => {
       setUser(currentUser);
     });
+    return () => unsubscribe();
   }, [auth]);
 
   return user;
