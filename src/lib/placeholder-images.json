@@ -1,3 +1,82 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "login-image",
+      "description": "A diverse group of people sharing a meal together at a long outdoor table.",
+      "imageUrl": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZW9wbGUlMjBlYXRpbmd8ZW58MHx8fHwxNzYxODA2MDE1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "people eating"
+    },
+    {
+      "id": "user-avatar-1",
+      "description": "Avatar for a user named Olivia Martin",
+      "imageUrl": "https://images.unsplash.com/photo-1598625873873-52f9aefd7d9d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx3b21hbiUyMHNtaWxpbmd8ZW58MHx8fHwxNzYxNzgzNzUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman smiling"
+    },
+    {
+      "id": "user-avatar-2",
+      "description": "Avatar for a user named Jackson Lee",
+      "imageUrl": "https://images.unsplash.com/photo-1522556189639-b150ed9c4330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjE3NTYzNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man portrait"
+    },
+    {
+      "id": "user-avatar-3",
+      "description": "Avatar for a user named Isabella Nguyen",
+      "imageUrl": "https://images.unsplash.com/photo-1546961329-78bef0414d7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MTgwMzQ2MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "user-avatar-4",
+      "description": "Avatar for a user named William Kim",
+      "imageUrl": "https://images.unsplash.com/photo-1656337789708-cdf37b07112d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwc21pbGluZ3xlbnwwfHx8fDE3NjE3ODM1Njh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man smiling"
+    },
+    {
+      "id": "user-avatar-5",
+      "description": "Avatar for a user named Sofia Davis",
+      "imageUrl": "https://images.unsplash.com/photo-1513673054901-2b5f51551112?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3b21hbiUyMGdsYXNzZXN8ZW58MHx8fHwxNzYxODM5MjMyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman glasses"
+    },
+    {
+      "id": "donation-1",
+      "description": "Freshly baked bread loaves",
+      "imageUrl": "https://images.unsplash.com/photo-1663904460424-91895028aa9e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxicmVhZCUyMGxvYXZlc3xlbnwwfHx8fDE3NjE4NTE0NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bread loaves"
+    },
+    {
+      "id": "donation-2",
+      "description": "A box of assorted fresh vegetables",
+      "imageUrl": "https://images.unsplash.com/photo-1643711038299-3a4588e2264f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx2ZWdldGFibGUlMjBib3h8ZW58MHx8fHwxNzYxODA4ODk3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vegetable box"
+    },
+    {
+      "id": "donation-3",
+      "description": "Canned goods stacked together",
+      "imageUrl": "https://images.unsplash.com/photo-1584263347416-85a696b4eda7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjYW5uZWQlMjBmb29kfGVufDB8fHx8MTc2MTg1MTQ2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "canned food"
+    },
+    {
+      "id": "impact-hero",
+      "description": "Hands holding a plant sprouting from the earth",
+      "imageUrl": "https://images.unsplash.com/photo-1589032625242-b5e27aaad77a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8aGFuZHMlMjBwbGFudHxlbnwwfHx8fDE3NjE4NTE0NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "hands plant"
+    },
+    {
+      "id": "impact-gallery-1",
+      "description": "A volunteer handing a bag of groceries to a person",
+      "imageUrl": "https://images.unsplash.com/photo-1587372653831-820c40aa336d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx2b2x1bnRlZXIlMjBnaXZpbmd8ZW58MHx8fHwxNzYxODUxNDYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "volunteer giving"
+    },
+    {
+      "id": "impact-gallery-2",
+      "description": "A community garden with people working together",
+      "imageUrl": "https://images.unsplash.com/photo-1688176971147-80c37d48977f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjb21tdW5pdHklMjBnYXJkZW58ZW58MHx8fHwxNzYxODExNzk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "community garden"
+    },
+    {
+      "id": "impact-gallery-3",
+      "description": "A smiling farmer holding a crate of fresh produce",
+      "imageUrl": "https://images.unsplash.com/photo-1668434484073-b3e722cb8017?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8ZmFybWVyJTIwcHJvZHVjZXxlbnwwfHx8fDE3NjE4NTE0NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "farmer produce"
+    }
+  ]
 }
