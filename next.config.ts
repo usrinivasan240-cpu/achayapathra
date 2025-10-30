@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -30,6 +31,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  devIndicators: {
+    buildActivity: false,
+  },
+  // The `allowedDevOrigins` is a security feature in Next.js that’s designed to prevent security
+  // vulnerabilities like DNS rebinding attacks. It allows developers to explicitly whitelist
+  // origins that are permitted to access the Next.js development server. This is important in a
+  // cloud-based development environment like Firebase Studio, where the development server may
+  // be accessed from various subdomains.
+  allowedDevOrigins: [
+    'https://*.googleusercontent.com',
+    'https://*.cloudworkstations.dev',
+  ],
 };
 
 export default nextConfig;
