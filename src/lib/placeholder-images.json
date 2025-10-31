@@ -8,33 +8,33 @@
     },
     {
       "id": "user-avatar-1",
-      "description": "Avatar for a smiling Tamil woman, conveying warmth and friendliness.",
-      "imageUrl": "https://images.unsplash.com/photo-1620089479631-42a2b3a87053?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0",
-      "imageHint": "tamil woman"
+      "description": "Avatar for a smiling user.",
+      "imageUrl": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx1c2VyJTIwYXZhdGFyfGVufDB8fHx8MTc2MTg4NjMzNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "user avatar"
     },
     {
       "id": "user-avatar-2",
-      "description": "Avatar for a smiling Tamil man, looking approachable and kind.",
-      "imageUrl": "https://images.unsplash.com/photo-1629577235815-c33b7a7f4577?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0",
-      "imageHint": "tamil man"
+      "description": "Avatar for another smiling user.",
+      "imageUrl": "https://images.unsplash.com/photo-1586297135537-94bc9ba060aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx1c2VyJTIwYXZhdGFyfGVufDB8fHx8MTc2MTg4NjMzNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "user avatar"
     },
     {
       "id": "user-avatar-3",
-      "description": "Avatar for a woman with a gentle expression.",
-      "imageUrl": "https://images.unsplash.com/photo-1619946794135-5bc917a27793?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0",
-      "imageHint": "indian woman"
+      "description": "Avatar for a user with a gentle expression.",
+      "imageUrl": "https://images.unsplash.com/photo-1704726135027-9c6f034cfa41?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx1c2VyJTIwYXZhdGFyfGVufDB8fHx8MTc2MTg4NjMzNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "user avatar"
     },
     {
       "id": "user-avatar-4",
-      "description": "Avatar for a man with a friendly and confident look.",
-      "imageUrl": "https://images.unsplash.com/photo-1599425433390-3b6d1b7a2455?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0",
-      "imageHint": "indian man"
+      "description": "Avatar for a user with a friendly and confident look.",
+      "imageUrl": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx1c2VyJTIwYXZhdGFyfGVufDB8fHx8MTc2MTg4NjMzNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "user avatar"
     },
     {
       "id": "user-avatar-5",
-      "description": "Avatar for a South Indian woman with a pleasant smile.",
-      "imageUrl": "https://images.unsplash.com/photo-1631215109559-055697a2d67d?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0",
-      "imageHint": "south-indian woman"
+      "description": "Avatar for a user with a pleasant smile.",
+      "imageUrl": "https://images.unsplash.com/photo-1639149888905-fb39731f2e6c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx1c2VyJTIwYXZhdGFyfGVufDB8fHx8MTc2MTg4NjMzNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "user avatar"
     },
     {
       "id": "donation-1",
@@ -57,7 +57,7 @@
     {
       "id": "impact-hero",
       "description": "A pair of hands carefully holding out a bowl of warm food, representing giving and sustenance.",
-      "imageUrl": "https://images.unsplash.com/photo-1593113589675-74b5c3a3ff37?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmb29kJTIwY2hhcml0eXxlbnwwfHx8fDE3NjE4NTIzNDJ8MA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1593113589675-74b5c3a3ff37?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmb29kJTIwY2hhcml0eXxlbnwwfHx8fDE3NjE4NTIzNDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "food charity"
     },
     {
@@ -69,13 +69,13 @@
     {
       "id": "impact-gallery-2",
       "description": "A group of happy children eating together, showing the positive result of food donations.",
-      "imageUrl": "https://images.unsplash.com/photo-1563263427-708318a97183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjaGlsZHJlbiUyMGVhdGluZ3xlbnwwfHx8fDE3NjE4NTUyMDV8MA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1563263427-708318a97183?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjaGlsZHJlbiUyMGVhdGluZ3xlbnwwfHx8fDE3NjE4NTUyMDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "children eating"
     },
     {
       "id": "impact-gallery-3",
       "description": "A large quantity of packed meals ready for distribution, illustrating the scale of impact.",
-      "imageUrl": "https://images.unsplash.com/photo-1609915437016-85693e56470f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwYWNrZWQlMjBtZWFsc3xlbnwwfHx8fDE3NjE4NTUyMDV8MA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1609915437016-85693e56470f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwYWNrZWQlMjBtZWFsc3xlbnwwfHx8fDE3NjE4NTUyMDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "packed meals"
     }
   ]
