@@ -1,0 +1,150 @@
+/**
+ * @fileOverview Firestore Security Rules for Achayapathra application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a combination of user-ownership and public-read/owner-write access patterns.
+ * User data is strictly controlled by the owning user.
+ * Donations are publicly readable but writable only by the donor.
+ * Volunteer tasks, feedback, leaderboard data, and site stats have restricted access.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores user profiles. Access is restricted to the user identified by {userId}.
+ * - /donations/{donationId}: Stores donation information. Publicly readable, but only the donor can create, update, or delete.
+ * - /volunteerTasks/{volunteerTaskId}: Stores volunteer task information. Only the associated volunteer or owner of the parent donation can create, update, or delete.
+ * - /feedbacks/{feedbackId}: Stores feedback data. Only the user who created feedback can modify it.
+ * - /leaderboard/{leaderboardId}: Stores leaderboard data. Write access is denied for now, read access is public.
+ * - /siteStats/{siteStatsId}: Stores site statistics. Write access is denied for now, read access is public.
+ *
+ * Key Security Decisions:
+ * - User listing is disallowed.
+ * - Public read access is granted to the /donations collection, enabling wide visibility of available donations.
+ * - Write access to Leaderboard and SiteStats collections is explicitly denied in this prototype phase.
+ *
+ * Denormalization for Authorization:
+ * - The `donations` collection includes the `donorId` field to enable owner-only write access without requiring additional reads.
+ * - The `volunteerTasks` collection includes `donationId` and `volunteerId` to enable rules based on the associated donation and volunteer.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Controls access to user profile data.
+     * @path /users/{userId}
+     * @allow (create) User with UID 'user_abc' can create their own profile with id == 'user_abc'.
+     * @deny (create) User with UID 'user_xyz' cannot create a profile with id == 'user_abc'.
+     * @allow (get, list, update, delete) User with UID 'user_abc' can read and modify their own profile with id == 'user_abc'.
+     * @deny (get, list, update, delete) User with UID 'user_xyz' cannot read or modify profile with id == 'user_abc'.
+     * @principle Enforces user-ownership; only the authenticated user can access their own profile.
+     */
+    match /users/{userId} {
+      function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id; //Immutable id check
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Controls access to donation data. Donations are publicly readable, but only the donor can modify them.
+     * @path /donations/{donationId}
+     * @allow (get, list) Any user can read the donations.
+     * @allow (create) User with UID 'user_abc' can create a donation with donorId == 'user_abc'.
+     * @deny (create) User with UID 'user_xyz' cannot create a donation with donorId == 'user_abc'.
+     * @allow (update, delete) User with UID 'user_abc' can update/delete their donation where donorId == 'user_abc'.
+     * @deny (update, delete) User with UID 'user_xyz' cannot update/delete a donation where donorId == 'user_abc'.
+     * @principle Allows public read access but enforces owner-only writes for donations.
+     */
+    match /donations/{donationId} {
+      function isOwner(donorId) {
+        return request.auth != null && request.auth.uid == donorId;
+      }
+
+      function isExistingOwner(donorId) {
+        return isOwner(donorId) && resource != null;
+      }
+
+      allow get, list: if true;
+      allow create: if request.auth != null && isOwner(request.resource.data.donorId);
+      allow update: if isExistingOwner(resource.data.donorId);
+      allow delete: if isExistingOwner(resource.data.donorId);
+    }
+
+    /**
+     * @description Controls access to volunteer task data.
+     * @path /volunteerTasks/{volunteerTaskId}
+     * @allow (create) User with UID 'user_abc' can create a volunteer task with volunteerId == 'user_abc'.
+     * @deny (create) User with UID 'user_xyz' cannot create a volunteer task with volunteerId == 'user_abc'.
+     * @allow (update, delete) User with UID 'user_abc' can update/delete their volunteer task where volunteerId == 'user_abc'.
+     * @deny (update, delete) User with UID 'user_xyz' cannot update/delete a volunteer task where volunteerId == 'user_abc'.
+     * @principle Enforces that only the assigned volunteer can create, update, or delete tasks.
+     */
+    match /volunteerTasks/{volunteerTaskId} {
+      function isVolunteer(volunteerId) {
+        return request.auth != null && request.auth.uid == volunteerId;
+      }
+       function isExistingVolunteer(volunteerId) {
+        return isVolunteer(volunteerId) && resource != null;
+      }
+
+      allow get, list: if true; // Anyone can view
+      allow create: if request.auth != null && isVolunteer(request.resource.data.volunteerId);
+      allow update: if isExistingVolunteer(resource.data.volunteerId);
+      allow delete: if isExistingVolunteer(resource.data.volunteerId);
+    }
+
+    /**
+     * @description Controls access to feedback data.
+     * @path /feedbacks/{feedbackId}
+     * @allow (create) User with UID 'user_abc' can create feedback with userId == 'user_abc'.
+     * @deny (create) User with UID 'user_xyz' cannot create feedback with userId == 'user_abc'.
+     * @allow (update, delete) User with UID 'user_abc' can update/delete their feedback where userId == 'user_abc'.
+     * @deny (update, delete) User with UID 'user_xyz' cannot update/delete feedback where userId == 'user_abc'.
+     * @principle Enforces that only the author can create, update, or delete feedback.
+     */
+    match /feedbacks/{feedbackId} {
+      function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+       function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+      allow get, list: if true; // Anyone can view feedback
+      allow create: if request.auth != null && isOwner(request.resource.data.userId);
+      allow update: if isExistingOwner(resource.data.userId);
+      allow delete: if isExistingOwner(resource.data.userId);
+    }
+
+    /**
+     * @description Controls access to leaderboard data.
+     * @path /leaderboard/{leaderboardId}
+     * @allow (get, list) Any user can read the leaderboard.
+     * @deny (create, update, delete) No one can modify the leaderboard through client.
+     * @principle Allows public read access but restricts write access for now.
+     */
+    match /leaderboard/{leaderboardId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Controls access to site statistics data.
+     * @path /siteStats/{siteStatsId}
+     * @allow (get, list) Any user can read site stats.
+     * @deny (create, update, delete) No one can modify site stats through client.
+     * @principle Allows public read access but restricts write access for now.
+     */
+    match /siteStats/{siteStatsId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+  }
+}
