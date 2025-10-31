@@ -8,50 +8,50 @@
     },
     {
       "id": "user-avatar-1",
-      "description": "Avatar for a smiling woman, conveying warmth and friendliness.",
-      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwb3J0cmFpdCUyMHdvbWFufGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "woman portrait"
+      "description": "Avatar for a smiling Tamil woman, conveying warmth and friendliness.",
+      "imageUrl": "https://images.unsplash.com/photo-1620089479631-42a2b3a87053?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0",
+      "imageHint": "tamil woman"
     },
     {
       "id": "user-avatar-2",
-      "description": "Avatar for a smiling man, looking approachable and kind.",
-      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBzbWlsaW5nJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzYxODUyMzQyfDA&ixlib-rb-4.1.0&q=80&w=1080",
-      "imageHint": "man smiling"
+      "description": "Avatar for a smiling Tamil man, looking approachable and kind.",
+      "imageUrl": "https://images.unsplash.com/photo-1629577235815-c33b7a7f4577?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0",
+      "imageHint": "tamil man"
     },
     {
       "id": "user-avatar-3",
       "description": "Avatar for a woman with a gentle expression.",
-      "imageUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib-rb-4.1.0&q=80&w=1080",
-      "imageHint": "woman portrait"
+      "imageUrl": "https://images.unsplash.com/photo-1619946794135-5bc917a27793?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0",
+      "imageHint": "indian woman"
     },
     {
       "id": "user-avatar-4",
       "description": "Avatar for a man with a friendly and confident look.",
-      "imageUrl": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjE4NTIzNDJ8MA&ixlib-rb-4.1.0&q=80&w=1080",
-      "imageHint": "man portrait"
+      "imageUrl": "https://images.unsplash.com/photo-1599425433390-3b6d1b7a2455?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0",
+      "imageHint": "indian man"
     },
     {
       "id": "user-avatar-5",
-      "description": "Avatar for a woman with glasses and a pleasant smile.",
-      "imageUrl": "https://images.unsplash.com/photo-1575439462433-8e1969065df7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMGdsYXNzZXMlMjBzbWlsaW5nfGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib-rb-4.1.0&q=80&w=1080",
-      "imageHint": "woman glasses"
+      "description": "Avatar for a South Indian woman with a pleasant smile.",
+      "imageUrl": "https://images.unsplash.com/photo-1631215109559-055697a2d67d?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0",
+      "imageHint": "south-indian woman"
     },
     {
       "id": "donation-1",
       "description": "A close-up of nutritious and colorful sambar rice, a staple South Indian dish.",
-      "imageUrl": "https://images.unsplash.com/photo-1628178129938-0df4b553535d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzYW1iYXIlMjByaWNlfGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1628178129938-0df4b553535d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzYW1iYXIlMjByaWNlfGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "sambar rice"
     },
     {
       "id": "donation-2",
       "description": "A warm plate of idli, a traditional South Indian breakfast food, ready to be served.",
-      "imageUrl": "https://images.unsplash.com/photo-1604537529428-15bcbeecfe4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzb3V0aCUyMGluZGlhbiUyMGZvb2R8ZW58MHx8fHwxNzYxODUyMzQyfDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1604537529428-15bcbeecfe4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzb3V0aCUyMGluZGlhbiUyMGZvb2R8ZW58MHx8fHwxNzYxODUyMzQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "indian food"
     },
     {
       "id": "donation-3",
       "description": "A box filled with fresh, vibrant vegetables, symbolizing healthy donations.",
-      "imageUrl": "https://images.unsplash.com/photo-1518843875459-f738682238a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx2ZWdldGFibGVzfGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1518843875459-f738682238a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx2ZWdldGFibGVzfGVufDB8fHx8MTc2MTg1MjM0Mnww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "vegetables fresh"
     },
     {
@@ -63,7 +63,7 @@
     {
       "id": "impact-gallery-1",
       "description": "A volunteer cheerfully handing a meal to a smiling recipient.",
-      "imageUrl": "https://images.unsplash.com/photo-1593113616828-6f22bca04804?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx2b2x1bnRlZXIlMjBmb29kfGVufDB8fHx8MTc2MTg1NTIwNXww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1593113616828-6f22bca04804?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx2b2x1bnRlZXIlMjBmb29kfGVufDB8fHx8MTc2MTg1NTIwNXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "volunteer food"
     },
     {
