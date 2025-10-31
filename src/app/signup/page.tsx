@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   HeartHandshake,
   User,
@@ -11,7 +12,9 @@ import {
   Lock,
   Phone,
   MapPin,
+  Loader2,
 } from 'lucide-react';
+import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -30,6 +33,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { useAuth } from '@/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -40,6 +46,11 @@ const formSchema = z.object({
 });
 
 export default function SignUpPage() {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const auth = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,9 +62,43 @@ export default function SignUpPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // In a real app, you'd handle registration logic here.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    if (!auth) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Error',
+        description: 'Could not connect to authentication service.',
+      });
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        values.email,
+        values.password
+      );
+      // In a real app, you would also save the additional user info (name, phone, address) to Firestore here.
+      console.log('User created:', userCredential.user);
+      toast({
+        title: 'Account Created!',
+        description: 'You can now sign in with your new account.',
+      });
+      router.push('/');
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Sign Up Failed',
+        description:
+          error.code === 'auth/email-already-in-use'
+            ? 'This email is already registered.'
+            : error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -86,6 +131,7 @@ export default function SignUpPage() {
                           placeholder="e.g., John Doe"
                           {...field}
                           className="pl-10"
+                          disabled={isLoading}
                         />
                       </div>
                     </FormControl>
@@ -107,6 +153,7 @@ export default function SignUpPage() {
                           placeholder="name@example.com"
                           {...field}
                           className="pl-10"
+                          disabled={isLoading}
                         />
                       </div>
                     </FormControl>
@@ -128,6 +175,7 @@ export default function SignUpPage() {
                           placeholder="••••••••"
                           {...field}
                           className="pl-10"
+                          disabled={isLoading}
                         />
                       </div>
                     </FormControl>
@@ -148,6 +196,7 @@ export default function SignUpPage() {
                           placeholder="+91 98765 43210"
                           {...field}
                           className="pl-10"
+                          disabled={isLoading}
                         />
                       </div>
                     </FormControl>
@@ -168,6 +217,7 @@ export default function SignUpPage() {
                           placeholder="123 Main St, Anytown"
                           {...field}
                           className="pl-10"
+                          disabled={isLoading}
                         />
                       </div>
                     </FormControl>
@@ -175,14 +225,18 @@ export default function SignUpPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign Up
               </Button>
             </form>
           </Form>
           <div className="mt-6 text-center text-sm">
             Already have an account?{' '}
-            <Link href="/" className="font-medium text-primary hover:underline">
+            <Link
+              href="/"
+              className="font-medium text-primary hover:underline"
+            >
               Sign In
             </Link>
           </div>
