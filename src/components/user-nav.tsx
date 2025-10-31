@@ -1,5 +1,7 @@
+'use client';
+
 import Link from 'next/link';
-import { LogOut, Settings, User } from 'lucide-react';
+import { LogOut, Settings, User as UserIcon } from 'lucide-react';
 import {
   Avatar,
   AvatarFallback,
@@ -15,20 +17,51 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { mockUsers } from '@/lib/data';
+import { useAuth, useUser } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 export function UserNav() {
-    const user = mockUsers[0];
+    const { user, isUserLoading } = useUser();
+    const auth = useAuth();
+    const router = useRouter();
+
+    const handleSignOut = async () => {
+        if (auth) {
+            await signOut(auth);
+            router.push('/');
+        }
+    };
+    
+    if (isUserLoading) {
+        return (
+            <div className="flex items-center space-x-4">
+                <div className="space-y-2">
+                    <div className="h-4 w-[150px] bg-gray-200 animate-pulse rounded"></div>
+                    <div className="h-4 w-[100px] bg-gray-200 animate-pulse rounded"></div>
+                </div>
+            </div>
+        );
+    }
+    
+    if (!user) {
+        return (
+            <Link href="/">
+                <Button variant="ghost">Sign In</Button>
+            </Link>
+        )
+    }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-full justify-start gap-2 px-2">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatarUrl} alt={user.name} />
-            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
+            <AvatarFallback>{user.displayName ? user.displayName.charAt(0) : 'U'}</AvatarFallback>
           </Avatar>
           <div className='text-left'>
-            <div className="text-sm font-medium">{user.name}</div>
+            <div className="text-sm font-medium">{user.displayName || 'User'}</div>
             <div className="text-xs text-muted-foreground">{user.email}</div>
           </div>
         </Button>
@@ -36,7 +69,7 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.name}</p>
+            <p className="text-sm font-medium leading-none">{user.displayName || 'User'}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
@@ -46,7 +79,7 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link href="/profile">
-              <User className="mr-2 h-4 w-4" />
+              <UserIcon className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </Link>
           </DropdownMenuItem>
@@ -56,11 +89,9 @@ export function UserNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/">
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
-          </Link>
+        <DropdownMenuItem onClick={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

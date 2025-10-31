@@ -15,6 +15,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import * as React from 'react';
+import { doc, setDoc } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -33,9 +34,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useAuth } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -48,6 +50,7 @@ const formSchema = z.object({
 export default function SignUpPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const auth = useAuth();
+  const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -64,7 +67,7 @@ export default function SignUpPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    if (!auth) {
+    if (!auth || !firestore) {
       toast({
         variant: 'destructive',
         title: 'Authentication Error',
@@ -79,8 +82,23 @@ export default function SignUpPage() {
         values.email,
         values.password
       );
-      // In a real app, you would also save the additional user info (name, phone, address) to Firestore here.
-      console.log('User created:', userCredential.user);
+      
+      const user = userCredential.user;
+      const userDocRef = doc(firestore, 'users', user.uid);
+
+      // Save additional user info to Firestore
+      await setDoc(userDocRef, {
+        id: user.uid,
+        email: values.email,
+        displayName: values.name,
+        phone: values.phone,
+        address: values.address,
+        role: 'donor', // default role
+        verified: false,
+        points: 0,
+        photoURL: '',
+      });
+
       toast({
         title: 'Account Created!',
         description: 'You can now sign in with your new account.',
