@@ -4,8 +4,8 @@
 import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/header';
-import { columns } from './columns';
-import { DataTable } from './data-table';
+import { columns } from '@/components/donations/columns';
+import { DataTable } from '@/components/donations/data-table';
 import Link from 'next/link';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
