@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -101,8 +102,9 @@ export default function NewDonationPage() {
   };
 
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onVerify(values: z.infer<typeof formSchema>) {
     setAiState('checking');
+    setProgress(0);
     let currentProgress = 0;
     const interval = setInterval(() => {
         currentProgress += 10;
@@ -117,6 +119,17 @@ export default function NewDonationPage() {
     }, 200);
   }
 
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    // Here you would handle the final submission to your backend
+    console.log("Submitting donation:", values);
+    toast({
+        title: "Donation Submitted!",
+        description: "Thank you for your contribution.",
+    });
+    form.reset();
+    setAiState('idle');
+  }
+
   return (
     <>
       <Header title="Add New Donation" />
@@ -127,7 +140,7 @@ export default function NewDonationPage() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <form onSubmit={form.handleSubmit(aiState === 'safe' ? onSubmit : onVerify)} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-8">
                     <FormField
@@ -268,7 +281,7 @@ export default function NewDonationPage() {
                             <FormItem>
                             <FormLabel>Food Image</FormLabel>
                             <FormControl>
-                                <Input type="file" accept="image/*" {...field} />
+                                <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files)} />
                             </FormControl>
                             <FormDescription>
                                 An AI check will be performed for food safety.
@@ -317,10 +330,25 @@ export default function NewDonationPage() {
                   </Card>
                 )}
 
+                <div className='flex gap-4'>
+                    {aiState !== 'safe' && (
+                        <Button type="submit" disabled={aiState === 'checking'}>
+                            {aiState === 'checking' ? 'Verifying...' : 'Verify Donation'}
+                        </Button>
+                    )}
 
-                <Button type="submit" disabled={aiState === 'checking'}>
-                  {aiState === 'checking' ? 'Submitting...' : 'Submit Donation'}
-                </Button>
+                    {aiState === 'safe' && (
+                        <Button type="submit">
+                            Submit Donation
+                        </Button>
+                    )}
+
+                    {(aiState === 'unsafe' || aiState === 'safe') && (
+                        <Button variant="outline" onClick={() => setAiState('idle')}>
+                            Start Over
+                        </Button>
+                    )}
+                </div>
               </form>
             </Form>
           </CardContent>
@@ -329,3 +357,4 @@ export default function NewDonationPage() {
     </>
   );
 }
+
