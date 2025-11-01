@@ -1,12 +1,18 @@
 
+import { Timestamp } from 'firebase/firestore';
+
 export type Donation = {
   id: string;
   foodName: string;
+  foodType: string;
   quantity: string;
   status: 'Available' | 'Claimed' | 'Delivered' | 'Pending';
-  expires: Date;
-  donor: User;
+  expires: Date | Timestamp;
   location: string;
+  description: string;
+  donorId: string;
+  donorName: string;
+  donorAvatarUrl: string;
   lat: number;
   lng: number;
 };

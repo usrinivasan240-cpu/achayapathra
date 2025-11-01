@@ -1,11 +1,35 @@
+
+'use client';
+
+import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/header';
 import { columns } from './columns';
 import { DataTable } from './data-table';
-import { mockDonations } from '@/lib/data';
 import Link from 'next/link';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
+import type { Donation } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DonationsPage() {
+  const firestore = useFirestore();
+
+  const donationsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'donations'), orderBy('expires', 'desc'));
+  }, [firestore]);
+
+  const { data: donationsData, isLoading } = useCollection<Donation>(donationsQuery);
+  
+  const donations = useMemo(() => {
+    return donationsData?.map(d => ({
+      ...d,
+      // Firestore Timestamps need to be converted to JS Dates for the table and details page
+      expires: (d.expires as unknown as Timestamp).toDate(),
+    })) || [];
+  }, [donationsData]);
+
   return (
     <>
       <Header title="Donations" />
@@ -16,7 +40,16 @@ export default function DonationsPage() {
                 <Button>Add New Donation</Button>
             </Link>
         </div>
-        <DataTable columns={columns} data={mockDonations} />
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : (
+          <DataTable columns={columns} data={donations} />
+        )}
       </main>
     </>
   );

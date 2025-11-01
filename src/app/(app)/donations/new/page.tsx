@@ -37,6 +37,9 @@ import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth, useFirestore, useUser } from '@/firebase';
+import { addDoc, collection } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),
@@ -54,7 +57,11 @@ export default function NewDonationPage() {
   const [aiState, setAiState] = React.useState<AISafetyCheckState>('idle');
   const [progress, setProgress] = React.useState(0);
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
+  const firestore = useFirestore();
+  const { user } = useUser();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -119,15 +126,57 @@ export default function NewDonationPage() {
     }, 200);
   }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Here you would handle the final submission to your backend
-    console.log("Submitting donation:", values);
-    toast({
-        title: "Donation Submitted!",
-        description: "Thank you for your contribution.",
-    });
-    form.reset();
-    setAiState('idle');
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!firestore || !user) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'You must be logged in to make a donation.',
+        });
+        return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+        const newDonation = {
+            foodName: values.foodName,
+            foodType: values.foodType,
+            quantity: values.quantity,
+            expires: values.expiryDate,
+            description: values.description || '',
+            location: values.location,
+            donorId: user.uid,
+            donorName: user.displayName || 'Anonymous',
+            donorAvatarUrl: user.photoURL || '',
+            status: 'Available',
+             // In a real app, you would get these from the location input
+            lat: 11.0168,
+            lng: 76.9558,
+        };
+
+        const donationsCol = collection(firestore, 'donations');
+        await addDoc(donationsCol, newDonation);
+        
+        toast({
+            title: "Donation Submitted!",
+            description: "Thank you for your contribution. You will be redirected.",
+        });
+
+        setTimeout(() => {
+             router.push('/donations');
+        }, 1500)
+
+    } catch (error) {
+        console.error("Error submitting donation:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Submission Failed',
+            description: 'There was a problem submitting your donation. Please try again.',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   return (
@@ -172,11 +221,11 @@ export default function NewDonationPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="cooked">Cooked Meal</SelectItem>
-                              <SelectItem value="baked">Baked Goods</SelectItem>
-                              <SelectItem value="produce">Fresh Produce</SelectItem>
-                              <SelectItem value="canned">Canned Goods</SelectItem>
-                              <SelectItem value="dry">Dry Goods</SelectItem>
+                              <SelectItem value="Cooked Meal">Cooked Meal</SelectItem>
+                              <SelectItem value="Baked Goods">Baked Goods</SelectItem>
+                              <SelectItem value="Fresh Produce">Fresh Produce</SelectItem>
+                              <SelectItem value="Canned Goods">Canned Goods</SelectItem>
+                              <SelectItem value="Dry Goods">Dry Goods</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -338,7 +387,8 @@ export default function NewDonationPage() {
                     )}
 
                     {aiState === 'safe' && (
-                        <Button type="submit">
+                        <Button type="submit" disabled={isSubmitting}>
+                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Submit Donation
                         </Button>
                     )}
@@ -357,4 +407,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
