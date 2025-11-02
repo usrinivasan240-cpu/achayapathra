@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, useUser, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,10 +48,12 @@ export default function ProfilePage() {
   const firestore = useFirestore();
   const { toast } = useToast();
 
-  const userQuery = useMemoFirebase(() => {
+  const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
+
+  const { data: userData, isLoading: isUserDocLoading } = useDoc<User>(userDocRef);
 
   const donationsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -74,38 +76,21 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   
-  // These will be populated from Firestore user document
   const [displayName, setDisplayName] = React.useState('');
   const [phone, setPhone] = React.useState('');
   const [address, setAddress] = React.useState('');
-  const [points, setPoints] = React.useState(0);
 
   React.useEffect(() => {
     if (user) {
         setAvatarUrl(user.photoURL);
         setDisplayName(user.displayName || '');
-        // In a real app, phone, address, and points would be fetched
-        // from the user's document in Firestore. We'll simulate that
-        // when the user document is loaded.
     }
-  }, [user]);
+    if (userData) {
+        setPhone(userData.phone || '');
+        setAddress(userData.address || '');
+    }
+  }, [user, userData]);
 
-  // This is a placeholder for fetching the full user profile from firestore
-  // which you would do with `useDoc` on a `/users/{userId}` document.
-   React.useEffect(() => {
-    if (user) {
-        const userDocRef = doc(firestore, "users", user.uid);
-        const unsub = onSnapshot(userDocRef, (doc) => {
-            if (doc.exists()) {
-                const data = doc.data() as User;
-                setPhone(data.phone || '');
-                setAddress(data.address || '');
-                setPoints(data.points || 0);
-            }
-        });
-        return () => unsub();
-    }
-  }, [user, firestore]);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -117,7 +102,7 @@ export default function ProfilePage() {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const newAvatarDataUrl = reader.result as string;
-        setAvatarUrl(newAvatarDataUrl);
+        setAvatarUrl(newAvatarDataUrl); // Optimistic update
 
         try {
             const storage = getStorage();
@@ -127,8 +112,9 @@ export default function ProfilePage() {
 
             // Update Auth and Firestore
             await updateProfile(user, { photoURL: downloadURL });
-            const userDocRef = doc(firestore, 'users', user.uid);
-            await updateDoc(userDocRef, { photoURL: downloadURL });
+            if (userDocRef) {
+                await updateDoc(userDocRef, { photoURL: downloadURL });
+            }
 
             setAvatarUrl(downloadURL); // Set the final URL
              toast({
@@ -151,7 +137,7 @@ export default function ProfilePage() {
   };
 
   const handleProfileUpdate = async () => {
-    if (!user || !firestore) {
+    if (!user || !userDocRef) {
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -161,7 +147,6 @@ export default function ProfilePage() {
     }
     setIsSaving(true);
     try {
-      const userDocRef = doc(firestore, 'users', user.uid);
       await updateDoc(userDocRef, {
         displayName: displayName,
         phone: phone,
@@ -188,7 +173,7 @@ export default function ProfilePage() {
     }
   };
 
-  if (isUserLoading) {
+  if (isUserLoading || isUserDocLoading) {
     return (
       <>
         <Header title="My Profile" />
@@ -231,7 +216,7 @@ export default function ProfilePage() {
     );
   }
 
-   if (!user) {
+   if (!user || !userData) {
     // This should ideally not happen if routes are protected, but it's good practice
     return (
         <>
@@ -308,7 +293,7 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-sm font-medium">Reward Points</p>
                     <p className="text-lg font-bold text-primary">
-                      {points} pts
+                      {userData.points} pts
                     </p>
                   </div>
                 </div>
@@ -438,3 +423,5 @@ export default function ProfilePage() {
     </>
   );
 }
+
+    
