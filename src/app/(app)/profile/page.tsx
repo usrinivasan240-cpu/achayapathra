@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -19,7 +20,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { mockUsers, mockDonations } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Phone,
@@ -32,49 +32,119 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useFirestore, useUser } from '@/firebase';
+import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, query, collection, where, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import type { Donation, User } from '@/lib/types';
+import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { updateProfile } from 'firebase/auth';
 
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
-  const userDonations = mockDonations.filter(
-    (d) => user && d.donor.id === user.uid
-  );
+
+  const userQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const donationsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(collection(firestore, 'donations'), where('donorId', '==', user.uid));
+  }, [firestore, user]);
+
+  const { data: donationsData, isLoading: isDonationsLoading } = useCollection<Donation>(donationsQuery);
+  
+  const userDonations = React.useMemo(() => {
+    return donationsData?.map(d => ({
+      ...d,
+      expires: (d.expires as unknown as Timestamp).toDate(),
+    })) || [];
+  }, [donationsData]);
+
 
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [isEditing, setIsEditing] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
-  const [phone, setPhone] = React.useState(mockUsers[0].phone);
-  const [address, setAddress] = React.useState(mockUsers[0].address);
+  
+  // These will be populated from Firestore user document
+  const [displayName, setDisplayName] = React.useState('');
+  const [phone, setPhone] = React.useState('');
+  const [address, setAddress] = React.useState('');
+  const [points, setPoints] = React.useState(0);
 
   React.useEffect(() => {
-    if (user?.photoURL) {
-      setAvatarUrl(user.photoURL);
+    if (user) {
+        setAvatarUrl(user.photoURL);
+        setDisplayName(user.displayName || '');
+        // In a real app, phone, address, and points would be fetched
+        // from the user's document in Firestore. We'll simulate that
+        // when the user document is loaded.
     }
   }, [user]);
+
+  // This is a placeholder for fetching the full user profile from firestore
+  // which you would do with `useDoc` on a `/users/{userId}` document.
+   React.useEffect(() => {
+    if (user) {
+        const userDocRef = doc(firestore, "users", user.uid);
+        const unsub = onSnapshot(userDocRef, (doc) => {
+            if (doc.exists()) {
+                const data = doc.data() as User;
+                setPhone(data.phone || '');
+                setAddress(data.address || '');
+                setPoints(data.points || 0);
+            }
+        });
+        return () => unsub();
+    }
+  }, [user, firestore]);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (file && user) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const newAvatarUrl = reader.result as string;
-        setAvatarUrl(newAvatarUrl);
-        // In a real app, you would upload the file to Firebase Storage
-        // and then update the user's photoURL in Firestore and Firebase Auth.
+      reader.onloadend = async () => {
+        const newAvatarDataUrl = reader.result as string;
+        setAvatarUrl(newAvatarDataUrl);
+
+        try {
+            const storage = getStorage();
+            const storageRef = ref(storage, `avatars/${user.uid}`);
+            await uploadString(storageRef, newAvatarDataUrl, 'data_url');
+            const downloadURL = await getDownloadURL(storageRef);
+
+            // Update Auth and Firestore
+            await updateProfile(user, { photoURL: downloadURL });
+            const userDocRef = doc(firestore, 'users', user.uid);
+            await updateDoc(userDocRef, { photoURL: downloadURL });
+
+            setAvatarUrl(downloadURL); // Set the final URL
+             toast({
+                title: "Avatar Updated!",
+                description: "Your new profile picture has been saved.",
+            });
+        } catch (error) {
+             console.error("Error uploading avatar:", error);
+            toast({
+                variant: 'destructive',
+                title: "Upload Failed",
+                description: "Could not save your new avatar.",
+            });
+            // Revert optimistic UI update
+            setAvatarUrl(user.photoURL);
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -93,9 +163,14 @@ export default function ProfilePage() {
     try {
       const userDocRef = doc(firestore, 'users', user.uid);
       await updateDoc(userDocRef, {
+        displayName: displayName,
         phone: phone,
         address: address,
       });
+      if (user.displayName !== displayName) {
+          await updateProfile(user, { displayName });
+      }
+
       toast({
         title: 'Profile Updated',
         description: 'Your information has been successfully saved.',
@@ -113,7 +188,7 @@ export default function ProfilePage() {
     }
   };
 
-  if (isUserLoading || !user) {
+  if (isUserLoading) {
     return (
       <>
         <Header title="My Profile" />
@@ -156,6 +231,18 @@ export default function ProfilePage() {
     );
   }
 
+   if (!user) {
+    // This should ideally not happen if routes are protected, but it's good practice
+    return (
+        <>
+            <Header title="My Profile" />
+            <main className="flex flex-1 items-center justify-center">
+                <p>Please log in to view your profile.</p>
+            </main>
+        </>
+    )
+   }
+
   return (
     <>
       <Header title="My Profile" />
@@ -172,10 +259,10 @@ export default function ProfilePage() {
                   <Avatar className="mb-4 h-24 w-24">
                     <AvatarImage
                       src={avatarUrl || ''}
-                      alt={user.displayName || 'User'}
+                      alt={displayName || 'User'}
                     />
                     <AvatarFallback>
-                      {user.displayName ? user.displayName.substring(0, 2) : 'U'}
+                      {displayName ? displayName.substring(0, 2) : 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black bg-opacity-50 opacity-0 transition-opacity group-hover:opacity-100">
@@ -190,7 +277,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <CardTitle className="font-headline text-3xl">
-                  {user.displayName}
+                  {displayName}
                 </CardTitle>
                 <CardDescription>Donor</CardDescription>
               </CardHeader>
@@ -206,14 +293,14 @@ export default function ProfilePage() {
                   <Phone className="mt-1 h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm font-medium">Phone</p>
-                    <p className="text-muted-foreground">{phone}</p>
+                    <p className="text-muted-foreground">{phone || 'Not provided'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="mt-1 h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm font-medium">Address</p>
-                    <p className="text-muted-foreground">{address}</p>
+                    <p className="text-muted-foreground">{address || 'Not provided'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -221,7 +308,7 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-sm font-medium">Reward Points</p>
                     <p className="text-lg font-bold text-primary">
-                      {mockUsers[0].points} pts
+                      {points} pts
                     </p>
                   </div>
                 </div>
@@ -243,6 +330,17 @@ export default function ProfilePage() {
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
+                       <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right">
+                          Name
+                        </Label>
+                        <Input
+                          id="name"
+                          value={displayName}
+                          onChange={(e) => setDisplayName(e.target.value)}
+                          className="col-span-3"
+                        />
+                      </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="phone" className="text-right">
                           Phone
@@ -297,7 +395,13 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {userDonations.length > 0 ? (
+                {isDonationsLoading ? (
+                    <div className='space-y-4'>
+                        <Skeleton className='h-16 w-full' />
+                        <Skeleton className='h-16 w-full' />
+                        <Skeleton className='h-16 w-full' />
+                    </div>
+                ) : userDonations.length > 0 ? (
                   userDonations.map((donation, index) => (
                     <div key={donation.id}>
                       {index > 0 && <Separator className="my-4" />}

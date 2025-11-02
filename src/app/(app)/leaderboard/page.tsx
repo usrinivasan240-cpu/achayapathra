@@ -1,10 +1,17 @@
+
+'use client';
+
+import { useMemo } from 'react';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { mockUsers } from '@/lib/data';
-import { User } from '@/lib/types';
-import { Crown, Medal, Trophy } from 'lucide-react';
+import type { User } from '@/lib/types';
+import { Crown, Medal, Trophy, Loader2 } from 'lucide-react';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 const UserRow = ({ user, rank }: { user: User, rank: number }) => {
   const rankIcon = () => {
@@ -32,9 +39,35 @@ const UserRow = ({ user, rank }: { user: User, rank: number }) => {
   )
 };
 
+const LeaderboardSkeleton = () => (
+    <div className="space-y-4">
+        {[...Array(5)].map((_, i) => (
+             <div key={i} className="flex items-center gap-4 p-2">
+                <Skeleton className="h-6 w-8" />
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className='flex-1 space-y-2'>
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-48" />
+                </div>
+                <Skeleton className="h-6 w-16" />
+             </div>
+        ))}
+    </div>
+)
+
 export default function LeaderboardPage() {
-  const topDonors = [...mockUsers].sort((a, b) => b.points - a.points);
-  const topVolunteers = [...mockUsers].sort((a, b) => a.points - b.points); // Just for variety
+    const firestore = useFirestore();
+
+    const usersQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'users'), orderBy('points', 'desc'));
+    }, [firestore]);
+
+    const { data: usersData, isLoading } = useCollection<User>(usersQuery);
+
+    const topDonors = useMemo(() => usersData || [], [usersData]);
+    // Replace with actual volunteer logic when available
+    const topVolunteers = useMemo(() => [...(usersData || [])].reverse(), [usersData]);
 
   return (
     <>
@@ -54,7 +87,7 @@ export default function LeaderboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {topDonors.map((user, index) => (
+                {isLoading ? <LeaderboardSkeleton /> : topDonors.map((user, index) => (
                     <UserRow key={user.id} user={user} rank={index + 1} />
                 ))}
               </CardContent>
@@ -69,7 +102,7 @@ export default function LeaderboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {topVolunteers.map((user, index) => (
+                {isLoading ? <LeaderboardSkeleton /> : topVolunteers.map((user, index) => (
                      <UserRow key={user.id} user={user} rank={index + 1} />
                 ))}
               </CardContent>
