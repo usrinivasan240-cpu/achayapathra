@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useMemo } from 'react';
 import { notFound } from 'next/navigation';
 import {
   Card,
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Header } from '@/components/layout/header';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Phone, MapPin, Utensils, Calendar } from 'lucide-react';
+import { MapPin, Utensils, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc, Timestamp } from 'firebase/firestore';
@@ -32,10 +33,13 @@ export default function DonationDetailsPage({
 
   const { data: donationData, isLoading } = useDoc<Donation>(donationRef);
 
-  const donation = donationData ? {
+  const donation = useMemo(() => {
+    if (!donationData) return null;
+    return {
       ...donationData,
-      expires: (donationData.expires as unknown as Timestamp).toDate(),
-  } : null;
+      expires: (donationData.expires as unknown as Timestamp)?.toDate(),
+    };
+  }, [donationData]);
 
   if (isLoading) {
     return (
@@ -72,13 +76,6 @@ export default function DonationDetailsPage({
     notFound();
   }
   
-  // A donor field is no longer directly on the donation, we create a mock one from the stored fields
-  const donor = {
-      name: donation.donorName,
-      email: '', // Not stored on donation, can be fetched if needed
-      avatarUrl: donation.donorAvatarUrl,
-  }
-
   return (
     <>
       <Header title="Donation Details" />
@@ -87,25 +84,22 @@ export default function DonationDetailsPage({
           <CardHeader>
             <CardTitle className="font-headline text-3xl">{donation.foodName}</CardTitle>
             <CardDescription>
-              Donated by {donor.name}
+              Donated by {donation.donorName}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6">
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
                 <AvatarImage
-                  src={donor.avatarUrl}
-                  alt={donor.name}
+                  src={donation.donorAvatarUrl}
+                  alt={donation.donorName}
                 />
                 <AvatarFallback>
-                  {donor.name.substring(0, 2)}
+                  {donation.donorName.substring(0, 2)}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-lg font-semibold">{donor.name}</p>
-                {/* <p className="text-sm text-muted-foreground">
-                  {donor.email}
-                </p> */}
+                <p className="text-lg font-semibold">{donation.donorName}</p>
               </div>
             </div>
 
@@ -151,7 +145,7 @@ export default function DonationDetailsPage({
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className='text-lg font-semibold'>{donation.expires.toLocaleDateString()}</p>
+                        <p className='text-lg font-semibold'>{donation.expires?.toLocaleDateString() || 'N/A'}</p>
                     </CardContent>
                 </Card>
             </div>
