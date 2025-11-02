@@ -24,15 +24,12 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https'
         hostname: 'picsum.photos',
         port: '',
         pathname: '/**',
       },
     ],
-  },
-  devIndicators: {
-    buildActivity: false,
   },
   // The `allowedDevOrigins` is a security feature in Next.js that’s designed to prevent security
   // vulnerabilities like DNS rebinding attacks. It allows developers to explicitly whitelist
