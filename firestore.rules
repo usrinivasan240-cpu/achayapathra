@@ -1,131 +1,170 @@
 /**
- * @file Firebase Security Rules for Achayapathra Application
+ * @fileoverview Firestore Security Rules for Achayapathra application.
  *
- * @corePhilosophy This ruleset enforces a strict user-ownership model for user profiles,
- * while allowing public read access to donations. Volunteer tasks and feedbacks are
- * accessible to authorized users. Leaderboard and site statistics are publicly readable and managed by Cloud Functions.
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for personal data and role-based access control for administrative data. Users can only manage their own data, while administrative functions are restricted to authorized admins.  The data model is designed for authorization independence, minimizing the need for complex `get()` calls within the rules.
  *
- * @dataStructure
- * - /users/{userId}: Stores individual user profiles, accessible only to the owning user.
- * - /donations/{donationId}: Stores donation information, publicly readable, but writable only by the donor.
- * - /volunteerTasks/{volunteerTaskId}: Stores volunteer task information.
- * - /feedbacks/{feedbackId}: Stores feedback data related to users, donations, and volunteer tasks.
- * - /leaderboard/{leaderboardId}: Stores leaderboard data, managed by Cloud Functions.
- * - /siteStats/{siteStatsId}: Stores site-wide statistics, managed by Cloud Functions.
+ * Data Structure:
+ * - User profiles are stored in `/users/{userId}`, accessible only by the user themselves.
+ * - User-specific data (donations, volunteer tasks, feedback) are stored in subcollections under `/users/{userId}`.
+ * - Global leaderboard data is stored in `/leaderboard/{leaderboardEntryId}` and site statistics in `/siteStats/{siteStatsId}`, both accessible only by admins.
+ * - Admin roles are determined by the presence of a document in `/roles_admin/{userId}`.
  *
- * @keySecurityDecisions
- * - User data is private and only accessible to the owning user.
- * - Donations are publicly readable to facilitate discovery, but only the donor can create, update, or delete them.
- * - Leaderboard and SiteStats are publicly readable and managed by Cloud Functions.
- * - Listing of user documents is disallowed to protect user privacy.
+ * Key Security Decisions:
+ * - Users can only create, read, update, and delete their own profiles and associated data.
+ * - Listing all users is disallowed.
+ * - Leaderboard and site statistics data are restricted to admin access.
+ * - The existence of a document in `/roles_admin/{userId}` grants administrative privileges.
  *
- * @denormalizationForAuthorization
- * - Donations include a `donorId` field to simplify ownership checks for write operations.
+ * Denormalization for Authorization:
+ * - Admin privileges are determined by the presence of a document in `/roles_admin/{userId}`, avoiding the need to store roles directly in the `/users/{userId}` document.
  *
- * @structuralSegregation
- * - User profiles are stored in a dedicated `/users/{userId}` collection to enforce strict ownership.
+ * Structural Segregation:
+ * - User-specific data is stored in subcollections, ensuring clear ownership and simplified security rules.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Enforces that only the authenticated user can read and write their own profile data.
+     * @description Defines whether a user is signed in.
+     * @return {boolean} True if the user is signed in, false otherwise.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Defines whether the requesting user is the owner of the resource.
+     * @param {string} userId The user ID to compare against the request's authentication UID.
+     * @return {boolean} True if the user is the owner, false otherwise.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Defines whether the requesting user is the owner of the resource, ensuring that the resource exists.
+     * @param {string} userId The user ID to compare against the request's authentication UID.
+     * @return {boolean} True if the user is the owner and the resource exists, false otherwise.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Checks if the requesting user is an administrator.
+     * @return {boolean} True if the user is an administrator, false otherwise.
+     */
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * @description Rules for the /users/{userId} collection.
      * @path /users/{userId}
-     * @allow (get, create, update, delete, list) if request.auth.uid == userId
-     * @deny (create, update, delete) if request.auth.uid != userId
-     * @principle Enforces document ownership for all operations.
+     * @allow (create) - A user can create their own profile if the userId matches their auth UID.
+     * @allow (get, update, delete) - A user can get, update, and delete their own profile.
+     * @deny (create) - A user cannot create a profile with a userId that does not match their auth UID.
+     * @deny (update, delete) - A user cannot update or delete another user's profile.
+     * @principle Enforces document ownership; users can only manage their own profiles.
      */
     match /users/{userId} {
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
       allow get: if isOwner(userId);
-      allow list: if false; // Listing users is disallowed.
+      allow list: if false; // Prevent listing all users
+
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for the /users/{userId}/donations/{donationId} collection.
+     * @path /users/{userId}/donations/{donationId}
+     * @allow (create) - A user can create a donation in their own subcollection.
+     * @allow (get, list, update, delete) - A user can get, list, update, and delete donations in their own subcollection.
+     * @deny (create, update, delete) - A user cannot create, update, or delete donations in another user's subcollection.
+     * @principle Enforces document ownership; users can only manage their own donations.
+     */
+    match /users/{userId}/donations/{donationId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+    }
+
+     /**
+     * @description Rules for the /users/{userId}/volunteerTasks/{volunteerTaskId} collection.
+     * @path /users/{userId}/volunteerTasks/{volunteerTaskId}
+     * @allow (create) - A user can create a volunteerTask in their own subcollection.
+     * @allow (get, list, update, delete) - A user can get, list, update, and delete volunteerTasks in their own subcollection.
+     * @deny (create, update, delete) - A user cannot create, update, or delete volunteerTasks in another user's subcollection.
+     * @principle Enforces document ownership; users can only manage their own volunteerTasks.
+     */
+    match /users/{userId}/volunteerTasks/{volunteerTaskId} {
+      allow get, list: if isOwner(userId);
       allow create: if isOwner(userId);
       allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
     }
 
     /**
-     * @description Allows public read access to donations but restricts write access to the donor.
-     * @path /donations/{donationId}
-     * @allow (get, list) if true
-     * @allow (create) if request.auth.uid == request.resource.data.donorId
-     * @allow (update, delete) if resource.data.donorId == request.auth.uid
-     * @deny (create, update, delete) if resource.data.donorId != request.auth.uid
-     * @principle Allows public reads for discovery while restricting writes to the donor.
+     * @description Rules for the /users/{userId}/feedback/{feedbackId} collection.
+     * @path /users/{userId}/feedback/{feedbackId}
+     * @allow (create) - A user can create feedback in their own subcollection.
+     * @allow (get, list, update, delete) - A user can get, list, update, and delete feedback in their own subcollection.
+     * @deny (create, update, delete) - A user cannot create, update, or delete feedback in another user's subcollection.
+     * @principle Enforces document ownership; users can only manage their own feedback.
      */
-    match /donations/{donationId} {
-      function isOwner(donorId) {
-        return request.auth.uid == donorId;
-      }
+    match /users/{userId}/feedback/{feedbackId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+    }
 
-      function isExistingOwner(donorId) {
-        return isOwner(donorId) && resource != null;
-      }
-
+    /**
+     * @description Rules for the /leaderboard/{leaderboardEntryId} collection.
+     * @path /leaderboard/{leaderboardEntryId}
+     * @allow (get, list) - Anyone can read the leaderboard entries.
+     * @allow (create, update, delete) - Only admins can create, update, and delete leaderboard entries.
+     * @deny (create, update, delete) - Non-admins cannot modify the leaderboard.
+     * @principle Enforces admin-only access for modifying leaderboard data.
+     */
+    match /leaderboard/{leaderboardEntryId} {
       allow get, list: if true;
-      allow create: if request.auth.uid == request.resource.data.donorId;
-      allow update: if isExistingOwner(resource.data.donorId);
-      allow delete: if isExistingOwner(resource.data.donorId);
+      allow create, update, delete: if isAdmin();
     }
 
     /**
-     * @description Restricts access to volunteer tasks.
-     * @path /volunteerTasks/{volunteerTaskId}
-     * @allow (read, write) if false
-     * @principle Restricts all access to the volunteerTasks collection.
-     */
-    match /volunteerTasks/{volunteerTaskId} {
-        allow get: if false;
-        allow list: if false;
-        allow create: if false;
-        allow update: if false;
-        allow delete: if false;
-    }
-
-    /**
-     * @description Restricts access to feedbacks.
-     * @path /feedbacks/{feedbackId}
-     * @allow (read, write) if false
-     * @principle Restricts all access to the feedbacks collection.
-     */
-    match /feedbacks/{feedbackId} {
-        allow get: if false;
-        allow list: if false;
-        allow create: if false;
-        allow update: if false;
-        allow delete: if false;
-    }
-
-    /**
-     * @description Allows public read access to leaderboard data, managed by Cloud Functions.
-     * @path /leaderboard/{leaderboardId}
-     * @allow (read) if true
-     * @deny (write) always
-     * @principle Allows public read access, restricts all write access.
-     */
-    match /leaderboard/{leaderboardId} {
-        allow get, list: if true;
-        allow create, update, delete: if false;
-    }
-
-    /**
-     * @description Allows public read access to site statistics, managed by Cloud Functions.
+     * @description Rules for the /siteStats/{siteStatsId} collection.
      * @path /siteStats/{siteStatsId}
-     * @allow (read) if true
-     * @deny (write) always
-     * @principle Allows public read access, restricts all write access.
+     * @allow (get, list) - Anyone can read the site statistics.
+     * @allow (create, update, delete) - Only admins can create, update, and delete site statistics.
+     * @deny (create, update, delete) - Non-admins cannot modify the site statistics.
+     * @principle Enforces admin-only access for modifying site statistics data.
      */
     match /siteStats/{siteStatsId} {
-        allow get, list: if true;
-        allow create, update, delete: if false;
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Rules for the /roles_admin/{userId} collection.
+     * @path /roles_admin/{userId}
+     * @allow (get) - Only the admin can get their own role.
+     * @allow (list) - No one can list the admins.
+     * @allow (create) - Only an admin can create their role.
+     * @allow (update) - Only an admin can update their role.
+     * @allow (delete) - Only an admin can delete their own role.
+     * @principle Enforces document ownership; admins can only manage their own role.
+     */
+    match /roles_admin/{userId} {
+      allow get: if isOwner(userId) && isAdmin();
+      allow list: if false;
+      allow create: if isOwner(userId) && isAdmin();
+      allow update: if isExistingOwner(userId) && isAdmin();
+      allow delete: if isExistingOwner(userId) && isAdmin();
     }
   }
 }

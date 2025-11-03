@@ -1,35 +1,64 @@
-// A typed event emitter for signaling specific, typed errors globally.
-import {EventEmitter} from 'events';
-import {FirestorePermissionError} from './errors';
+'use client';
+import { FirestorePermissionError } from '@/firebase/errors';
 
-// Define the interface for the events and their expected payload types.
-interface TypedEvents {
-  'permission-error': (error: FirestorePermissionError) => void;
-  // Add other typed events here as needed.
+/**
+ * Defines the shape of all possible events and their corresponding payload types.
+ * This centralizes event definitions for type safety across the application.
+ */
+export interface AppEvents {
+  'permission-error': FirestorePermissionError;
 }
 
-// Extend EventEmitter and type its methods.
-class TypedEventEmitter extends EventEmitter {
-  // Type `emit` to ensure the correct payload type for each event.
-  emit<E extends keyof TypedEvents>(event: E, ...args: Parameters<TypedEvents[E]>): boolean {
-    return super.emit(event, ...args);
-  }
+// A generic type for a callback function.
+type Callback<T> = (data: T) => void;
 
-  // Type `on` to ensure the correct listener signature for each event.
-  on<E extends keyof TypedEvents>(event: E, listener: TypedEvents[E]): this {
-    return super.on(event, listener);
-  }
+/**
+ * A strongly-typed pub/sub event emitter.
+ * It uses a generic type T that extends a record of event names to payload types.
+ */
+function createEventEmitter<T extends Record<string, any>>() {
+  // The events object stores arrays of callbacks, keyed by event name.
+  // The types ensure that a callback for a specific event matches its payload type.
+  const events: { [K in keyof T]?: Array<Callback<T[K]>> } = {};
 
-  // Type `off` for completeness.
-  off<E extends keyof TypedEvents>(event: E, listener: TypedEvents[E]): this {
-    return super.off(event, listener);
-  }
+  return {
+    /**
+     * Subscribe to an event.
+     * @param eventName The name of the event to subscribe to.
+     * @param callback The function to call when the event is emitted.
+     */
+    on<K extends keyof T>(eventName: K, callback: Callback<T[K]>) {
+      if (!events[eventName]) {
+        events[eventName] = [];
+      }
+      events[eventName]?.push(callback);
+    },
 
-  // Type `once` for completeness.
-  once<E extends keyof TypedEvents>(event: E, listener: TypedEvents[E]): this {
-    return super.once(event, listener);
-  }
+    /**
+     * Unsubscribe from an event.
+     * @param eventName The name of the event to unsubscribe from.
+     * @param callback The specific callback to remove.
+     */
+    off<K extends keyof T>(eventName: K, callback: Callback<T[K]>) {
+      if (!events[eventName]) {
+        return;
+      }
+      events[eventName] = events[eventName]?.filter(cb => cb !== callback);
+    },
+
+    /**
+     * Publish an event to all subscribers.
+     * @param eventName The name of the event to emit.
+     * @param data The data payload that corresponds to the event's type.
+     */
+    emit<K extends keyof T>(eventName: K, data: T[K]) {
+      if (!events[eventName]) {
+        return;
+      }
+      events[eventName]?.forEach(callback => callback(data));
+    },
+  };
 }
 
-// Export a singleton instance of the typed emitter.
-export const errorEmitter = new TypedEventEmitter();
+// Create and export a singleton instance of the emitter, typed with our AppEvents interface.
+export const errorEmitter = createEventEmitter<AppEvents>();
