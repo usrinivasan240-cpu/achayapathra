@@ -21,10 +21,6 @@ import {
   DocumentData,
   DocumentReference,
 } from 'firebase/firestore';
-import { FirebaseClientProvider } from './client-provider';
-
-// The use* hooks are designed to be called from client components.
-// If you need to use Firebase on the server, see firebase-admin.ts.
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -112,4 +108,4 @@ export function useDoc<T>(ref: DocumentReference<DocumentData>) {
   return {data, isLoading};
 }
 
-export { FirebaseClientProvider, FirebaseContext, app, auth, firestore, functions, storage };
+export { FirebaseContext, app, auth, firestore, functions, storage };
