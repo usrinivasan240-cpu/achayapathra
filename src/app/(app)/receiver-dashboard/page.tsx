@@ -23,7 +23,7 @@ export default function ReceiverDashboardPage() {
   const availableDonations = useMemo(() => {
     return donationsData?.map(d => ({
       ...d,
-      expires: (d.expires as unknown as Timestamp).toDate(),
+      expires: (d.expires as unknown as Timestamp)?.toDate(),
     })) || [];
   }, [donationsData]);
 

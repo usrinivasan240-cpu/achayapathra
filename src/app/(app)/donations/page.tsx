@@ -26,7 +26,7 @@ export default function DonationsPage() {
     return donationsData?.map(d => ({
       ...d,
       // Firestore Timestamps need to be converted to JS Dates for the table and details page
-      expires: (d.expires as unknown as Timestamp).toDate(),
+      expires: (d.expires as unknown as Timestamp)?.toDate(),
     })) || [];
   }, [donationsData]);
 
