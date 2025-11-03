@@ -1,6 +1,6 @@
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import PlaceHolderImages from '@/lib/placeholder-images.json';
 import { Utensils, Users, Globe, Smile } from 'lucide-react';
 import Image from 'next/image';
 
@@ -44,7 +44,7 @@ export default function ImpactPage() {
             <Image
               src={heroImage.imageUrl}
               alt={heroImage.description}
-              layout="fill"
+              fill
               objectFit="cover"
               data-ai-hint={heroImage.imageHint}
               className="brightness-50"

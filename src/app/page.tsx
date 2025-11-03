@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { UserAuthFormTabs } from '@/components/auth/user-auth-form-tabs';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import PlaceHolderImages from '@/lib/placeholder-images.json';
 
 export default function AuthenticationPage() {
   const loginImage = PlaceHolderImages.find((img) => img.id === 'login-image');
