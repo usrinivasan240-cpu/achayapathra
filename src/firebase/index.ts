@@ -169,9 +169,7 @@ export function FirebaseClientProvider({children}: {children: React.ReactNode}) 
   const storage = getStorage(app);
 
   return (
-    <FirebaseContext.Provider
-      value={{app, auth, firestore, functions, storage}}
-    >
+    <FirebaseContext.Provider value={{app, auth, firestore, functions, storage}}>
       {children}
     </FirebaseContext.Provider>
   );
