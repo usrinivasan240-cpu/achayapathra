@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -37,9 +36,6 @@ import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth, useFirestore, useUser } from '@/firebase';
-import { addDoc, collection } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),
@@ -57,11 +53,7 @@ export default function NewDonationPage() {
   const [aiState, setAiState] = React.useState<AISafetyCheckState>('idle');
   const [progress, setProgress] = React.useState(0);
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
-  const firestore = useFirestore();
-  const { user } = useUser();
-  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -109,9 +101,8 @@ export default function NewDonationPage() {
   };
 
 
-  function onVerify(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     setAiState('checking');
-    setProgress(0);
     let currentProgress = 0;
     const interval = setInterval(() => {
         currentProgress += 10;
@@ -126,59 +117,6 @@ export default function NewDonationPage() {
     }, 200);
   }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!firestore || !user) {
-        toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'You must be logged in to make a donation.',
-        });
-        return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-        const newDonation = {
-            foodName: values.foodName,
-            foodType: values.foodType,
-            quantity: values.quantity,
-            expires: values.expiryDate,
-            description: values.description || '',
-            location: values.location,
-            donorId: user.uid,
-            donorName: user.displayName || 'Anonymous',
-            donorAvatarUrl: user.photoURL || '',
-            status: 'Available',
-             // In a real app, you would get these from the location input
-            lat: 11.0168,
-            lng: 76.9558,
-        };
-
-        const donationsCol = collection(firestore, 'donations');
-        await addDoc(donationsCol, newDonation);
-        
-        toast({
-            title: "Donation Submitted!",
-            description: "Thank you for your contribution. You will be redirected.",
-        });
-
-        setTimeout(() => {
-             router.push('/donations');
-        }, 1500)
-
-    } catch (error) {
-        console.error("Error submitting donation:", error);
-        toast({
-            variant: 'destructive',
-            title: 'Submission Failed',
-            description: 'There was a problem submitting your donation. Please try again.',
-        });
-    } finally {
-        setIsSubmitting(false);
-    }
-  }
-
   return (
     <>
       <Header title="Add New Donation" />
@@ -189,7 +127,7 @@ export default function NewDonationPage() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(aiState === 'safe' ? onSubmit : onVerify)} className="space-y-8">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-8">
                     <FormField
@@ -221,11 +159,11 @@ export default function NewDonationPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="Cooked Meal">Cooked Meal</SelectItem>
-                              <SelectItem value="Baked Goods">Baked Goods</SelectItem>
-                              <SelectItem value="Fresh Produce">Fresh Produce</SelectItem>
-                              <SelectItem value="Canned Goods">Canned Goods</SelectItem>
-                              <SelectItem value="Dry Goods">Dry Goods</SelectItem>
+                              <SelectItem value="cooked">Cooked Meal</SelectItem>
+                              <SelectItem value="baked">Baked Goods</SelectItem>
+                              <SelectItem value="produce">Fresh Produce</SelectItem>
+                              <SelectItem value="canned">Canned Goods</SelectItem>
+                              <SelectItem value="dry">Dry Goods</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -330,7 +268,7 @@ export default function NewDonationPage() {
                             <FormItem>
                             <FormLabel>Food Image</FormLabel>
                             <FormControl>
-                                <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files)} />
+                                <Input type="file" accept="image/*" {...field} />
                             </FormControl>
                             <FormDescription>
                                 An AI check will be performed for food safety.
@@ -379,26 +317,10 @@ export default function NewDonationPage() {
                   </Card>
                 )}
 
-                <div className='flex gap-4'>
-                    {aiState !== 'safe' && (
-                        <Button type="submit" disabled={aiState === 'checking'}>
-                            {aiState === 'checking' ? 'Verifying...' : 'Verify Donation'}
-                        </Button>
-                    )}
 
-                    {aiState === 'safe' && (
-                        <Button type="submit" disabled={isSubmitting}>
-                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Submit Donation
-                        </Button>
-                    )}
-
-                    {(aiState === 'unsafe' || aiState === 'safe') && (
-                        <Button variant="outline" onClick={() => setAiState('idle')}>
-                            Start Over
-                        </Button>
-                    )}
-                </div>
+                <Button type="submit" disabled={aiState === 'checking'}>
+                  {aiState === 'checking' ? 'Submitting...' : 'Submit Donation'}
+                </Button>
               </form>
             </Form>
           </CardContent>

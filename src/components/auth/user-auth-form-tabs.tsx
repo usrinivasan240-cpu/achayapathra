@@ -1,24 +1,39 @@
+
 'use client';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserAuthForm } from '@/components/auth/user-auth-form';
+import { UserAuthSigninForm } from './user-auth-signin-form';
+import { UserAuthSocial } from './user-auth-social';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export function UserAuthFormTabs() {
   return (
-    <Tabs defaultValue="donor" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="donor">Donor</TabsTrigger>
-        <TabsTrigger value="receiver">Receiver</TabsTrigger>
-        <TabsTrigger value="volunteer">Volunteer</TabsTrigger>
+    <Tabs defaultValue="email" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="email">Email</TabsTrigger>
+        <TabsTrigger value="google">Google</TabsTrigger>
       </TabsList>
-      <TabsContent value="donor">
-        <UserAuthForm role="donor" />
+      <TabsContent value="email">
+         <Card>
+            <CardHeader>
+                <CardTitle className="text-2xl">Sign In</CardTitle>
+                <CardDescription>Enter your email below to sign in to your account</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <UserAuthSigninForm />
+            </CardContent>
+         </Card>
       </TabsContent>
-      <TabsContent value="receiver">
-        <UserAuthForm role="receiver" />
-      </TabsContent>
-      <TabsContent value="volunteer">
-        <UserAuthForm role="volunteer" />
+      <TabsContent value="google">
+      <Card>
+            <CardHeader>
+                <CardTitle className="text-2xl">Sign In with Google</CardTitle>
+                <CardDescription>Use your Google account to sign in instantly.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <UserAuthSocial />
+            </CardContent>
+         </Card>
       </TabsContent>
     </Tabs>
   );

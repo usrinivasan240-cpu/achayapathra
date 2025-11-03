@@ -1,31 +1,13 @@
 
-'use client';
-
-import { useMemo } from 'react';
+import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/header';
-import { columns } from '@/components/donations/columns';
-import { DataTable } from '@/components/donations/data-table';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where, Timestamp } from 'firebase/firestore';
-import type { Donation } from '@/lib/types';
-import { Skeleton } from '@/components/ui/skeleton';
+import { columns } from '@/app/(app)/donations/columns';
+import { DataTable } from '@/app/(app)/donations/data-table';
+import { mockDonations } from '@/lib/data';
+import Link from 'next/link';
 
 export default function ReceiverDashboardPage() {
-  const firestore = useFirestore();
-
-  const donationsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'donations'), where('status', '==', 'Available'));
-  }, [firestore]);
-
-  const { data: donationsData, isLoading } = useCollection<Donation>(donationsQuery);
-
-  const availableDonations = useMemo(() => {
-    return donationsData?.map(d => ({
-      ...d,
-      expires: (d.expires as unknown as Timestamp)?.toDate(),
-    })) || [];
-  }, [donationsData]);
+  const availableDonations = mockDonations.filter(d => d.status === 'Available');
 
   return (
     <>
@@ -34,16 +16,9 @@ export default function ReceiverDashboardPage() {
         <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold font-headline">Ready for Pickup</h2>
         </div>
-        {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-          </div>
-        ) : (
-          <DataTable columns={columns} data={availableDonations} />
-        )}
+        <DataTable columns={columns} data={availableDonations} />
       </main>
     </>
   );
 }
+
