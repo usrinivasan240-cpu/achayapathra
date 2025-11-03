@@ -11,21 +11,17 @@ import {getFirestore, Firestore} from 'firebase/firestore';
 import {
   getFunctions,
   Functions,
-  httpsCallable,
-  connectFunctionsEmulator,
 } from 'firebase/functions';
 import {
   getStorage,
   FirebaseStorage,
-  connectStorageEmulator,
 } from 'firebase/storage';
 import {
-  doc,
-  getDoc,
-  DocumentData,
   onSnapshot,
+  DocumentData,
   DocumentReference,
 } from 'firebase/firestore';
+import { FirebaseClientProvider } from './client-provider';
 
 // The use* hooks are designed to be called from client components.
 // If you need to use Firebase on the server, see firebase-admin.ts.
@@ -48,6 +44,11 @@ if (!getApps().length) {
   app = getApp();
 }
 
+const auth = getAuth(app);
+const firestore = getFirestore(app);
+const functions = getFunctions(app);
+const storage = getStorage(app);
+
 const FirebaseContext = createContext<{
   app: FirebaseApp;
   auth: Auth;
@@ -56,65 +57,19 @@ const FirebaseContext = createContext<{
   storage: FirebaseStorage;
 } | null>(null);
 
-/**
- * A hook that returns the Firebase app object.
- * @returns The Firebase app object.
- */
-export function useFirebase() {
-  const context = useContext(FirebaseContext);
-  if (!context) {
-    throw new Error('useFirebase must be used within a FirebaseProvider');
-  }
-  return context;
+export const useFirebase = () => {
+    const context = useContext(FirebaseContext);
+    if (context === null) {
+        throw new Error("useFirebase must be used within a FirebaseProvider");
+    }
+    return context;
 }
 
-/**
- * A hook that returns the Firebase Auth object.
- * @returns The Firebase Auth object.
- */
-export function useAuth() {
-  const context = useContext(FirebaseContext);
-  if (!context) {
-    throw new Error('useAuth must be used within a FirebaseProvider');
-  }
-  return context.auth;
-}
+export const useAuth = () => useFirebase().auth;
+export const useFirestore = () => useFirebase().firestore;
+export const useFunctions = () => useFirebase().functions;
+export const useStorage = () => useFirebase().storage;
 
-/**
- * A hook that returns the Firebase Firestore object.
- * @returns The Firebase Firestore object.
- */
-export function useFirestore() {
-  const context = useContext(FirebaseContext);
-  if (!context) {
-    throw new Error('useFirestore must be used within a FirebaseProvider');
-  }
-  return context.firestore;
-}
-
-/**
- * A hook that returns the Firebase Functions object.
- * @returns The Firebase Functions object.
- */
-export function useFunctions() {
-  const context = useContext(FirebaseContext);
-  if (!context) {
-    throw new Error('useFunctions must be used within a FirebaseProvider');
-  }
-  return context.functions;
-}
-
-/**
- * A hook that returns the Firebase Storage object.
- * @returns The Firebase Storage object.
- */
-export function useStorage() {
-  const context = useContext(FirebaseContext);
-  if (!context) {
-    throw new Error('useStorage must be used within a FirebaseProvider');
-  }
-  return context.storage;
-}
 
 /**
  * A hook that returns the currently signed-in user.
@@ -157,20 +112,4 @@ export function useDoc<T>(ref: DocumentReference<DocumentData>) {
   return {data, isLoading};
 }
 
-/**
- * A component that provides the Firebase app object to its children.
- * @param children The children to render.
- * @returns The provider component.
- */
-export function FirebaseClientProvider({children}: {children: React.ReactNode}) {
-  const auth = getAuth(app);
-  const firestore = getFirestore(app);
-  const functions = getFunctions(app);
-  const storage = getStorage(app);
-
-  return (
-    <FirebaseContext.Provider value={{app, auth, firestore, functions, storage}}>
-      {children}
-    </FirebaseContext.Provider>
-  );
-}
+export { FirebaseClientProvider, FirebaseContext, app, auth, firestore, functions, storage };

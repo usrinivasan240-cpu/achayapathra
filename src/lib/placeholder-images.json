@@ -1,0 +1,32 @@
+[
+  {
+    "id": "login-image",
+    "imageUrl": "https://picsum.photos/seed/login/1920/1080",
+    "description": "A diverse group of people sharing food and smiling",
+    "imageHint": "community food sharing"
+  },
+  {
+    "id": "impact-hero",
+    "imageUrl": "https://picsum.photos/seed/impact-hero/1600/400",
+    "description": "A wide shot of volunteers serving food to a long line of people.",
+    "imageHint": "volunteers serving food"
+  },
+  {
+    "id": "impact-gallery-1",
+    "imageUrl": "https://picsum.photos/seed/gallery1/400/300",
+    "description": "A close-up of a volunteer handing a meal to a grateful recipient.",
+    "imageHint": "giving food"
+  },
+  {
+    "id": "impact-gallery-2",
+    "imageUrl": "https://picsum.photos/seed/gallery2/400/300",
+    "description": "A child smiling while eating a nutritious meal.",
+    "imageHint": "child eating happy"
+  },
+  {
+    "id": "impact-gallery-3",
+    "imageUrl": "https://picsum.photos/seed/gallery3/400/300",
+    "description": "A group of volunteers happily posing together.",
+    "imageHint": "happy volunteers"
+  }
+]
