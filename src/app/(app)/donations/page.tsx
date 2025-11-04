@@ -5,28 +5,42 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/header';
 import { columns } from './columns';
 import { DataTable } from './data-table';
-import { mockDonations as initialDonations } from '@/lib/data';
 import Link from 'next/link';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, doc, updateDoc } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
 
 export default function DonationsPage() {
-  const [donations, setDonations] = React.useState<Donation[]>(initialDonations);
   const { toast } = useToast();
+  const firestore = useFirestore();
 
-  const handleClaimDonation = (donationId: string) => {
-    setDonations((prevDonations) =>
-      prevDonations.map((donation) => {
-        if (donation.id === donationId && donation.status === 'Available') {
-          toast({
-            title: 'Donation Claimed!',
-            description: `You have successfully claimed "${donation.foodName}".`,
-          });
-          return { ...donation, status: 'Claimed' };
-        }
-        return donation;
-      })
-    );
+  const donationsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'donations');
+  }, [firestore]);
+
+  const { data: donations, isLoading } = useCollection<Donation>(donationsQuery);
+
+  const handleClaimDonation = async (donationId: string) => {
+    if (!firestore) return;
+    const donationRef = doc(firestore, 'donations', donationId);
+
+    try {
+      await updateDoc(donationRef, { status: 'Claimed' });
+      toast({
+        title: 'Donation Claimed!',
+        description: 'You have successfully claimed the donation.',
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not claim the donation. Please try again.',
+      });
+      console.error('Error claiming donation: ', error);
+    }
   };
 
   return (
@@ -41,10 +55,16 @@ export default function DonationsPage() {
             <Button>Add New Donation</Button>
           </Link>
         </div>
-        <DataTable
-          columns={columns({ onClaim: handleClaimDonation })}
-          data={donations}
-        />
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : (
+          <DataTable
+            columns={columns({ onClaim: handleClaimDonation })}
+            data={donations || []}
+          />
+        )}
       </main>
     </>
   );

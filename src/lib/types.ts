@@ -1,3 +1,16 @@
+import { Timestamp } from 'firebase/firestore';
+
+export type UserProfile = {
+  id: string;
+  displayName: string;
+  email: string;
+  photoURL: string;
+  points: number;
+  address: string;
+  phone: string;
+  role: string;
+};
+
 export type User = {
   id: string;
   name: string;
@@ -14,8 +27,12 @@ export type Donation = {
   status: 'Available' | 'Claimed' | 'Delivered' | 'Pending';
   quantity: string;
   location: string;
-  expires: Date;
-  donor: User;
-  lat: number;
-  lng: number;
+  expires: Timestamp;
+  donor: {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl: string;
+  };
+  donorId: string;
 };

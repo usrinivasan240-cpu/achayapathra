@@ -36,6 +36,9 @@ import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { useFirestore, useUser } from '@/firebase';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),
@@ -53,7 +56,13 @@ export default function NewDonationPage() {
   const [aiState, setAiState] = React.useState<AISafetyCheckState>('idle');
   const [progress, setProgress] = React.useState(0);
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const { toast } = useToast();
+  const firestore = useFirestore();
+  const { user } = useUser();
+  const router = useRouter();
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -101,6 +110,58 @@ export default function NewDonationPage() {
   };
 
 
+  async function handleFinalSubmit(values: z.infer<typeof formSchema>) {
+    if (!firestore || !user) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not connect to the database. Please try again.'
+        });
+        return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+        const donationsCol = collection(firestore, 'donations');
+        await addDoc(donationsCol, {
+            donorId: user.uid,
+            foodName: values.foodName,
+            foodType: values.foodType,
+            quantity: values.quantity,
+            expires: values.expiryDate,
+            description: values.description || '',
+            location: values.location,
+            status: 'Available',
+            createdAt: serverTimestamp(),
+            donor: {
+                id: user.uid,
+                name: user.displayName || 'Anonymous',
+                email: user.email,
+                avatarUrl: user.photoURL || '',
+            }
+        });
+
+        toast({
+            title: 'Donation Listed!',
+            description: 'Your donation has been successfully submitted.'
+        });
+
+        router.push('/donations');
+
+    } catch (error) {
+        console.error('Error submitting donation:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Submission Failed',
+            description: 'There was an error submitting your donation.'
+        })
+    } finally {
+        setIsSubmitting(false);
+    }
+  }
+
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     setAiState('checking');
     let currentProgress = 0;
@@ -111,7 +172,11 @@ export default function NewDonationPage() {
             clearInterval(interval);
             // Simulate AI result
             setTimeout(() => {
-                setAiState(Math.random() > 0.2 ? 'safe' : 'unsafe');
+                const isSafe = Math.random() > 0.2;
+                setAiState(isSafe ? 'safe' : 'unsafe');
+                if (isSafe) {
+                    handleFinalSubmit(values);
+                }
             }, 500);
         }
     }, 200);
@@ -300,7 +365,7 @@ export default function NewDonationPage() {
                            <ShieldCheck className="h-8 w-8" />
                            <div>
                             <p className="font-bold text-lg">Food looks safe!</p>
-                            <p className="text-sm">Safety Score: 92%. Your donation is ready to be listed.</p>
+                            <p className="text-sm">Safety Score: 92%. Submitting your donation...</p>
                            </div>
                          </div>
                       )}
@@ -318,8 +383,12 @@ export default function NewDonationPage() {
                 )}
 
 
-                <Button type="submit" disabled={aiState === 'checking'}>
-                  {aiState === 'checking' ? 'Submitting...' : 'Submit Donation'}
+                <Button type="submit" disabled={aiState === 'checking' || isSubmitting}>
+                  {isSubmitting
+                    ? 'Submitting...'
+                    : aiState === 'checking'
+                    ? 'Analyzing...'
+                    : 'Submit Donation'}
                 </Button>
               </form>
             </Form>

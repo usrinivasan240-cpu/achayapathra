@@ -1,3 +1,5 @@
+'use client';
+
 import { Header } from '@/components/layout/header';
 import {
   Card,
@@ -6,16 +8,54 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { mockUsers, mockDonations } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Phone, Mail, MapPin, Award, History } from 'lucide-react';
+import { Phone, Mail, MapPin, Award, History, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import { Donation, UserProfile } from '@/lib/types';
 
 export default function ProfilePage() {
-  // We'll use the first mock user as the logged-in user
-  const user = mockUsers[0];
-  const userDonations = mockDonations.filter((d) => d.donor.id === user.id);
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
+
+  const userDonationsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(collection(firestore, 'donations'), where('donorId', '==', user.uid));
+  }, [firestore, user]);
+
+  const { data: userDonations, isLoading: areDonationsLoading } = useCollection<Donation>(userDonationsQuery);
+
+  const isLoading = isUserLoading || isProfileLoading || areDonationsLoading;
+
+  if (isLoading) {
+    return (
+      <>
+        <Header title="My Profile" />
+        <div className="flex flex-1 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </>
+    );
+  }
+
+  if (!user || !userProfile) {
+    return (
+       <>
+        <Header title="My Profile" />
+        <div className="flex flex-1 items-center justify-center">
+            <p>Could not load user profile.</p>
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
@@ -27,43 +67,43 @@ export default function ProfilePage() {
             <Card>
               <CardHeader className="items-center text-center">
                 <Avatar className="h-24 w-24 mb-4">
-                  <AvatarImage src={user.avatarUrl} alt={user.name} />
+                  <AvatarImage src={userProfile.photoURL} alt={userProfile.displayName} />
                   <AvatarFallback>
-                    {user.name.substring(0, 2)}
+                    {userProfile.displayName.substring(0, 2)}
                   </AvatarFallback>
                 </Avatar>
                 <CardTitle className="font-headline text-3xl">
-                  {user.name}
+                  {userProfile.displayName}
                 </CardTitle>
-                <CardDescription>Donor</CardDescription>
+                <CardDescription>{userProfile.role}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
                   <Mail className="h-5 w-5 text-muted-foreground mt-1" />
                   <div>
                     <p className="text-sm font-medium">Email</p>
-                    <p className="text-muted-foreground">{user.email}</p>
+                    <p className="text-muted-foreground">{userProfile.email}</p>
                   </div>
                 </div>
                  <div className="flex items-start gap-3">
                   <Phone className="h-5 w-5 text-muted-foreground mt-1" />
                   <div>
                     <p className="text-sm font-medium">Phone</p>
-                    <p className="text-muted-foreground">{user.phone}</p>
+                    <p className="text-muted-foreground">{userProfile.phone}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="h-5 w-5 text-muted-foreground mt-1" />
                   <div>
                     <p className="text-sm font-medium">Address</p>
-                    <p className="text-muted-foreground">{user.address}</p>
+                    <p className="text-muted-foreground">{userProfile.address}</p>
                   </div>
                 </div>
                  <div className="flex items-start gap-3">
                   <Award className="h-5 w-5 text-muted-foreground mt-1" />
                   <div>
                     <p className="text-sm font-medium">Reward Points</p>
-                    <p className="font-bold text-lg text-primary">{user.points} pts</p>
+                    <p className="font-bold text-lg text-primary">{userProfile.points} pts</p>
                   </div>
                 </div>
               </CardContent>
@@ -83,7 +123,7 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {userDonations.length > 0 ? (
+                {userDonations && userDonations.length > 0 ? (
                   userDonations.map((donation, index) => (
                     <div key={donation.id}>
                       {index > 0 && <Separator className="my-4" />}
@@ -91,7 +131,9 @@ export default function ProfilePage() {
                         <div className="col-span-2">
                            <p className="font-semibold">{donation.foodName}</p>
                            <p className='text-sm text-muted-foreground'>{donation.location}</p>
-                           <p className='text-sm text-muted-foreground'>Expires: {donation.expires.toLocaleDateString()}</p>
+                           <p className='text-sm text-muted-foreground'>
+                                Expires: {new Date(donation.expires.seconds * 1000).toLocaleDateString()}
+                           </p>
                         </div>
                         <div className='text-right'>
                             <Badge>{donation.status}</Badge>

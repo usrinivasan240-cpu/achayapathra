@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
@@ -16,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Donation } from '@/lib/types';
+import { Timestamp } from 'firebase/firestore';
 
 const statusVariantMap: { [key in Donation['status']]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
     Available: 'default',
@@ -53,7 +53,8 @@ export const columns = (options: { onClaim: (id: string) => void }): ColumnDef<D
     accessorKey: 'expires',
     header: 'Expires',
     cell: ({ row }) => {
-      const date = new Date(row.getValue('expires'));
+      const timestamp = row.getValue('expires') as Timestamp;
+      const date = timestamp.toDate();
       return <span>{date.toLocaleDateString()}</span>;
     },
   },
@@ -93,4 +94,3 @@ export const columns = (options: { onClaim: (id: string) => void }): ColumnDef<D
     },
   },
 ];
-
