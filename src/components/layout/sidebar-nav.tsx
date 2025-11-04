@@ -10,19 +10,16 @@ import {
   BarChart,
   Users,
   Hand,
-  User,
 } from 'lucide-react';
 import {
   Sidebar,
   SidebarHeader,
   SidebarContent,
   SidebarFooter,
-  SidebarNav,
   SidebarNavItem,
   SidebarNavSeparator,
 } from '@/components/ui/sidebar';
 import { UserNav } from '@/components/user-nav';
-import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -33,7 +30,7 @@ const navItems = [
 
 const secondaryNavItems = [
     { href: '/receiver-dashboard', label: 'Find Food', icon: Users },
-    { href: '/volunteer-dashboard', label: 'Volunteer', icon: Hand },
+    { href: 'volunteer-dashboard', label: 'Volunteer', icon: Hand },
 ]
 
 export function SidebarNav() {
@@ -46,7 +43,7 @@ export function SidebarNav() {
         <span className="text-lg font-semibold font-headline">SharePlate</span>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarNav>
+        <nav className="flex flex-col gap-1 px-2 py-4 text-sm font-medium">
           {navItems.map((item) => (
             <SidebarNavItem
               key={item.href}
@@ -68,7 +65,7 @@ export function SidebarNav() {
               {item.label}
             </SidebarNavItem>
           ))}
-        </SidebarNav>
+        </nav>
       </SidebarContent>
       <SidebarFooter>
         <UserNav />
