@@ -1,168 +1,62 @@
-/**
- * @description This ruleset enforces a strict user-ownership model for user data and leverages denormalization to avoid costly `get()` calls. It also defines admin roles using a dedicated collection.
- * @dataStructure
- * - /users/{userId}: Stores user profiles. Only the user and admins can read/write their own profile.
- * - /users/{userId}/donations/{donationId}: Stores donations made by a user. The 'donorId' field is denormalized for authorization.
- * - /volunteerTasks/{volunteerTaskId}: Stores volunteer tasks.
- * - /feedbacks/{feedbackId}: Stores feedback for donations and volunteer tasks.
- * - /leaderboard/{leaderboardId}: Stores leaderboard data. Publicly readable.
- * - /siteStats/{siteStatsId}: Stores site statistics. Admin-only access.
- * - /roles_admin/{userId}: Collection to store admin roles. Existence of a document grants admin privileges.
- * @keySecurityDecisions
- * - User listing is disallowed to protect user privacy.
- * - Public read access is granted to the /leaderboard collection.
- * - Default security posture for ambiguous relationships is strict owner-only access.
- * - All write operations are validated to ensure data integrity and prevent unauthorized modifications.
- * @denormalizationForAuthorization The 'donorId' field is denormalized in the /donations collection to avoid the need for `get()` calls to the /users collection for authorization.
- * @structuralSegregation User-specific data is stored under the /users/{userId} path, while public data (leaderboard) is stored in a separate top-level collection.
- */
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    /**
-     * @description Manages user profiles. Only the user and admins can read/write their own profile.
-     * @path /users/{userId}
-     * @allow (create) User with ID 'user123' can create their profile if request.auth.uid == 'user123'.
-     * @allow (get, update, delete) User with ID 'user123' can get, update, or delete their profile if request.auth.uid == 'user123'.
-     * @deny (create, get, update, delete) User with ID 'user456' cannot access user profile 'user123'.
-     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
-     */
-    match /users/{userId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if false; // User listing is not allowed.
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
-    }
-
-    /**
-     * @description Stores donations made by a user. Includes denormalized 'donorId' for authorization independence.
-     * @path /users/{userId}/donations/{donationId}
-     * @allow (create) User 'user123' can create a donation under their profile. The 'donorId' field must match the user ID.
-     * @allow (get, list, update, delete) User 'user123' can get, list, update, or delete their own donations.
-     * @deny (create, get, list, update, delete) User 'user456' cannot access donations under user 'user123' profile.
-     * @principle Enforces document ownership for writes and restricts access to a user's own data.
-     */
-    match /users/{userId}/donations/{donationId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && request.resource.data.donorId == userId;
-      allow update: if isSignedIn() && isExistingOwner(userId) && resource.data.donorId == userId;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
-    }
-
-    /**
-     * @description Stores volunteer tasks. Includes references to 'volunteerId' and 'donationId'.
-     * @path /volunteerTasks/{volunteerTaskId}
-     * @allow (create) Signed-in user can create a volunteer task.
-     * @allow (get, list, update, delete) Signed-in user can get, list, update, or delete a volunteer task.
-     * @deny (create, get, list, update, delete) Anonymous user cannot access volunteer tasks.
-     * @principle Requires user authentication for all operations on volunteer tasks.
-     */
-    match /volunteerTasks/{volunteerTaskId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
-    }
-
-    /**
-     * @description Stores feedback for donations and volunteer tasks. Includes references to 'userId' and 'donationId'.
-     * @path /feedbacks/{feedbackId}
-     * @allow (create) Signed-in user can create feedback.
-     * @allow (get, list, update, delete) Signed-in user can get, list, update, or delete feedback.
-     * @deny (create, get, list, update, delete) Anonymous user cannot access feedback.
-     * @principle Requires user authentication for all operations on feedback.
-     */
-    match /feedbacks/{feedbackId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
-    }
-
-    /**
-     * @description Stores leaderboard data. Publicly readable.
-     * @path /leaderboard/{leaderboardId}
-     * @allow (get, list) Any user can read the leaderboard data.
-     * @deny (create, update, delete) Only admins can create, update, or delete leaderboard data.
-     * @principle Allows public read access to leaderboard data while restricting write access to admins.
-     */
-    match /leaderboard/{leaderboardId} {
-      allow get, list: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
-    }
-
-    /**
-     * @description Stores site statistics. Admin-only access.
-     * @path /siteStats/{siteStatsId}
-     * @allow (create, get, list, update, delete) Only admins can create, get, list, update, or delete site statistics.
-     * @deny (create, get, list, update, delete) Regular users cannot access site statistics.
-     * @principle Restricts access to site statistics to admins only.
-     */
-    match /siteStats/{siteStatsId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
-    }
-
-    /**
-     * @description Collection to store admin roles. Existence of a document grants admin privileges.
-     * @path /roles_admin/{userId}
-     * @allow (create) Signed-in user can create an admin role.
-     * @allow (get, list, update, delete) Signed-in user can get, list, update, or delete an admin role.
-     * @deny (create, get, list, update, delete) Anonymous user cannot access admin roles.
-     * @principle Requires user authentication for all operations on admin roles.
-     */
-    match /roles_admin/{userId} {
-      allow get: if isAdmin();
-      allow list: if false; // Admin role listing is not allowed to prevent information disclosure.
-      allow create: if isAdmin();
-      allow update: if false; // Admin roles cannot be updated after creation.
-      allow delete: if isAdmin() && resource != null;
-    }
-
-    // ---- Helper functions ----
-
-    /**
-     * @description Checks if the user is signed in.
-     * @returns {boolean} True if the user is signed in, false otherwise.
-     */
+    
+    // Helper functions
     function isSignedIn() {
       return request.auth != null;
     }
-
-    /**
-     * @description Checks if the user is the owner of the document.
-     * @param {string} userId - The user ID to check against.
-     * @returns {boolean} True if the user is the owner, false otherwise.
-     */
+    
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
 
-     /**
-      * @description Checks if the user is the owner of the document and the document exists.
-      * @param {string} userId - The user ID to check against.
-      * @returns {boolean} True if the user is the owner and the document exists, false otherwise.
-      */
-    function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-    }
-
-    /**
-     * @description Checks if the user has admin privileges by checking for the existence of a document in the /roles_admin collection.
-     * @returns {boolean} True if the user is an admin, false otherwise.
-     */
     function isAdmin() {
       return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+    
+    // Users can only read/write their own data. Admins can read any user's data.
+    match /users/{userId} {
+      allow read: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow write: if isSignedIn() && isOwner(userId);
+    }
+
+    // Any signed-in user can view donations. Only owners can create/update/delete their own donations.
+    match /donations/{donationId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && request.resource.data.donorId == request.auth.uid;
+        allow update, delete: if isSignedIn() && resource.data.donorId == request.auth.uid;
+    }
+    
+    // Any signed-in user can create, read, and update volunteer tasks. Deletion is restricted to owners or admins.
+    match /volunteerTasks/{volunteerTaskId} {
+      allow read, update, create: if isSignedIn();
+      allow delete: if isSignedIn() && (resource.data.volunteerId == request.auth.uid || isAdmin());
+    }
+
+    // Feedback can be read by anyone, but only created/updated/deleted by the user who wrote it.
+    match /feedbacks/{feedbackId} {
+        allow read: if true;
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Leaderboard is public for all to read. Only admins can write to it.
+    match /leaderboard/{leaderboardId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Site stats are admin-only for both read and write.
+    match /siteStats/{siteStatsId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Admin roles can only be managed by other admins.
+    match /roles_admin/{userId} {
+        allow read, write: if isAdmin();
     }
   }
 }
