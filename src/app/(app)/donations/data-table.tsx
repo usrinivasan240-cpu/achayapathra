@@ -51,6 +51,9 @@ export function DataTable<TData, TValue>({
       sorting,
       columnFilters,
     },
+    // This will prevent the table from resetting its state on every render
+    // which is important now that the parent component manages the data state
+    autoResetPageIndex: false,
   });
 
   return (
