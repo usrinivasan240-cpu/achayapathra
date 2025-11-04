@@ -4,24 +4,24 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a user within the Achayapathra application.",
+      "description": "Represents a user in the Achayapathra application.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the user."
+          "description": "Unique identifier for the User entity."
         },
         "email": {
           "type": "string",
           "description": "User's email address.",
           "format": "email"
         },
-        "displayName": {
-          "type": "string",
-          "description": "User's display name."
-        },
         "phoneNumber": {
           "type": "string",
           "description": "User's phone number."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User's display name."
         },
         "photoURL": {
           "type": "string",
@@ -30,11 +30,11 @@
         },
         "role": {
           "type": "string",
-          "description": "User's role within the application (e.g., donor, receiver, volunteer, admin)."
+          "description": "User's role (e.g., donor, receiver, volunteer, admin)."
         },
         "verified": {
           "type": "boolean",
-          "description": "Indicates if the user's identity is verified."
+          "description": "Indicates whether the user's identity is verified."
         },
         "points": {
           "type": "number",
@@ -42,11 +42,11 @@
         },
         "location": {
           "type": "string",
-          "description": "User's location (e.g., GeoPoint as a string)."
+          "description": "User's location (e.g., coordinates or address)."
         },
         "identityId": {
           "type": "string",
-          "description": "Unique identifier for the user's identity document (e.g., Driver's License)"
+          "description": "Unique identifier for the user's verified identity."
         }
       },
       "required": [
@@ -54,7 +54,9 @@
         "email",
         "role",
         "verified",
-        "points"
+        "points",
+        "location",
+        "identityId"
       ]
     },
     "Donation": {
@@ -65,15 +67,15 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the donation."
+          "description": "Unique identifier for the Donation entity."
         },
         "donorId": {
           "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Donation). ID of the user who made the donation."
+          "description": "Reference to User (Donor). (Relationship: User 1:N Donation)"
         },
         "foodName": {
           "type": "string",
-          "description": "Name of the food being donated."
+          "description": "Name of the food item."
         },
         "foodType": {
           "type": "string",
@@ -86,29 +88,29 @@
         },
         "expiryTime": {
           "type": "string",
-          "description": "Time when the food expires.",
+          "description": "Expiration date and time of the food.",
           "format": "date-time"
         },
         "quantity": {
           "type": "string",
-          "description": "Quantity of food being donated."
+          "description": "Quantity of food available for donation."
         },
         "description": {
           "type": "string",
-          "description": "Optional description of the donation."
+          "description": "Optional description of the food donation."
         },
         "location": {
           "type": "string",
-          "description": "Pickup location for the donation (e.g., GeoPoint as a string)."
+          "description": "Location where the food can be picked up."
         },
-        "imageUrl": {
+        "imageURL": {
           "type": "string",
           "description": "URL of the food image.",
           "format": "uri"
         },
         "aiImageAnalysis": {
           "type": "string",
-          "description": "Result of the AI image analysis for food safety (e.g., safe, unsafe, needs review)."
+          "description": "Result of the AI image analysis for food safety."
         },
         "status": {
           "type": "string",
@@ -124,7 +126,7 @@
         "expiryTime",
         "quantity",
         "location",
-        "imageUrl",
+        "imageURL",
         "aiImageAnalysis",
         "status"
       ]
@@ -137,37 +139,29 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the volunteer task."
-        },
-        "donationId": {
-          "type": "string",
-          "description": "Reference to Donation. (Relationship: Donation 1:N VolunteerTask). ID of the donation associated with the task."
+          "description": "Unique identifier for the VolunteerTask entity."
         },
         "volunteerId": {
           "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N VolunteerTask). ID of the volunteer assigned to the task."
+          "description": "Reference to User (Volunteer). (Relationship: User 1:N VolunteerTask)"
+        },
+        "donationId": {
+          "type": "string",
+          "description": "Reference to Donation. (Relationship: Donation 1:N VolunteerTask)"
         },
         "type": {
           "type": "string",
-          "description": "Type of task (e.g., pickup, delivery)."
+          "description": "Type of volunteer task (e.g., pickup, delivery)."
         },
         "status": {
           "type": "string",
-          "description": "Status of the task (e.g., assigned, completed, cancelled)."
-        },
-        "pickupLocation": {
-          "type": "string",
-          "description": "Pickup location for the task (e.g., GeoPoint as a string)."
-        },
-        "deliveryLocation": {
-          "type": "string",
-          "description": "Delivery location for the task (e.g., GeoPoint as a string)."
+          "description": "Status of the volunteer task (e.g., pending, in progress, completed)."
         }
       },
       "required": [
         "id",
-        "donationId",
         "volunteerId",
+        "donationId",
         "type",
         "status"
       ]
@@ -180,19 +174,15 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the feedback."
-        },
-        "donationId": {
-          "type": "string",
-          "description": "Reference to Donation. (Relationship: Donation 1:N Feedback). ID of the donation the feedback is about (Optional)."
-        },
-        "volunteerTaskId": {
-          "type": "string",
-          "description": "Reference to VolunteerTask. (Relationship: VolunteerTask 1:N Feedback). ID of the volunteer task the feedback is about (Optional)."
+          "description": "Unique identifier for the Feedback entity."
         },
         "userId": {
           "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Feedback). ID of the user giving the feedback."
+          "description": "Reference to User. (Relationship: User 1:N Feedback)"
+        },
+        "donationId": {
+          "type": "string",
+          "description": "Reference to Donation. (Relationship: Donation 1:N Feedback)"
         },
         "rating": {
           "type": "number",
@@ -200,60 +190,62 @@
         },
         "comment": {
           "type": "string",
-          "description": "Optional comment accompanying the rating."
+          "description": "Optional comment associated with the feedback."
         }
       },
       "required": [
         "id",
         "userId",
+        "donationId",
         "rating"
       ]
     },
-    "LeaderboardEntry": {
+    "Leaderboard": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "LeaderboardEntry",
+      "title": "Leaderboard",
       "type": "object",
-      "description": "Represents an entry in the leaderboard.",
+      "description": "Represents the leaderboard data for top donors and volunteers.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the leaderboard entry."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N LeaderboardEntry). ID of the user in the leaderboard."
-        },
-        "points": {
-          "type": "number",
-          "description": "User's points on the leaderboard."
-        },
-        "rank": {
-          "type": "number",
-          "description": "User's rank on the leaderboard."
+          "description": "Unique identifier for the Leaderboard entity."
         },
         "date": {
           "type": "string",
-          "description": "Date of the leaderboard entry.",
+          "description": "Date for which the leaderboard is generated.",
           "format": "date-time"
+        },
+        "topDonors": {
+          "type": "array",
+          "description": "Array of user IDs of the top donors.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "topVolunteers": {
+          "type": "array",
+          "description": "Array of user IDs of the top volunteers.",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
         "id",
-        "userId",
-        "points",
-        "rank",
-        "date"
+        "date",
+        "topDonors",
+        "topVolunteers"
       ]
     },
     "SiteStats": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "SiteStats",
       "type": "object",
-      "description": "Represents site statistics.",
+      "description": "Represents site statistics related to hunger data.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the site statistics."
+          "description": "Unique identifier for the SiteStats entity."
         },
         "date": {
           "type": "string",
@@ -262,7 +254,7 @@
         },
         "hungerData": {
           "type": "string",
-          "description": "Data related to hunger statistics (e.g., number of donations, people fed)."
+          "description": "Data related to hunger statistics (e.g., number of people fed)."
         }
       },
       "required": [
@@ -287,11 +279,11 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profiles.  'userId' is the Firebase Auth UID. Only the user can modify their own profile.",
+          "description": "Stores user profiles. Only the user and admins can read/write their own profile.",
           "params": [
             {
               "name": "userId",
-              "description": "The Firebase Auth UID of the user."
+              "description": "The unique ID of the user."
             }
           ]
         }
@@ -303,71 +295,63 @@
           "schema": {
             "$ref": "#/backend/entities/Donation"
           },
-          "description": "Stores donations associated with a specific user. Only the user can create/modify donations in their subcollection.",
+          "description": "Stores donations made by a user. Includes denormalized 'donorId' for authorization independence.",
           "params": [
             {
               "name": "userId",
-              "description": "The Firebase Auth UID of the user (donor)."
+              "description": "The unique ID of the user."
             },
             {
               "name": "donationId",
-              "description": "Unique ID of the donation."
+              "description": "The unique ID of the donation."
             }
           ]
         }
       },
       {
-        "path": "/users/{userId}/volunteerTasks/{volunteerTaskId}",
+        "path": "/volunteerTasks/{volunteerTaskId}",
         "definition": {
           "entityName": "VolunteerTask",
           "schema": {
             "$ref": "#/backend/entities/VolunteerTask"
           },
-          "description": "Stores volunteer tasks associated with a specific user. Only the user can create/modify volunteerTasks in their subcollection.",
+          "description": "Stores volunteer tasks. Includes references to 'volunteerId' and 'donationId'.",
           "params": [
             {
-              "name": "userId",
-              "description": "The Firebase Auth UID of the user (volunteer)."
-            },
-            {
               "name": "volunteerTaskId",
-              "description": "Unique ID of the volunteer task."
+              "description": "The unique ID of the volunteer task."
             }
           ]
         }
       },
       {
-        "path": "/users/{userId}/feedback/{feedbackId}",
+        "path": "/feedbacks/{feedbackId}",
         "definition": {
           "entityName": "Feedback",
           "schema": {
             "$ref": "#/backend/entities/Feedback"
           },
-          "description": "Stores feedback associated with a specific user. Only the user can create/modify feedback in their subcollection.",
+          "description": "Stores feedback for donations and volunteer tasks. Includes references to 'userId' and 'donationId'.",
           "params": [
             {
-              "name": "userId",
-              "description": "The Firebase Auth UID of the user giving the feedback."
-            },
-            {
               "name": "feedbackId",
-              "description": "Unique ID of the feedback."
+              "description": "The unique ID of the feedback."
             }
           ]
         }
       },
       {
-        "path": "/leaderboard/{leaderboardEntryId}",
+        "path": "/leaderboard/{leaderboardId}",
         "definition": {
-          "entityName": "LeaderboardEntry",
+          "entityName": "Leaderboard",
           "schema": {
-            "$ref": "#/backend/entities/LeaderboardEntry"
+            "$ref": "#/backend/entities/Leaderboard"
           },
-          "description": "Stores leaderboard entries. Only accessible by the admin.",
+          "description": "Stores leaderboard data. Publicly readable.",
           "params": [
             {
-              "name": "leaderboardEntryId",
-              "description": "Unique ID of the leaderboard entry."
+              "name": "leaderboardId",
+              "description": "The unique ID of the leaderboard entry."
             }
           ]
         }
@@ -379,11 +363,11 @@
           "schema": {
             "$ref": "#/backend/entities/SiteStats"
           },
-          "description": "Stores site statistics. Only accessible by the admin.",
+          "description": "Stores site statistics. Admin-only access.",
           "params": [
             {
               "name": "siteStatsId",
-              "description": "Unique ID of the site statistics document."
+              "description": "The unique ID of the site statistics entry."
             }
           ]
         }
@@ -391,20 +375,20 @@
       {
         "path": "/roles_admin/{userId}",
         "definition": {
-          "entityName": "User",
+          "entityName": "AdminRole",
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Documents in this collection grant admin privileges.  Authorization rules check for the existence of a document with the user's UID in this collection.",
+          "description": "Collection to store admin roles. Existence of a document grants admin privileges.",
           "params": [
             {
               "name": "userId",
-              "description": "The Firebase Auth UID of the administrator."
+              "description": "The unique ID of the user with admin privileges."
             }
           ]
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support Achayapathra's food donation web application, focusing on secure and efficient data access. Authorization Independence is achieved by denormalizing relevant user roles where needed. Path-based ownership is used for user-specific data (donations, volunteer tasks, and feedback).  The structure facilitates secure `list` operations (QAPs) through structural segregation and role-based access control, enforced in the security rules.\n\nSpecifically:\n\n*   `/users/{userId}`: Stores user profiles. Access control is based on the `userId`.\n*   `/users/{userId}/donations/{donationId}`:  Donations are stored as subcollections to their respective owners. Security rules can easily validate that only the user can create or modify donations in their path.\n*   `/users/{userId}/volunteerTasks/{volunteerTaskId}`:  Volunteer Tasks are stored as subcollections to their respective owners. Security rules can easily validate that only the user can create or modify volunteerTasks in their path.\n*   `/users/{userId}/feedback/{feedbackId}`: Feedbacks are stored as subcollections to their respective owners. Security rules can easily validate that only the user can create or modify feedbacks in their path.\n*   `/leaderboard/{leaderboardEntryId}`: Stores leaderboard entries.  Admin-writeable only.\n*   `/siteStats/{siteStatsId}`: Stores site statistics. Admin-writeable only.\n*   `/roles_admin/{userId}`: Documents in this collection indicate admin roles.  Existence is checked in rules for admin-only operations.\n\nThis structure avoids complex `get()` calls in security rules, promoting atomic operations and easier debugging. Segregation ensures that each collection has a clear and consistent security posture."
+    "reasoning": "The Firestore data structure is designed to support the Achayapathra (SharePlate) application, focusing on food donations and related activities. The design prioritizes security, scalability, and maintainability, adhering to the principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Rules are not Filters).  \n\n**Authorization Independence:** This is achieved through denormalization. For example, access to donations requires knowing the donor. This information is duplicated in subcollections if access to them depends on the donation's attributes. Collaborative access uses membership maps.  This prevents `get()` calls in security rules.\n\n**Structural Segregation:** Data with different access requirements are stored in separate collections. User profiles are stored under `/users/{userId}`, ensuring only the user (and admins) can access them. Publicly accessible data, such as leaderboards, is stored in a dedicated collection (`/leaderboard`) with rules that allow read access.\n\n**Access Modeling:** Ownership is explicitly modeled using path-based ownership (`/users/{userId}/donations/{donationId}`). Collaborative access (e.g., admin roles) uses dedicated collections like `/roles_admin/{userId}`.\n\n**QAPs (Rules are not Filters):** The structure enables secure list operations.  For example, listing donations is allowed, but security rules ensure that only authorized users can access sensitive donation data.  Admin roles are checked against the `/roles_admin` collection. The separation of private and public data into different collections ensures that list operations do not expose sensitive data.\n\n**Invariants:** The structure supports the integrity of ownership and timestamps. For instance, the `donorId` field in the `donations` collection ensures that each donation is associated with a specific user. Timestamps (e.g., `cookedTime`, `expiryTime`) can be enforced through security rules to ensure data consistency.\n\n**Denormalization Strategy:** The `donations` documents include the `donorId` to link back to the user who created them, avoiding the need for `get()` calls to the `users` collection in security rules related to donations. This ensures authorization independence. The `volunteerTasks` document links both `volunteerId` and `donationId` to the corresponding collections.\n\n**Admin Roles:**  The `/roles_admin/{userId}` collection supports the admin role. The existence of a document in this collection grants admin privileges to the corresponding user.  The security rules check for the existence of this document to authorize admin-only operations.\n"
   }
 }
