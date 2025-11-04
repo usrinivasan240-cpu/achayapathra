@@ -31,9 +31,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  devIndicators: {
-    buildActivity: false,
-  },
   // The `allowedDevOrigins` is a security feature in Next.js that’s designed to prevent security
   // vulnerabilities like DNS rebinding attacks. It allows developers to explicitly whitelist
   // origins that are permitted to access the Next.js development server. This is important in a
