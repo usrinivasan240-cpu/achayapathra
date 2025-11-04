@@ -36,9 +36,9 @@ export function UserNav() {
     if (isUserLoading) {
         return (
             <div className="flex items-center space-x-4">
+                 <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
                 <div className="space-y-2">
                     <div className="h-4 w-[150px] bg-gray-200 animate-pulse rounded"></div>
-                    <div className="h-4 w-[100px] bg-gray-200 animate-pulse rounded"></div>
                 </div>
             </div>
         );
@@ -47,7 +47,7 @@ export function UserNav() {
     if (!user) {
         return (
             <Link href="/">
-                <Button variant="ghost">Sign In</Button>
+                <Button>Sign In</Button>
             </Link>
         )
     }
@@ -55,15 +55,11 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-full justify-start gap-2 px-2">
-          <Avatar className="h-8 w-8">
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+          <Avatar className="h-10 w-10">
             <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
-            <AvatarFallback>{user.displayName ? user.displayName.charAt(0) : 'U'}</AvatarFallback>
+            <AvatarFallback>{user.displayName ? user.displayName.substring(0, 2).toUpperCase() : 'U'}</AvatarFallback>
           </Avatar>
-          <div className='text-left'>
-            <div className="text-sm font-medium">{user.displayName || 'User'}</div>
-            <div className="text-xs text-muted-foreground">{user.email}</div>
-          </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
