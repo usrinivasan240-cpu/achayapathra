@@ -105,4 +105,59 @@ export const mockDonations: Donation[] = [
     lat: 11.03,
     lng: 77.03,
   },
+  {
+    id: 'd6',
+    foodName: 'Idli & Sambar',
+    status: 'Available',
+    quantity: '50 pieces',
+    location: 'Ukkadam',
+    expires: new Date(new Date().getTime() + 6 * 60 * 60 * 1000), // 6 hours from now
+    donor: mockUsers[4],
+    lat: 10.99,
+    lng: 76.96,
+  },
+  {
+    id: 'd7',
+    foodName: 'Fresh Bananas',
+    status: 'Available',
+    quantity: '5 dozen',
+    location: 'Singanallur',
+    expires: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
+    donor: mockUsers[1],
+    lat: 11.00,
+    lng: 77.02,
+  },
+  {
+    id: 'd8',
+    foodName: 'Biscuits & Cookies',
+    status: 'Delivered',
+    quantity: '100 packs',
+    location: 'Vadavalli',
+    expires: new Date(new Date().getTime() + 60 * 24 * 60 * 60 * 1000), // 2 months from now
+    donor: mockUsers[2],
+    lat: 11.03,
+    lng: 76.90,
+  },
+  {
+    id: 'd9',
+    foodName: 'Packed Lunch Boxes',
+    status: 'Available',
+    quantity: '30 boxes',
+    location: 'Thudiyalur',
+    expires: new Date(new Date().getTime() + 4 * 60 * 60 * 1000), // 4 hours from now
+    donor: mockUsers[3],
+    lat: 11.10,
+    lng: 76.94,
+  },
+  {
+    id: 'd10',
+    foodName: 'Fresh Milk',
+    status: 'Claimed',
+    quantity: '10 Liters',
+    location: 'Ramanathapuram',
+    expires: new Date(new Date().getTime() + 18 * 60 * 60 * 1000), // 18 hours from now
+    donor: mockUsers[0],
+    lat: 10.99,
+    lng: 76.99,
+  },
 ];
