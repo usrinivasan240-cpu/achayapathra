@@ -4,8 +4,8 @@ import { Timestamp } from 'firebase/firestore';
 export const mockUsers: UserProfile[] = [
   {
     id: '1',
-    displayName: 'Alice Donor',
-    email: 'alice@example.com',
+    displayName: 'Priya Krishnan',
+    email: 'priya@example.com',
     photoURL: 'https://picsum.photos/seed/user1/100/100',
     points: 1250,
     address: '123 Main St, Anytown, USA',
@@ -24,8 +24,8 @@ export const mockUsers: UserProfile[] = [
   },
   {
     id: '3',
-    displayName: 'Charlie Volunteer',
-    email: 'charlie@example.com',
+    displayName: 'Sanjay Gupta',
+    email: 'sanjay@example.com',
     photoURL: 'https://picsum.photos/seed/user3/100/100',
     points: 850,
     address: '789 Pine Ln, Anytown, USA',
@@ -34,8 +34,8 @@ export const mockUsers: UserProfile[] = [
   },
   {
     id: '4',
-    displayName: 'Diana Donor',
-    email: 'diana@example.com',
+    displayName: 'Anjali Sharma',
+    email: 'anjali@example.com',
     photoURL: 'https://picsum.photos/seed/user4/100/100',
     points: 1500,
     address: '101 Maple Dr, Anytown, USA',
@@ -44,8 +44,8 @@ export const mockUsers: UserProfile[] = [
   },
   {
     id: '5',
-    displayName: 'Ethan Volunteer',
-    email: 'ethan@example.com',
+    displayName: 'Arun Kumar',
+    email: 'arun@example.com',
     photoURL: 'https://picsum.photos/seed/user5/100/100',
     points: 1100,
     address: '212 Birch Rd, Anytown, USA',
@@ -64,8 +64,8 @@ export const mockDonations: Donation[] = [
     pickupBy: Timestamp.fromDate(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)),
     donor: {
       id: '1',
-      name: 'Alice Donor',
-      email: 'alice@example.com',
+      name: 'Priya Krishnan',
+      email: 'priya@example.com',
       photoURL: 'https://picsum.photos/seed/user1/100/100',
       phone: '555-1234',
     },
@@ -82,8 +82,8 @@ export const mockDonations: Donation[] = [
     pickupBy: Timestamp.fromDate(new Date(Date.now() + 1 * 24 * 60 * 60 * 1000)),
     donor: {
       id: '4',
-      name: 'Diana Donor',
-      email: 'diana@example.com',
+      name: 'Anjali Sharma',
+      email: 'anjali@example.com',
       photoURL: 'https://picsum.photos/seed/user4/100/100',
       phone: '555-3456',
     },
@@ -100,8 +100,8 @@ export const mockDonations: Donation[] = [
     pickupBy: Timestamp.fromDate(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)),
     donor: {
       id: '1',
-      name: 'Alice Donor',
-      email: 'alice@example.com',
+      name: 'Priya Krishnan',
+      email: 'priya@example.com',
       photoURL: 'https://picsum.photos/seed/user1/100/100',
       phone: '555-1234',
     },
@@ -118,8 +118,8 @@ export const mockDonations: Donation[] = [
     pickupBy: Timestamp.fromDate(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)),
     donor: {
       id: '4',
-      name: 'Diana Donor',
-      email: 'diana@example.com',
+      name: 'Anjali Sharma',
+      email: 'anjali@example.com',
       photoURL: 'https://picsum.photos/seed/user4/100/100',
       phone: '555-3456',
     },
