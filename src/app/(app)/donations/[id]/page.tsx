@@ -94,11 +94,11 @@ export default function DonationDetailsPage({
                     <CardHeader className='pb-2'>
                         <CardTitle className='text-base font-medium flex items-center gap-2 text-muted-foreground'>
                            <Calendar className='h-4 w-4' />
-                           Expires On
+                           Pickup By
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className='text-lg font-semibold'>{donation.expires.toLocaleDateString()}</p>
+                        <p className='text-lg font-semibold'>{donation.pickupBy.toDate().toLocaleDateString()}</p>
                     </CardContent>
                 </Card>
             </div>

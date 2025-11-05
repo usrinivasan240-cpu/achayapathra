@@ -37,14 +37,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser } from '@/firebase';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),
   foodType: z.string({ required_error: 'Please select a food type.' }),
   quantity: z.string().min(1, 'Quantity is required.'),
-  expiryDate: z.date({ required_error: 'Expiry date is required.' }),
+  cookedTime: z.string().min(1, 'Cooked time is required.'),
+  pickupDate: z.date({ required_error: 'Pickup date is required.' }),
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
   image: z.any().optional(),
@@ -70,6 +71,7 @@ export default function NewDonationPage() {
       foodName: '',
       quantity: '',
       location: '',
+      cookedTime: format(new Date(), 'HH:mm'),
     },
   });
 
@@ -124,12 +126,19 @@ export default function NewDonationPage() {
 
     try {
         const donationsCol = collection(firestore, 'donations');
+        
+        const [hours, minutes] = values.cookedTime.split(':');
+        const cookedDateTime = new Date();
+        cookedDateTime.setHours(parseInt(hours, 10));
+        cookedDateTime.setMinutes(parseInt(minutes, 10));
+
         await addDoc(donationsCol, {
             donorId: user.uid,
             foodName: values.foodName,
             foodType: values.foodType,
             quantity: values.quantity,
-            expires: values.expiryDate,
+            cookedTime: Timestamp.fromDate(cookedDateTime),
+            pickupBy: Timestamp.fromDate(values.pickupDate),
             description: values.description || '',
             location: values.location,
             status: 'Available',
@@ -248,12 +257,26 @@ export default function NewDonationPage() {
                         </FormItem>
                       )}
                     />
+                    <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name="expiryDate"
+                      name="cookedTime"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cooked Time</FormLabel>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="pickupDate"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>Expiration Date</FormLabel>
+                          <FormLabel>Pickup By</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -287,6 +310,7 @@ export default function NewDonationPage() {
                         </FormItem>
                       )}
                     />
+                    </div>
                     </div>
                     <div className="space-y-8">
                      <FormField

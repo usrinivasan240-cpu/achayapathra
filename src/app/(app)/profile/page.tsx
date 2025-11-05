@@ -13,7 +13,7 @@ import { Phone, Mail, MapPin, Award, History, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, doc } from 'firebase/firestore';
 import { Donation, UserProfile } from '@/lib/types';
 
 export default function ProfilePage() {
@@ -132,7 +132,7 @@ export default function ProfilePage() {
                            <p className="font-semibold">{donation.foodName}</p>
                            <p className='text-sm text-muted-foreground'>{donation.location}</p>
                            <p className='text-sm text-muted-foreground'>
-                                Expires: {new Date(donation.expires.seconds * 1000).toLocaleDateString()}
+                                Pickup By: {new Date(donation.pickupBy.seconds * 1000).toLocaleDateString()}
                            </p>
                         </div>
                         <div className='text-right'>

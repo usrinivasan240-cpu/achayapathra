@@ -27,7 +27,8 @@ export type Donation = {
   status: 'Available' | 'Claimed' | 'Delivered' | 'Pending';
   quantity: string;
   location: string;
-  expires: Timestamp;
+  pickupBy: Timestamp;
+  cookedTime?: Timestamp;
   donor: {
     id: string;
     name: string;

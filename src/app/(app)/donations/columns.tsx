@@ -50,10 +50,10 @@ export const columns = (options: { onClaim: (id: string) => void }): ColumnDef<D
     header: 'Location',
   },
   {
-    accessorKey: 'expires',
-    header: 'Expires',
+    accessorKey: 'pickupBy',
+    header: 'Pickup By',
     cell: ({ row }) => {
-      const expiresValue = row.getValue('expires');
+      const expiresValue = row.getValue('pickupBy');
       let date: Date;
       if (expiresValue instanceof Timestamp) {
         date = expiresValue.toDate();
