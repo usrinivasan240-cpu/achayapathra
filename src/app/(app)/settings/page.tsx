@@ -1,7 +1,8 @@
+
 'use client';
 
 import * as React from 'react';
-import { Moon, Sun, Bell, ALargeSmall } from 'lucide-react';
+import { Moon, Sun, Bell, ALargeSmall, Loader2 } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import {
   Card,
@@ -18,19 +19,43 @@ import { Separator } from '@/components/ui/separator';
 export default function SettingsPage() {
   const [theme, setTheme] = React.useState('light');
   const [fontSize, setFontSize] = React.useState('medium');
+  const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+    setIsMounted(true);
+    const storedTheme = localStorage.getItem('theme') || 'light';
+    const storedFontSize = localStorage.getItem('fontSize') || 'medium';
+    setTheme(storedTheme);
+    setFontSize(storedFontSize);
+  }, []);
 
   React.useEffect(() => {
-    document.documentElement.style.fontSize =
-      fontSize === 'small' ? '14px' : fontSize === 'large' ? '18px' : '16px';
-  }, [fontSize]);
+    if (isMounted) {
+      const root = window.document.documentElement;
+      root.classList.remove('light', 'dark');
+      root.classList.add(theme);
+      localStorage.setItem('theme', theme);
+    }
+  }, [theme, isMounted]);
 
+  React.useEffect(() => {
+    if (isMounted) {
+      document.documentElement.style.fontSize =
+        fontSize === 'small' ? '14px' : fontSize === 'large' ? '18px' : '16px';
+      localStorage.setItem('fontSize', fontSize);
+    }
+  }, [fontSize, isMounted]);
+
+  if (!isMounted) {
+    return (
+        <>
+            <Header title="Settings" />
+            <div className="flex flex-1 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        </>
+    );
+  }
 
   return (
     <>
@@ -129,3 +154,4 @@ export default function SettingsPage() {
     </>
   );
 }
+
