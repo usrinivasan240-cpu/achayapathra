@@ -39,7 +39,7 @@ export default function DonationDetailsPage() {
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
                 <AvatarImage
-                  src={donation.donor.avatarUrl}
+                  src={donation.donor.photoURL}
                   alt={donation.donor.name}
                 />
                 <AvatarFallback>
@@ -96,7 +96,9 @@ export default function DonationDetailsPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className='text-lg font-semibold'>{donation.pickupBy.toDate().toLocaleDateString()}</p>
+                        <p className='text-lg font-semibold'>
+                            {donation.pickupBy ? donation.pickupBy.toDate().toLocaleDateString() : 'Not specified'}
+                        </p>
                     </CardContent>
                 </Card>
             </div>

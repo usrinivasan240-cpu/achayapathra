@@ -34,6 +34,7 @@ export type Donation = {
     name: string;
     email: string;
     photoURL: string;
+    phone?: string;
   };
   donorId: string;
   lat?: number;

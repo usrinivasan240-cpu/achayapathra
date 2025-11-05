@@ -6,7 +6,7 @@ export const mockUsers: User[] = [
     id: '1',
     name: 'Priya Kumari',
     email: 'priya@example.com',
-    avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
+    photoURL: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
     points: 1250,
     address: '123 Maple St, Springfield',
     phone: '555-1234',
@@ -15,7 +15,7 @@ export const mockUsers: User[] = [
     id: '2',
     name: 'Arjun Selvam',
     email: 'arjun@example.com',
-    avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026705d',
+    photoURL: 'https://i.pravatar.cc/150?u=a042581f4e29026705d',
     points: 850,
     address: '456 Oak Ave, Springfield',
     phone: '555-5678',
@@ -24,7 +24,7 @@ export const mockUsers: User[] = [
     id: '3',
     name: 'Anandhi Sharma',
     email: 'anandhi@example.com',
-    avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026706d',
+    photoURL: 'https://i.pravatar.cc/150?u=a042581f4e29026706d',
     points: 1500,
     address: '789 Pine Ln, Springfield',
     phone: '555-9012',
@@ -33,7 +33,7 @@ export const mockUsers: User[] = [
     id: '4',
     name: 'Vikram Singh',
     email: 'vikram@example.com',
-    avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026707d',
+    photoURL: 'https://i.pravatar.cc/150?u=a042581f4e29026707d',
     points: 700,
     address: '321 Birch Rd, Springfield',
     phone: '555-3456',
@@ -42,7 +42,7 @@ export const mockUsers: User[] = [
     id: '5',
     name: 'Meera Krishnan',
     email: 'meera@example.com',
-    avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026708d',
+    photoURL: 'https://i.pravatar.cc/150?u=a042581f4e29026708d',
     points: 2100,
     address: '654 Elm St, Springfield',
     phone: '555-7890',
@@ -61,12 +61,12 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     quantity: 'Feeds 10 people',
     location: 'Saravanampatti',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000)), // 2 days from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000)), // 2 days from now
     donor: {
       id: mockUsers[0].id,
       name: mockUsers[0].name,
       email: mockUsers[0].email,
-      avatarUrl: mockUsers[0].avatarUrl,
+      photoURL: mockUsers[0].photoURL,
     },
     donorId: mockUsers[0].id,
     lat: 11.08,
@@ -78,12 +78,12 @@ export const mockDonations: Donation[] = [
     status: 'Claimed',
     quantity: '20 loaves',
     location: 'Gandhipuram',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 1 * 24 * 60 * 60 * 1000)), // 1 day from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 1 * 24 * 60 * 60 * 1000)), // 1 day from now
     donor: {
       id: mockUsers[1].id,
       name: mockUsers[1].name,
       email: mockUsers[1].email,
-      avatarUrl: mockUsers[1].avatarUrl,
+      photoURL: mockUsers[1].photoURL,
     },
     donorId: mockUsers[1].id,
     lat: 11.01,
@@ -95,12 +95,12 @@ export const mockDonations: Donation[] = [
     status: 'Delivered',
     quantity: '50 cans',
     location: 'R.S. Puram',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)), // 1 month from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)), // 1 month from now
     donor: {
       id: mockUsers[2].id,
       name: mockUsers[2].name,
       email: mockUsers[2].email,
-      avatarUrl: mockUsers[2].avatarUrl,
+      photoURL: mockUsers[2].photoURL,
     },
     donorId: mockUsers[2].id,
     lat: 11.00,
@@ -112,12 +112,12 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     quantity: '1 large cake',
     location: 'Saibaba Colony',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 12 * 60 * 60 * 1000)), // 12 hours from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 12 * 60 * 60 * 1000)), // 12 hours from now
     donor: {
       id: mockUsers[0].id,
       name: mockUsers[0].name,
       email: mockUsers[0].email,
-      avatarUrl: mockUsers[0].avatarUrl,
+      photoURL: mockUsers[0].photoURL,
     },
     donorId: mockUsers[0].id,
     lat: 11.02,
@@ -129,12 +129,12 @@ export const mockDonations: Donation[] = [
     status: 'Pending',
     quantity: 'Feeds 50+ people',
     location: 'Peelamedu',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 8 * 60 * 60 * 1000)), // 8 hours from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 8 * 60 * 60 * 1000)), // 8 hours from now
     donor: {
       id: mockUsers[3].id,
       name: mockUsers[3].name,
       email: mockUsers[3].email,
-      avatarUrl: mockUsers[3].avatarUrl,
+      photoURL: mockUsers[3].photoURL,
     },
     donorId: mockUsers[3].id,
     lat: 11.03,
@@ -146,12 +146,12 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     quantity: '50 pieces',
     location: 'Ukkadam',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 6 * 60 * 60 * 1000)), // 6 hours from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 6 * 60 * 60 * 1000)), // 6 hours from now
     donor: {
       id: mockUsers[4].id,
       name: mockUsers[4].name,
       email: mockUsers[4].email,
-      avatarUrl: mockUsers[4].avatarUrl,
+      photoURL: mockUsers[4].photoURL,
     },
     donorId: mockUsers[4].id,
     lat: 10.99,
@@ -163,12 +163,12 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     quantity: '5 dozen',
     location: 'Singanallur',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000)), // 3 days from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000)), // 3 days from now
     donor: {
       id: mockUsers[1].id,
       name: mockUsers[1].name,
       email: mockUsers[1].email,
-      avatarUrl: mockUsers[1].avatarUrl,
+      photoURL: mockUsers[1].photoURL,
     },
     donorId: mockUsers[1].id,
     lat: 11.00,
@@ -180,12 +180,12 @@ export const mockDonations: Donation[] = [
     status: 'Delivered',
     quantity: '100 packs',
     location: 'Vadavalli',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 60 * 24 * 60 * 60 * 1000)), // 2 months from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 60 * 24 * 60 * 60 * 1000)), // 2 months from now
     donor: {
       id: mockUsers[2].id,
       name: mockUsers[2].name,
       email: mockUsers[2].email,
-      avatarUrl: mockUsers[2].avatarUrl,
+      photoURL: mockUsers[2].photoURL,
     },
     donorId: mockUsers[2].id,
     lat: 11.03,
@@ -197,12 +197,12 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     quantity: '30 boxes',
     location: 'Thudiyalur',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 4 * 60 * 60 * 1000)), // 4 hours from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 4 * 60 * 60 * 1000)), // 4 hours from now
     donor: {
       id: mockUsers[3].id,
       name: mockUsers[3].name,
       email: mockUsers[3].email,
-      avatarUrl: mockUsers[3].avatarUrl,
+      photoURL: mockUsers[3].photoURL,
     },
     donorId: mockUsers[3].id,
     lat: 11.10,
@@ -214,12 +214,12 @@ export const mockDonations: Donation[] = [
     status: 'Claimed',
     quantity: '10 Liters',
     location: 'Ramanathapuram',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 18 * 60 * 60 * 1000)), // 18 hours from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 18 * 60 * 60 * 1000)), // 18 hours from now
     donor: {
       id: mockUsers[0].id,
       name: mockUsers[0].name,
       email: mockUsers[0].email,
-      avatarUrl: mockUsers[0].avatarUrl,
+      photoURL: mockUsers[0].photoURL,
     },
     donorId: mockUsers[0].id,
     lat: 10.99,
@@ -231,12 +231,12 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     quantity: '25 sets',
     location: 'Saravanampatti',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 5 * 60 * 60 * 1000)), // 5 hours from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 5 * 60 * 60 * 1000)), // 5 hours from now
     donor: {
       id: mockUsers[4].id,
       name: mockUsers[4].name,
       email: mockUsers[4].email,
-      avatarUrl: mockUsers[4].avatarUrl,
+      photoURL: mockUsers[4].photoURL,
     },
     donorId: mockUsers[4].id,
     lat: 11.08,
@@ -248,12 +248,12 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     quantity: '10 kg',
     location: 'Town Hall',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 4 * 24 * 60 * 60 * 1000)), // 4 days from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 4 * 24 * 60 * 60 * 1000)), // 4 days from now
     donor: {
       id: mockUsers[1].id,
       name: mockUsers[1].name,
       email: mockUsers[1].email,
-      avatarUrl: mockUsers[1].avatarUrl,
+      photoURL: mockUsers[1].photoURL,
     },
     donorId: mockUsers[1].id,
     lat: 10.99,
@@ -265,12 +265,12 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     quantity: 'Feeds 15 people',
     location: 'Kovaipudur',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 7 * 60 * 60 * 1000)), // 7 hours from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 7 * 60 * 60 * 1000)), // 7 hours from now
     donor: {
       id: mockUsers[2].id,
       name: mockUsers[2].name,
       email: mockUsers[2].email,
-      avatarUrl: mockUsers[2].avatarUrl,
+      photoURL: mockUsers[2].photoURL,
     },
     donorId: mockUsers[2].id,
     lat: 10.95,
@@ -282,12 +282,12 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     quantity: 'Feeds 20 people',
     location: 'Edayarpalayam',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 9 * 60 * 60 * 1000)), // 9 hours from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 9 * 60 * 60 * 1000)), // 9 hours from now
     donor: {
       id: mockUsers[0].id,
       name: mockUsers[0].name,
       email: mockUsers[0].email,
-      avatarUrl: mockUsers[0].avatarUrl,
+      photoURL: mockUsers[0].photoURL,
     },
     donorId: mockUsers[0].id,
     lat: 11.04,
@@ -299,12 +299,12 @@ export const mockDonations: Donation[] = [
     status: 'Available',
     quantity: '5 kg',
     location: 'Cheran ma Nagar',
-    expires: dateToTimestamp(new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000)), // 5 days from now
+    pickupBy: dateToTimestamp(new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000)), // 5 days from now
     donor: {
       id: mockUsers[3].id,
       name: mockUsers[3].name,
       email: mockUsers[3].email,
-      avatarUrl: mockUsers[3].avatarUrl,
+      photoURL: mockUsers[3].photoURL,
     },
     donorId: mockUsers[3].id,
     lat: 11.07,
