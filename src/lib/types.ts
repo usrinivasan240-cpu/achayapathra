@@ -30,6 +30,7 @@ export type Donation = {
   location: string;
   pickupBy: Timestamp;
   cookedTime?: Timestamp;
+  description?: string;
   donor: {
     id: string;
     name: string;
@@ -41,6 +42,5 @@ export type Donation = {
   lat?: number;
   lng?: number;
   imageURL?: string;
+  aiImageAnalysis?: string;
 };
-
-    

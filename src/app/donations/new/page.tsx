@@ -35,10 +35,9 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser, useFirebaseApp } from '@/firebase';
-import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, Timestamp, updateDoc, doc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { aiSafeFoodCheck, AISafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
 import { ImageUpload } from '@/components/ui/image-upload';
@@ -68,7 +67,6 @@ const formSchema = z.object({
     ),
 });
 
-type AISafetyCheckState = 'idle' | 'checking' | 'safe' | 'unsafe' | 'submitting';
 
 type LocationCoords = {
     latitude: number;
@@ -76,9 +74,7 @@ type LocationCoords = {
 } | null;
 
 export default function NewDonationPage() {
-  const [aiState, setAiState] = React.useState<AISafetyCheckState>('idle');
-  const [aiResult, setAiResult] = React.useState<AISafeFoodCheckOutput | null>(null);
-  const [progress, setProgress] = React.useState(0);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
   const [coords, setCoords] = React.useState<LocationCoords>(null);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
@@ -154,61 +150,15 @@ export default function NewDonationPage() {
         return;
     }
     
-    setAiState('checking');
-    setProgress(10);
-
-    const imageFile = values.image[0] as File;
-    const storage = getStorage(firebaseApp);
-    const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
+    setIsSubmitting(true);
 
     try {
-        const [aiCheckSettled, uploadSettled] = await Promise.allSettled([
-            (async () => {
-                const foodDataUri = await fileToDataURI(imageFile);
-                setProgress(p => p + 20);
-                const result = await aiSafeFoodCheck({ foodDataUri });
-                setProgress(p => p + 30);
-                return result;
-            })(),
-            (async () => {
-                const uploadResult = await uploadBytes(storageRef, imageFile);
-                setProgress(p => p + 40);
-                return getDownloadURL(uploadResult.ref);
-            })()
-        ]);
-
-        if (aiCheckSettled.status === 'rejected') {
-            throw new Error('Image analysis failed.');
-        }
-        if (uploadSettled.status === 'rejected') {
-            throw new Error('Image upload failed.');
-        }
-
-        const aiCheckResult = aiCheckSettled.value;
-        const imageUrl = uploadSettled.value;
-
-        setAiResult(aiCheckResult);
-
-        if (!aiCheckResult?.isFood) {
-            setAiState('unsafe');
-            toast({
-                variant: 'destructive',
-                title: 'Image Analysis Failed',
-                description: aiCheckResult?.reason || "Could not confirm image contains food.",
-            });
-            await deleteObject(storageRef);
-            return;
-        }
-        
-        setAiState('safe');
-        setAiResult(aiCheckResult);
-        
-        setAiState('submitting');
         const [hours, minutes] = values.cookedTime.split(':').map(Number);
         const cookedDateTime = new Date(values.pickupDate);
         cookedDateTime.setHours(hours, minutes, 0, 0);
 
-        await addDoc(collection(firestore, 'donations'), {
+        // 1. Immediately create the donation document with "Pending" status
+        const donationDocRef = await addDoc(collection(firestore, 'donations'), {
             donorId: user.uid,
             foodName: values.foodName,
             foodType: values.foodType,
@@ -217,9 +167,8 @@ export default function NewDonationPage() {
             pickupBy: Timestamp.fromDate(values.pickupDate),
             description: values.description || '',
             location: values.location,
-            imageURL: imageUrl,
             ...(coords && { lat: coords.latitude, lng: coords.longitude }),
-            status: 'Available',
+            status: 'Pending', // <-- New optimistic status
             createdAt: serverTimestamp(),
             donor: {
                 id: user.uid,
@@ -229,17 +178,19 @@ export default function NewDonationPage() {
             }
         });
 
+        // 2. Inform the user and navigate away
         toast({
-            title: 'Donation Listed!',
-            description: 'Your donation has been successfully submitted.'
+            title: 'Submission Received!',
+            description: 'Your donation is being processed and will be available shortly.'
         });
-
         router.push('/donations/list');
+
+        // 3. Start background processing (AI check and upload)
+        processDonationInBackground(donationDocRef.id, values.image[0]);
 
     } catch (error: any) {
         console.error('Donation submission error:', error);
-        setAiState('idle');
-        setProgress(0);
+        setIsSubmitting(false);
         toast({
             variant: 'destructive',
             title: 'Submission Failed',
@@ -247,6 +198,56 @@ export default function NewDonationPage() {
         });
     }
   }
+
+  const processDonationInBackground = async (donationId: string, imageFile: File) => {
+    if (!firestore || !user || !firebaseApp) return;
+
+    const storage = getStorage(firebaseApp);
+    const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
+    const donationDocRef = doc(firestore, 'donations', donationId);
+
+    try {
+      const [aiCheckSettled, uploadSettled] = await Promise.allSettled([
+        fileToDataURI(imageFile).then(foodDataUri => aiSafeFoodCheck({ foodDataUri })),
+        uploadBytes(storageRef, imageFile).then(uploadResult => getDownloadURL(uploadResult.ref)),
+      ]);
+
+      if (aiCheckSettled.status === 'rejected' || uploadSettled.status === 'rejected') {
+        throw new Error('Background processing failed. AI check or upload error.');
+      }
+      
+      const aiResult = aiCheckSettled.value;
+      const imageUrl = uploadSettled.value;
+
+      if (!aiResult.isFood) {
+        // AI check failed, flag the donation and delete the image.
+        await updateDoc(donationDocRef, {
+          status: 'Rejected', // Or some other status to indicate failure
+          aiImageAnalysis: aiResult.reason,
+        });
+        await deleteObject(storageRef);
+      } else {
+        // All good, update the donation to "Available"
+        await updateDoc(donationDocRef, {
+          status: 'Available',
+          imageURL: imageUrl,
+          aiImageAnalysis: 'Verified as food.',
+        });
+      }
+    } catch (error) {
+      console.error(`Error processing donation ${donationId} in background:`, error);
+      // If background processing fails, update the status to reflect that
+      try {
+        await updateDoc(donationDocRef, {
+          status: 'Failed', // Or some other error status
+          aiImageAnalysis: 'Processing failed unexpectedly.',
+        });
+      } catch (updateError) {
+        console.error(`Failed to update status for donation ${donationId} after background error:`, updateError);
+      }
+    }
+  };
+
 
   return (
     <>
@@ -431,53 +432,9 @@ export default function NewDonationPage() {
                     </div>
                 </div>
 
-                {aiState !== 'idle' && (
-                  <Card className="mt-8">
-                    <CardHeader>
-                      <CardTitle className="font-headline text-lg">AI Image Analysis & Upload</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {(aiState === 'checking' || aiState === 'submitting') && (
-                        <div className="flex items-center gap-4">
-                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                          <div>
-                            <p className="font-semibold">{aiState === 'checking' ? 'Analyzing and uploading...' : 'Finalizing submission...'}</p>
-                            <Progress value={progress} className="w-full mt-2" />
-                          </div>
-                        </div>
-                      )}
-                      {aiState === 'safe' && aiResult && (
-                         <div className="space-y-4">
-                            <div className="flex items-center gap-4 text-green-600">
-                               <ShieldCheck className="h-8 w-8" />
-                               <div>
-                                <p className="font-bold text-lg">Image Verified!</p>
-                                <p className="text-sm">{aiResult.reason} Submitting your donation...</p>
-                               </div>
-                            </div>
-                         </div>
-                      )}
-                       {aiState === 'unsafe' && aiResult && (
-                         <div className="flex items-center gap-4 text-red-600">
-                           <ShieldX className="h-8 w-8" />
-                           <div>
-                            <p className="font-bold text-lg">Analysis failed.</p>
-                            <p className="text-sm">{aiResult.reason}</p>
-                           </div>
-                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-
-
-                <Button type="submit" disabled={aiState === 'checking' || aiState === 'submitting'}>
-                  {(aiState === 'checking' || aiState === 'submitting') && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {aiState === 'submitting'
-                    ? 'Submitting...'
-                    : aiState === 'checking'
-                    ? 'Analyzing...'
-                    : 'Submit Donation'}
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isSubmitting ? 'Submitting...' : 'Submit Donation'}
                 </Button>
               </form>
             </Form>
@@ -487,5 +444,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    

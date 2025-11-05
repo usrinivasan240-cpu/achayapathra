@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -114,7 +115,7 @@
         },
         "status": {
           "type": "string",
-          "description": "Status of the donation (e.g., available, picked up, delivered)."
+          "description": "Status of the donation (e.g., available, picked up, delivered, pending)."
         }
       },
       "required": [
