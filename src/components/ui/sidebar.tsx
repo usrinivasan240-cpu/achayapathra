@@ -46,13 +46,13 @@ export function Sidebar({
       <div
         onClick={() => setIsOpen(false)}
         className={cn(
-          'fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 md:hidden',
+          'fixed inset-0 z-40 bg-black/50 transition-opacity duration-300',
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
       />
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r bg-sidebar text-sidebar-foreground transition-transform duration-300 ease-in-out md:translate-x-0',
+          'fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r bg-sidebar text-sidebar-foreground transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : '-translate-x-full',
           className
         )}
@@ -151,8 +151,13 @@ export function SidebarNavSeparator() {
 }
 
 export function SidebarInset({ children }: { children: React.ReactNode }) {
-  return <div className="md:pl-64">{children}</div>;
-}
+    const { isOpen } = useSidebar();
+    return (
+      <div className={cn('transition-[padding]', isOpen && 'md:pl-64')}>
+        {children}
+      </div>
+    );
+  }
 
 export function SidebarToggle() {
   const { isOpen, setIsOpen } = useSidebar();
@@ -160,7 +165,7 @@ export function SidebarToggle() {
     <Button
       variant="ghost"
       size="icon"
-      className="shrink-0 md:hidden"
+      className="shrink-0"
       onClick={() => setIsOpen(!isOpen)}
     >
       {isOpen ? (

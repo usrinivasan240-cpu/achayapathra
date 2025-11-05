@@ -7,7 +7,7 @@ import {
   Gift,
   Trophy,
   BarChart,
-  Menu,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -17,6 +17,7 @@ const navItems = [
   { href: '/donations', label: 'Donate', icon: Gift },
   { href: '/impact', label: 'Impact', icon: BarChart },
   { href: '/leaderboard', label: 'Leaders', icon: Trophy },
+  { href: '/profile', label: 'Profile', icon: User },
 ];
 
 export function BottomNav() {
@@ -49,14 +50,6 @@ export function BottomNav() {
             </Link>
           );
         })}
-        <button
-            type="button"
-            onClick={() => setIsOpen(true)}
-            className="inline-flex flex-col items-center justify-center px-5 text-muted-foreground hover:bg-muted group"
-        >
-            <Menu className="w-5 h-5 mb-1 group-hover:text-primary" />
-            <span className="text-xs">More</span>
-        </button>
       </div>
     </div>
   );
