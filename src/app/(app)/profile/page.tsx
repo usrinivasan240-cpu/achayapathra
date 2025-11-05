@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Header } from '@/components/layout/header';
@@ -131,9 +132,11 @@ export default function ProfilePage() {
                         <div className="col-span-2">
                            <p className="font-semibold">{donation.foodName}</p>
                            <p className='text-sm text-muted-foreground'>{donation.location}</p>
-                           <p className='text-sm text-muted-foreground'>
+                           {donation.pickupBy && (
+                            <p className='text-sm text-muted-foreground'>
                                 Pickup By: {new Date(donation.pickupBy.seconds * 1000).toLocaleDateString()}
-                           </p>
+                            </p>
+                           )}
                         </div>
                         <div className='text-right'>
                             <Badge>{donation.status}</Badge>
