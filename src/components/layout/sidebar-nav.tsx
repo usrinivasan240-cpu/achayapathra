@@ -10,6 +10,7 @@ import {
   BarChart,
   Users,
   Hand,
+  Settings,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -65,6 +66,14 @@ export function SidebarNav() {
               {item.label}
             </SidebarNavItem>
           ))}
+            <SidebarNavSeparator />
+             <SidebarNavItem
+                href="/settings"
+                icon={<Settings className="h-4 w-4" />}
+                isActive={pathname.startsWith('/settings')}
+                >
+                Settings
+            </SidebarNavItem>
         </nav>
       </SidebarContent>
       <SidebarFooter>
