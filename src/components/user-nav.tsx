@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { LogOut, Settings, User as UserIcon } from 'lucide-react';
+import { LogOut, Settings, User as UserIcon, Award } from 'lucide-react';
 import {
   Avatar,
   AvatarFallback,
@@ -71,11 +71,15 @@ export function UserNav() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
+          <div className="flex flex-col space-y-2">
             <p className="text-sm font-medium leading-none">{userProfile.displayName || 'User'}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
+            <div className="flex items-center pt-1">
+                <Award className="mr-2 h-4 w-4 text-yellow-500" />
+                <p className="text-xs font-semibold">{userProfile.points} Points</p>
+            </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
