@@ -248,6 +248,7 @@ export default function NewDonationPage() {
     } catch (error) {
         console.error("AI check failed:", error);
         setAiState('idle');
+        setProgress(0);
         toast({
             variant: 'destructive',
             title: 'AI Check Error',
@@ -494,4 +495,5 @@ export default function NewDonationPage() {
       </main>
     </>
   );
-}
+
+    
