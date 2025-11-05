@@ -11,26 +11,17 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Phone, Mail, MapPin, Award, History, Loader2, Edit } from 'lucide-react';
+import { Phone, Mail, MapPin, Award, History, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser, useFirebaseApp } from '@/firebase';
-import { EditProfileDialog } from '@/components/profile/edit-profile-dialog';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { doc, collection, query, where, Timestamp, updateDoc } from 'firebase/firestore';
+import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { doc, collection, query, where, Timestamp } from 'firebase/firestore';
 import { UserProfile, Donation } from '@/lib/types';
-import { updateProfile } from 'firebase/auth';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const firebaseApp = useFirebaseApp();
-  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
-  const [isUploading, setIsUploading] = React.useState(false);
-  const { toast } = useToast();
   
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -44,35 +35,6 @@ export default function ProfilePage() {
   }, [firestore, user]);
   const { data: userDonations, isLoading: donationsLoading } = useCollection<Donation>(userDonationsQuery);
 
-
-  const handleProfileUpdate = async (file: File) => {
-    if (!user || !firestore || !firebaseApp) {
-      toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
-      return;
-    }
-    
-    setIsUploading(true);
-    try {
-      const storage = getStorage(firebaseApp);
-      const storageRef = ref(storage, `profile-pictures/${user.uid}`);
-      
-      await uploadBytes(storageRef, file);
-      const photoURL = await getDownloadURL(storageRef);
-
-      await updateProfile(user, { photoURL });
-      
-      const userRef = doc(firestore, 'users', user.uid);
-      await updateDoc(userRef, { photoURL });
-
-      toast({ title: 'Success!', description: 'Your profile picture has been updated.' });
-    } catch (error) {
-      console.error(error);
-      toast({ variant: 'destructive', title: 'Upload failed', description: 'Could not update profile picture.' });
-    } finally {
-      setIsUploading(false);
-      setIsEditDialogOpen(false);
-    }
-  }
   
   const isLoading = isUserLoading || profileLoading || donationsLoading;
 
@@ -106,10 +68,6 @@ export default function ProfilePage() {
           <div className="md:col-span-1">
             <Card>
               <CardHeader className="items-center text-center relative">
-                 <Button variant="ghost" size="icon" className="absolute top-4 right-4" onClick={() => setIsEditDialogOpen(true)}>
-                    <Edit className="h-4 w-4" />
-                    <span className="sr-only">Edit Profile</span>
-                </Button>
                 <Avatar className="h-24 w-24 mb-4">
                   <AvatarImage src={userProfile.photoURL} alt={userProfile.displayName} />
                   <AvatarFallback>
@@ -197,12 +155,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
-      <EditProfileDialog 
-        isOpen={isEditDialogOpen} 
-        onOpenChange={setIsEditDialogOpen}
-        onProfileUpdate={handleProfileUpdate}
-        isUploading={isUploading}
-      />
     </>
   );
 }
