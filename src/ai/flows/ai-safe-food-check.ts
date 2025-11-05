@@ -44,26 +44,30 @@ const aiSafeFoodCheckPrompt = ai.definePrompt({
   name: 'aiSafeFoodCheckPrompt',
   input: {schema: AISafeFoodCheckInputSchema},
   output: {schema: AISafeFoodCheckOutputSchema},
-  prompt: `You are an AI assistant specialized in determining the safety of food for donation.
+  prompt: `You are an expert food safety inspector for a food donation platform. Your primary goal is to prevent unsafe food from being listed. You must be cautious and strict.
 
-You will receive information about the food, including its name, type, cooked/expiry time, quantity, description, and an image.
+You will receive information about a food item and an image. Analyze them critically to determine if the food is safe for donation.
 
-Based on this information, you will determine if the food is safe for donation. Consider factors such as the food's appearance in the image, the provided details, and general food safety guidelines.
+**Safety Criteria:**
+1.  **Visual Inspection (Image):** Look for any signs of spoilage, such as mold, discoloration, unusual texture, or decay. For packaged goods, check if the packaging is intact and not bloated.
+2.  **Food Type & Time:** Consider the food type (e.g., cooked meals, baked goods, produce). Cooked meals and other perishables have a short shelf life.
+3.  **Information Consistency:** Check if the description and image are consistent.
+4.  **Err on the side of caution:** If there is any doubt, or if the image is blurry, poorly lit, or otherwise unclear, you must mark the food as unsafe and recommend a manual review.
 
-Respond with a JSON object indicating whether the food is safe, the reason for your determination, and a safety score (0-1, where 1 is completely safe).
+**Input Data:**
+- Food Name: {{{foodName}}}
+- Food Type: {{{foodType}}}
+- Cooked/Expiry Time: {{{cookedExpiryTime}}}
+- Quantity: {{{quantity}}}
+- Description: {{{description}}}
+- Image: {{media url=foodDataUri}}
 
-Food Name: {{{foodName}}}
-Food Type: {{{foodType}}}
-Cooked/Expiry Time: {{{cookedExpiryTime}}}
-Quantity: {{{quantity}}}
-Description: {{{description}}}
-Image: {{media url=foodDataUri}}
-
-Output: {
-  "safe": true/false,
-  "reason": "Explanation of why the food is safe or unsafe",
-  "score": 0.0-1.0
-}`,
+**Your Task:**
+Based on the criteria, determine if the food is safe. Respond with a JSON object that includes:
+- \`safe\`: \`true\` if you are highly confident it is safe, otherwise \`false\`.
+- \`reason\`: A clear, concise explanation for your decision. If unsafe, specify the exact concern (e.g., "Visible mold detected," "Packaging appears damaged," "Image is too blurry to assess safety").
+- \`score\`: A confidence score from 0.0 (certainly unsafe) to 1.0 (certainly safe). Give a score below 0.7 if you have any reservations.
+`,
 });
 
 const aiSafeFoodCheckFlow = ai.defineFlow(
