@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useUser } from '@/firebase';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -45,6 +46,20 @@ function NavItem({ href, label, icon: Icon, isActive }: { href: string, label: s
 
 export function SidebarNavContent() {
   const pathname = usePathname();
+  const { user } = useUser();
+
+  if (!user) {
+    return (
+      <div className="flex h-full max-h-screen flex-col gap-2">
+        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+            <Link href="/" className="flex items-center gap-2 font-semibold font-headline">
+            <HeartHandshake className="h-6 w-6 text-primary" />
+            <span>SharePlate</span>
+            </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

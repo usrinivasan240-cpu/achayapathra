@@ -11,6 +11,7 @@ import {
   User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUser } from '@/firebase';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -22,6 +23,11 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { user } = useUser();
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-10 w-full border-t bg-background md:hidden">

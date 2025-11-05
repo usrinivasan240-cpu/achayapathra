@@ -1,25 +1,59 @@
 
+'use client';
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { FirebaseClientProvider, useUser } from '@/firebase/client-provider';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { BottomNav } from '@/components/layout/bottom-nav';
+import { usePathname } from 'next/navigation';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: 'SharePlate',
-  description: 'Building Humanity Through Sharing',
-};
+// This is a client component because it uses usePathname and useUser
+function AppLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const { user, isUserLoading } = useUser();
+
+  const isPublicPage = ['/', '/signup'].includes(pathname);
+  const showNav = !isUserLoading && user && !isPublicPage;
+
+  if (isPublicPage) {
+    return <>{children}</>;
+  }
+
+  return (
+    <SidebarProvider>
+      <div className="md:grid md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+        {showNav && (
+          <div className="hidden border-r bg-muted/40 md:block">
+            <SidebarNav />
+          </div>
+        )}
+        <div className="flex flex-col">
+          <main className="flex flex-1 flex-col pb-16 md:pb-0">
+            {children}
+          </main>
+        </div>
+      </div>
+      {showNav && <BottomNav />}
+    </SidebarProvider>
+  );
+}
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const metadata: Metadata = {
+    title: 'SharePlate',
+    description: 'Building Humanity Through Sharing',
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -30,19 +64,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className}`}>
         <FirebaseClientProvider>
-          <SidebarProvider>
-            <div className="md:grid md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-              <div className="hidden border-r bg-muted/40 md:block">
-                <SidebarNav />
-              </div>
-              <div className="flex flex-col">
-                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-                  {children}
-                </main>
-              </div>
-            </div>
-            <BottomNav />
-          </SidebarProvider>
+          <AppLayout>{children}</AppLayout>
         </FirebaseClientProvider>
         <Toaster />
       </body>
