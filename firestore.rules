@@ -21,7 +21,7 @@ service cloud.firestore {
     // The leaderboard can list users by points.
     match /users/{userId} {
       allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
-      allow list: if isSignedIn() && request.query.orderBy == "points desc" && request.query.limit <= 10;
+      allow list: if isSignedIn() && request.query.orderBy.path == "points" && request.query.orderBy.direction == "desc" && request.query.limit <= 10;
       allow write: if isSignedIn() && isOwner(userId);
     }
 
