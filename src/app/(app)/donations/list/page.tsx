@@ -19,9 +19,10 @@ export default function DonationsPage() {
   const { user, isUserLoading } = useUser();
 
   const donationsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    // Only create the query if the user is logged in
+    if (!firestore || !user) return null;
     return collection(firestore, 'donations');
-  }, [firestore]);
+  }, [firestore, user]);
 
   const {
     data: donations,
