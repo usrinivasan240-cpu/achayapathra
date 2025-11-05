@@ -1,7 +1,7 @@
 
 'use client';
-
 import { CreditCard, DollarSign, Package, Users, Loader2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import {
   Card,
   CardContent,
@@ -9,11 +9,16 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Header } from '@/components/layout/header';
-import { Overview } from '@/components/dashboard/overview';
 import { RecentDonations } from '@/components/dashboard/recent-donations';
 import { useUser, useFirestore, useMemoFirebase, useCollection, useDoc } from '@/firebase';
 import { doc, collection, query, where } from 'firebase/firestore';
 import { Donation, UserProfile } from '@/lib/types';
+
+// Dynamically import the Overview component to prevent SSR hydration mismatch
+const Overview = dynamic(() => import('@/components/dashboard/overview').then(mod => mod.Overview), {
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-[350px]"><Loader2 className="h-8 w-8 animate-spin" /></div>
+});
 
 
 export default function DashboardPage() {
