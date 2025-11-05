@@ -18,11 +18,10 @@ import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@
 import { EditProfileDialog } from '@/components/profile/edit-profile-dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { doc, collection, query, where, Timestamp } from 'firebase/firestore';
+import { doc, collection, query, where, Timestamp, updateDoc } from 'firebase/firestore';
 import { UserProfile, Donation } from '@/lib/types';
 import { updateProfile } from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { updateDoc } from 'firebase/firestore';
 
 
 export default function ProfilePage() {
