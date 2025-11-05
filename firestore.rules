@@ -23,11 +23,17 @@ service cloud.firestore {
       allow write: if isSignedIn() && isOwner(userId);
     }
 
-    // Any signed-in user can view donations. Only owners can create/update/delete their own donations.
+    // Any signed-in user can view donations.
+    // Creation requires ownership.
+    // Updates are allowed by the owner OR if a user is claiming an "Available" donation.
+    // Deletes are restricted to the owner.
     match /donations/{donationId} {
         allow read: if isSignedIn();
         allow create: if isSignedIn() && request.resource.data.donorId == request.auth.uid;
-        allow update, delete: if isSignedIn() && resource.data.donorId == request.auth.uid;
+        allow update: if isSignedIn() && 
+                      (resource.data.donorId == request.auth.uid || 
+                       (request.resource.data.status == 'Claimed' && resource.data.status == 'Available'));
+        allow delete: if isSignedIn() && resource.data.donorId == request.auth.uid;
     }
     
     // Any signed-in user can create, read, and update volunteer tasks. Deletion is restricted to owners or admins.
