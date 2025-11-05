@@ -87,3 +87,15 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Add padding to the bottom of the body to prevent content from being hidden by the bottom nav */
+@layer utilities {
+    .pb-16 {
+        padding-bottom: 4rem;
+    }
+    @media (min-width: 768px) {
+        .md\:pb-0 {
+            padding-bottom: 0;
+        }
+    }
+}
