@@ -42,7 +42,7 @@ import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firesto
 import { useRouter } from 'next/navigation';
 import { aiSafeFoodCheck, AISafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { Separator } from '@/components/ui/separator';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -152,6 +152,15 @@ export default function NewDonationPage() {
     setIsSubmitting(true);
 
     try {
+        // 1. Upload image to Firebase Storage
+        const imageFile = values.image[0] as File;
+        const storage = getStorage();
+        const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
+        
+        await uploadBytes(storageRef, imageFile);
+        const imageURL = await getDownloadURL(storageRef);
+
+        // 2. Prepare data for Firestore
         const donationsCol = collection(firestore, 'donations');
         
         const [hours, minutes] = values.cookedTime.split(':');
@@ -159,6 +168,7 @@ export default function NewDonationPage() {
         cookedDateTime.setHours(parseInt(hours, 10));
         cookedDateTime.setMinutes(parseInt(minutes, 10));
 
+        // 3. Add document to Firestore
         await addDoc(donationsCol, {
             donorId: user.uid,
             foodName: values.foodName,
@@ -168,6 +178,7 @@ export default function NewDonationPage() {
             pickupBy: Timestamp.fromDate(values.pickupDate),
             description: values.description || '',
             location: values.location,
+            imageURL: imageURL, // Save the image URL
             ...(coords && { lat: coords.latitude, lng: coords.longitude }),
             status: 'Available',
             createdAt: serverTimestamp(),
@@ -484,3 +495,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
