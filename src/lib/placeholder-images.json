@@ -1,15 +1,15 @@
 [
   {
     "id": "login-image",
-    "imageUrl": "https://picsum.photos/seed/login/1920/1080",
-    "description": "A diverse group of people sharing food and smiling",
-    "imageHint": "community food sharing"
+    "imageUrl": "https://picsum.photos/seed/food-donation/1920/1080",
+    "description": "A person handing a box of food to another person.",
+    "imageHint": "person donating food"
   },
   {
     "id": "impact-hero",
-    "imageUrl": "https://picsum.photos/seed/impact-hero/1600/400",
-    "description": "A wide shot of volunteers serving food to a long line of people.",
-    "imageHint": "volunteers serving food"
+    "imageUrl": "https://picsum.photos/seed/impact-hero-new/1600/400",
+    "description": "A panoramic photo of a community food drive with many volunteers.",
+    "imageHint": "community food drive"
   },
   {
     "id": "impact-gallery-1",
