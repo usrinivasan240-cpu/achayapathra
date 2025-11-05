@@ -9,9 +9,9 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Header } from '@/components/layout/header';
-import { MapPin, Loader2, Utensils, Map } from 'lucide-react';
+import { MapPin, Loader2, Utensils, Map, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Donation } from '@/lib/types';
@@ -19,6 +19,9 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 type LocationState = {
   city: string;
@@ -62,11 +65,13 @@ const deg2rad = (deg: number) => {
 export default function VolunteerDashboardPage() {
   const [location, setLocation] = useState<LocationState | null>(null);
   const [isUpdating, setIsUpdating] = useState(true);
-  const [nearbyDonations, setNearbyDonations] = useState<
-    DonationWithDistance[]
-  >([]);
+  const [nearbyDonations, setNearbyDonations] = useState<DonationWithDistance[]>([]);
+  const [searchRadius, setSearchRadius] = useState(10); // Default 10km
+  const [isLiveTracking, setIsLiveTracking] = useState(true);
+  
   const { toast } = useToast();
   const firestore = useFirestore();
+  const watchIdRef = useRef<number | null>(null);
 
   const availableDonationsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -75,7 +80,36 @@ export default function VolunteerDashboardPage() {
 
   const { data: availableDonations } = useCollection<Donation>(availableDonationsQuery);
 
-  useEffect(() => {
+  const stopWatchingLocation = useCallback(() => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+  }, []);
+
+  const handleLocationSuccess = useCallback((position: GeolocationPosition) => {
+    const { latitude, longitude } = position.coords;
+    setLocation({
+      city: 'Current Location',
+      state: `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`,
+      coords: { latitude, longitude },
+    });
+    setIsUpdating(false);
+  }, []);
+
+  const handleLocationError = useCallback((error: GeolocationPositionError) => {
+    setIsUpdating(false);
+    if (!location) { // Only show error toast if location was never found
+        toast({
+            variant: 'destructive',
+            title: 'Geolocation Error',
+            description: 'Could not retrieve your location. Please ensure you have granted location permissions.',
+        });
+    }
+    console.error('Geolocation error:', error);
+  }, [location, toast]);
+
+  const startWatchingLocation = useCallback(() => {
     if (!navigator.geolocation) {
       toast({
         variant: 'destructive',
@@ -86,47 +120,43 @@ export default function VolunteerDashboardPage() {
       return;
     }
 
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
+    setIsUpdating(true);
+    stopWatchingLocation(); // Clear any existing watcher
 
-        setLocation({
-          city: 'Current Location',
-          state: `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`,
-          coords: { latitude, longitude },
-        });
-
-        if (isUpdating) {
-            toast({
-              title: 'Location Found',
-              description: 'Now tracking your live location for nearby donations.',
-            });
-        }
-        setIsUpdating(false);
-      },
-      (error) => {
-        setIsUpdating(false);
-        if (location === null) {
-          toast({
-            variant: 'destructive',
-            title: 'Geolocation Error',
-            description:
-              'Could not retrieve your location. Please ensure you have granted location permissions.',
-          });
-        }
-        console.error('Geolocation error:', error);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0,
-      }
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      handleLocationSuccess,
+      handleLocationError,
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
+  }, [handleLocationSuccess, handleLocationError, stopWatchingLocation, toast]);
+
+  const handleRefreshLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+        toast({
+            variant: 'destructive',
+            title: 'Geolocation not supported',
+        });
+        return;
+    }
+    setIsUpdating(true);
+    navigator.geolocation.getCurrentPosition(handleLocationSuccess, handleLocationError);
+  }, [handleLocationSuccess, handleLocationError, toast]);
+
+
+  useEffect(() => {
+    if (isLiveTracking) {
+      startWatchingLocation();
+    } else {
+      stopWatchingLocation();
+      if (!location) { // If no location yet, get it once
+        handleRefreshLocation();
+      }
+    }
 
     return () => {
-      navigator.geolocation.clearWatch(watchId);
+      stopWatchingLocation();
     };
-  }, [isUpdating, location, toast]);
+  }, [isLiveTracking, startWatchingLocation, stopWatchingLocation, location, handleRefreshLocation]);
 
 
   useEffect(() => {
@@ -141,11 +171,12 @@ export default function VolunteerDashboardPage() {
             );
             return { ...donation, distance };
           })
+          .filter(donation => donation.distance <= searchRadius)
           .sort((a, b) => a.distance - b.distance);
 
         setNearbyDonations(donationsWithDistance);
     }
-  }, [location, availableDonations]);
+  }, [location, availableDonations, searchRadius]);
 
   const getDirectionsUrl = (donation: Donation) => {
     if (!location?.coords || !donation.lat || !donation.lng) return `https://www.google.com/maps/search/?api=1&query=${donation.location}`;
@@ -157,16 +188,16 @@ export default function VolunteerDashboardPage() {
       <Header title="Volunteer Dashboard" />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-8">
             <Card>
               <CardHeader>
-                <CardTitle className="font-headline">Your Live Location</CardTitle>
+                <CardTitle className="font-headline">Your Location</CardTitle>
                 <CardDescription>
-                  Your location updates in real-time to find the nearest tasks.
+                  Track your location to find the nearest tasks.
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
-                {isUpdating ? (
+                {isUpdating && !location ? (
                     <div className='flex items-center gap-2 text-muted-foreground'>
                         <Loader2 className="h-4 w-4 animate-spin" />
                         <span>Getting your location...</span>
@@ -180,7 +211,6 @@ export default function VolunteerDashboardPage() {
                         <p className="text-muted-foreground">{location.state}</p>
                         </div>
                     </div>
-                    
                     <Link
                         href={`https://www.google.com/maps/search/?api=1&query=${location.coords?.latitude},${location.coords?.longitude}`}
                         target="_blank"
@@ -196,6 +226,39 @@ export default function VolunteerDashboardPage() {
                 )}
               </CardContent>
             </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className='font-headline'>Settings</CardTitle>
+                </CardHeader>
+                 <CardContent className="space-y-6">
+                    <div className="space-y-3">
+                        <Label>Search Radius: <span className='font-bold text-primary'>{searchRadius} km</span></Label>
+                        <Slider
+                            defaultValue={[searchRadius]}
+                            max={50}
+                            step={1}
+                            onValueChange={(value) => setSearchRadius(value[0])}
+                        />
+                    </div>
+                     <div className="flex items-center justify-between">
+                        <Label htmlFor="live-tracking-switch" className="flex flex-col gap-1">
+                            <span>Live Location</span>
+                            <span className='text-xs font-normal text-muted-foreground'>Automatically update donations as you move</span>
+                        </Label>
+                        <Switch
+                            id="live-tracking-switch"
+                            checked={isLiveTracking}
+                            onCheckedChange={setIsLiveTracking}
+                        />
+                    </div>
+                    {!isLiveTracking && (
+                         <Button onClick={handleRefreshLocation} disabled={isUpdating} className='w-full'>
+                            {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className='mr-2 h-4 w-4' />}
+                            Refresh Location
+                        </Button>
+                    )}
+                 </CardContent>
+            </Card>
           </div>
           <div className="lg:col-span-2">
             <Card>
@@ -204,14 +267,14 @@ export default function VolunteerDashboardPage() {
                   Nearby Pickup Locations
                 </CardTitle>
                 <CardDescription>
-                  Available donations near you, sorted by distance.
+                  Available donations within {searchRadius}km, sorted by distance.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {isUpdating ? (
+                {isUpdating && nearbyDonations.length === 0 ? (
                     <div className="text-center text-muted-foreground py-12">
                         <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-                        <p>Waiting for your location...</p>
+                        <p>Searching for donations...</p>
                     </div>
                 ) : nearbyDonations.length > 0 ? (
                   nearbyDonations.map((donation, index) => (
@@ -243,7 +306,7 @@ export default function VolunteerDashboardPage() {
                 ) : (
                   <div className="text-center text-muted-foreground py-12">
                     <p>
-                      No available donations found near your location.
+                      No available donations found within {searchRadius}km. Try increasing your search radius.
                     </p>
                   </div>
                 )}
@@ -255,3 +318,4 @@ export default function VolunteerDashboardPage() {
     </>
   );
 }
+
