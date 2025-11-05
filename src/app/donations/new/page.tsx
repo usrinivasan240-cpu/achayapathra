@@ -38,8 +38,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser } from '@/firebase';
-import { addDoc, collection, serverTimestamp, Timestamp, GeoPoint } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
+import { aiSafeFoodCheck, AISafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
+import { ImageUpload } from '@/components/ui/image-upload';
+
+const MAX_FILE_SIZE = 2 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),
@@ -49,6 +54,17 @@ const formSchema = z.object({
   pickupDate: z.date({ required_error: 'Pickup date is required.' }),
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
+  image: z
+    .any()
+    .refine((files) => files?.length === 1, 'Image is required.')
+    .refine(
+      (files) => files?.[0]?.size <= MAX_FILE_SIZE,
+      `Max file size is 2MB.`
+    )
+    .refine(
+      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+      '.jpg, .jpeg, .png and .webp files are accepted.'
+    ),
 });
 
 type AISafetyCheckState = 'idle' | 'checking' | 'safe' | 'unsafe';
@@ -60,6 +76,7 @@ type LocationCoords = {
 
 export default function NewDonationPage() {
   const [aiState, setAiState] = React.useState<AISafetyCheckState>('idle');
+  const [aiResult, setAiResult] = React.useState<AISafeFoodCheckOutput | null>(null);
   const [progress, setProgress] = React.useState(0);
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -181,30 +198,55 @@ export default function NewDonationPage() {
   }
 
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const fileToDataURI = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+  }
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setAiState('checking');
-    let currentProgress = 0;
-    const interval = setInterval(() => {
-        currentProgress += 10;
-        setProgress(currentProgress);
-        if (currentProgress >= 100) {
-            clearInterval(interval);
-            // Simulate AI result
-            setTimeout(() => {
-                const isSafe = Math.random() > 0.2;
-                setAiState(isSafe ? 'safe' : 'unsafe');
-                if (isSafe) {
-                    handleFinalSubmit(values);
-                } else {
-                    toast({
-                        variant: 'destructive',
-                        title: 'Safety Concern',
-                        description: 'AI check failed. This item cannot be listed.'
-                    })
-                }
-            }, 500);
+    setProgress(30);
+
+    try {
+        const foodDataUri = await fileToDataURI(values.image[0]);
+        setProgress(60);
+
+        const result = await aiSafeFoodCheck({
+            foodDataUri,
+            foodName: values.foodName,
+            foodType: values.foodType,
+            cookedExpiryTime: `${values.cookedTime} on ${values.pickupDate.toDateString()}`,
+            quantity: values.quantity,
+            description: values.description,
+        });
+
+        setProgress(100);
+        setAiResult(result);
+        
+        if (result.safe) {
+            setAiState('safe');
+            await handleFinalSubmit(values);
+        } else {
+            setAiState('unsafe');
+            toast({
+                variant: 'destructive',
+                title: 'Safety Concern',
+                description: result.reason,
+            })
         }
-    }, 200);
+    } catch (error) {
+        console.error("AI check failed:", error);
+        setAiState('idle');
+        toast({
+            variant: 'destructive',
+            title: 'AI Check Error',
+            description: 'The food safety check could not be completed.'
+        });
+    }
   }
 
   return (
@@ -361,16 +403,31 @@ export default function NewDonationPage() {
                             <Textarea
                               placeholder="Any additional details, like ingredients or allergens."
                               className="resize-none"
-                              rows={5}
+                              rows={3}
                               {...field}
                             />
                           </FormControl>
-                            <FormDescription>
-                                An AI check will be performed for food safety.
-                            </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="image"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Food Image</FormLabel>
+                                <FormControl>
+                                    <ImageUpload
+                                        onChange={(files) => field.onChange(files)}
+                                    />
+                                </FormControl>
+                                <FormDescription>
+                                    An AI check will be performed for food safety.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
                     </div>
                 </div>
@@ -390,21 +447,21 @@ export default function NewDonationPage() {
                           </div>
                         </div>
                       )}
-                      {aiState === 'safe' && (
+                      {aiState === 'safe' && aiResult && (
                          <div className="flex items-center gap-4 text-green-600">
                            <ShieldCheck className="h-8 w-8" />
                            <div>
                             <p className="font-bold text-lg">Food looks safe!</p>
-                            <p className="text-sm">Safety Score: 92%. Submitting your donation...</p>
+                            <p className="text-sm">Safety Score: {Math.round(aiResult.score * 100)}%. Submitting your donation...</p>
                            </div>
                          </div>
                       )}
-                       {aiState === 'unsafe' && (
+                       {aiState === 'unsafe' && aiResult && (
                          <div className="flex items-center gap-4 text-red-600">
                            <ShieldX className="h-8 w-8" />
                            <div>
                             <p className="font-bold text-lg">Safety concern detected.</p>
-                            <p className="text-sm">This item cannot be listed. Reason: Potential spoilage detected.</p>
+                            <p className="text-sm">{aiResult.reason}</p>
                            </div>
                          </div>
                       )}
@@ -414,6 +471,7 @@ export default function NewDonationPage() {
 
 
                 <Button type="submit" disabled={aiState === 'checking' || isSubmitting}>
+                  {(aiState === 'checking' || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {isSubmitting
                     ? 'Submitting...'
                     : aiState === 'checking'
@@ -428,3 +486,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
