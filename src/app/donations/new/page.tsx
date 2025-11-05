@@ -218,23 +218,19 @@ export default function NewDonationPage() {
 
         const result = await aiSafeFoodCheck({
             foodDataUri,
-            foodName: values.foodName,
-            foodType: values.foodType,
-            quantity: values.quantity,
-            description: values.description,
         });
 
         setProgress(100);
         setAiResult(result);
         
-        if (result.safe) {
+        if (result.isFood) {
             setAiState('safe');
             await handleFinalSubmit(values);
         } else {
             setAiState('unsafe');
             toast({
                 variant: 'destructive',
-                title: 'Safety Concern',
+                title: 'Image Analysis Failed',
                 description: result.reason,
             })
         }
@@ -244,7 +240,7 @@ export default function NewDonationPage() {
         toast({
             variant: 'destructive',
             title: 'AI Check Error',
-            description: 'The food safety check could not be completed.'
+            description: 'The image analysis could not be completed.'
         });
     }
   }
@@ -423,7 +419,7 @@ export default function NewDonationPage() {
                                     />
                                 </FormControl>
                                 <FormDescription>
-                                    An AI check will be performed for food safety.
+                                    An AI check will be performed to verify the image contains food.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -435,14 +431,14 @@ export default function NewDonationPage() {
                 {aiState !== 'idle' && (
                   <Card className="mt-8">
                     <CardHeader>
-                      <CardTitle className="font-headline text-lg">AI Food Safety Check</CardTitle>
+                      <CardTitle className="font-headline text-lg">AI Image Analysis</CardTitle>
                     </CardHeader>
                     <CardContent>
                       {aiState === 'checking' && (
                         <div className="flex items-center gap-4">
                           <Loader2 className="h-6 w-6 animate-spin text-primary" />
                           <div>
-                            <p className="font-semibold">Analyzing for safety...</p>
+                            <p className="font-semibold">Analyzing image...</p>
                             <Progress value={progress} className="w-full mt-2" />
                           </div>
                         </div>
@@ -452,26 +448,17 @@ export default function NewDonationPage() {
                             <div className="flex items-center gap-4 text-green-600">
                                <ShieldCheck className="h-8 w-8" />
                                <div>
-                                <p className="font-bold text-lg">Food looks safe!</p>
-                                <p className="text-sm">Safety Score: {Math.round(aiResult.score * 100)}%. Submitting your donation...</p>
+                                <p className="font-bold text-lg">Image contains food!</p>
+                                <p className="text-sm">{aiResult.reason} Submitting your donation...</p>
                                </div>
                             </div>
-                            {aiResult.ingredients && (
-                                <>
-                                    <Separator />
-                                    <div>
-                                        <h4 className="font-semibold text-sm mb-2">Likely Ingredients:</h4>
-                                        <p className="text-sm text-muted-foreground">{aiResult.ingredients}</p>
-                                    </div>
-                                </>
-                            )}
                          </div>
                       )}
                        {aiState === 'unsafe' && aiResult && (
                          <div className="flex items-center gap-4 text-red-600">
                            <ShieldX className="h-8 w-8" />
                            <div>
-                            <p className="font-bold text-lg">Safety concern detected.</p>
+                            <p className="font-bold text-lg">Analysis failed.</p>
                             <p className="text-sm">{aiResult.reason}</p>
                            </div>
                          </div>
