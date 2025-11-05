@@ -31,7 +31,7 @@ const navItems = [
 
 const secondaryNavItems = [
     { href: '/receiver-dashboard', label: 'Find Food', icon: Users },
-    { href: 'volunteer-dashboard', label: 'Volunteer', icon: Hand },
+    { href: '/volunteer-dashboard', label: 'Volunteer', icon: Hand },
 ]
 
 export function SidebarNav() {
