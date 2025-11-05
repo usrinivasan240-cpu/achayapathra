@@ -1,9 +1,10 @@
+
 'use client';
 
 import * as React from 'react';
 import { Header } from '@/components/layout/header';
-import { columns } from '@/app/(app)/donations/columns';
-import { DataTable } from '@/app/(app)/donations/data-table';
+import { columns } from '@/app/(app)/donations/list/columns';
+import { DataTable } from '@/app/(app)/donations/list/data-table';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { mockDonations } from '@/lib/data';
