@@ -15,25 +15,22 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Phone, MapPin, Utensils, Calendar, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import * as React from 'react';
+import { Donation } from '@/lib/types';
 
 export default function DonationDetailsPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  const [donation, setDonation] = React.useState(() => 
-    id ? mockDonations.find((d) => d.id === id) : undefined
-  );
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [donation, setDonation] = React.useState<Donation | undefined | null>(undefined);
   
   React.useEffect(() => {
     if (id) {
       const foundDonation = mockDonations.find((d) => d.id === id);
       setDonation(foundDonation);
-      setIsLoading(false);
     }
   }, [id]);
 
-  if (isLoading) {
+  if (donation === undefined) {
     return (
         <>
             <Header title="Donation Details" />
