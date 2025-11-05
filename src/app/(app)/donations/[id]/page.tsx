@@ -1,7 +1,7 @@
 
 'use client';
 
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -15,12 +15,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Phone, MapPin, Utensils, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-export default function DonationDetailsPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const donation = mockDonations.find((d) => d.id === params.id);
+export default function DonationDetailsPage() {
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const donation = mockDonations.find((d) => d.id === id);
 
   if (!donation) {
     notFound();
