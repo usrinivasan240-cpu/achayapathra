@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -145,6 +146,23 @@ export default function DonationDetailsPage() {
                     </>
                 )}
 
+                <Separator className="my-6" />
+
+                <div>
+                    <h4 className="font-semibold mb-4">Donated By</h4>
+                    <div className="flex items-center gap-4">
+                        <Avatar className="h-12 w-12">
+                            <AvatarImage src={donation.donor?.photoURL} />
+                            <AvatarFallback>{donation.donor?.name?.substring(0,2) || 'U'}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <p className="font-semibold">{donation.donor?.name || 'Anonymous'}</p>
+                            <p className="text-sm text-muted-foreground">{donation.donor?.email}</p>
+                        </div>
+                    </div>
+                </div>
+
+
               </CardContent>
             </Card>
           </div>
@@ -169,23 +187,6 @@ export default function DonationDetailsPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline">Donated By</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={donation.donor?.photoURL} />
-                    <AvatarFallback>{donation.donor?.name?.substring(0,2) || 'U'}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold">{donation.donor?.name || 'Anonymous'}</p>
-                    <p className="text-sm text-muted-foreground">{donation.donor?.email}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
              {donation.status === 'Available' && (
                 <Button size="lg" className="w-full">Claim This Donation</Button>
             )}
