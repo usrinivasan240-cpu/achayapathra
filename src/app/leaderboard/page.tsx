@@ -7,8 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserProfile } from '@/lib/types';
 import { Crown, Medal, Trophy, Loader2 } from 'lucide-react';
 import React from 'react';
-import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { collection, query, orderBy, limit, where } from 'firebase/firestore';
+import { mockUsers } from '@/lib/data';
 
 const UserRow = ({ user, rank }: { user: UserProfile; rank: number }) => {
   const rankIcon = () => {
@@ -35,35 +34,17 @@ const UserRow = ({ user, rank }: { user: UserProfile; rank: number }) => {
 };
 
 export default function LeaderboardPage() {
-    const firestore = useFirestore();
-    const { user } = useUser();
+    
+    const isLoading = false; // Data is now static
 
-    const topDonorsQuery = useMemoFirebase(() => {
-        if (!firestore || !user) return null;
-        return query(
-            collection(firestore, 'users'),
-            orderBy('points', 'desc'),
-            limit(10)
-        );
-    }, [firestore, user]);
+    const topDonors = [...mockUsers]
+        .sort((a, b) => b.points - a.points)
+        .slice(0, 10);
 
-    const { data: topDonors, isLoading: donorsLoading } = useCollection<UserProfile>(topDonorsQuery);
-
-    const topVolunteersQuery = useMemoFirebase(() => {
-        if (!firestore || !user) return null;
-        // This is a placeholder, as we don't have a separate volunteer score.
-        // In a real app, you might have a 'volunteerPoints' field.
-        return query(
-            collection(firestore, 'users'),
-            where('role', '==', 'volunteer'),
-            orderBy('points', 'desc'),
-            limit(10)
-        );
-    }, [firestore, user]);
-
-    const { data: topVolunteers, isLoading: volunteersLoading } = useCollection<UserProfile>(topVolunteersQuery);
-
-    const isLoading = donorsLoading || volunteersLoading;
+    const topVolunteers = mockUsers
+        .filter(u => u.role === 'volunteer')
+        .sort((a, b) => b.points - a.points)
+        .slice(0, 10);
 
 
   return (
