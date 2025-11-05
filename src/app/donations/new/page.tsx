@@ -49,7 +49,6 @@ const formSchema = z.object({
   pickupDate: z.date({ required_error: 'Pickup date is required.' }),
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
-  image: z.any().optional(),
 });
 
 type AISafetyCheckState = 'idle' | 'checking' | 'safe' | 'unsafe';
@@ -366,26 +365,13 @@ export default function NewDonationPage() {
                               {...field}
                             />
                           </FormControl>
+                            <FormDescription>
+                                An AI check will be performed for food safety.
+                            </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="image"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Food Image</FormLabel>
-                            <FormControl>
-                                <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files)} />
-                            </FormControl>
-                            <FormDescription>
-                                An AI check will be performed for food safety.
-                            </FormDescription>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
                     </div>
                 </div>
 
@@ -399,7 +385,7 @@ export default function NewDonationPage() {
                         <div className="flex items-center gap-4">
                           <Loader2 className="h-6 w-6 animate-spin text-primary" />
                           <div>
-                            <p className="font-semibold">Analyzing image for safety...</p>
+                            <p className="font-semibold">Analyzing for safety...</p>
                             <Progress value={progress} className="w-full mt-2" />
                           </div>
                         </div>
