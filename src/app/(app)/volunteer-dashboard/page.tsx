@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -10,7 +11,7 @@ import {
 import { Header } from '@/components/layout/header';
 import { MapPin, Loader2, Utensils, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Donation } from '@/lib/types';
@@ -59,11 +60,8 @@ const deg2rad = (deg: number) => {
 };
 
 export default function VolunteerDashboardPage() {
-  const [location, setLocation] = useState<LocationState>({
-    city: 'Coimbatore',
-    state: 'Tamil Nadu',
-  });
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [location, setLocation] = useState<LocationState | null>(null);
+  const [isUpdating, setIsUpdating] = useState(true);
   const [nearbyDonations, setNearbyDonations] = useState<
     DonationWithDistance[]
   >([]);
@@ -77,39 +75,67 @@ export default function VolunteerDashboardPage() {
 
   const { data: availableDonations } = useCollection<Donation>(availableDonationsQuery);
 
-  const handleUpdateLocation = () => {
+  useEffect(() => {
     if (!navigator.geolocation) {
       toast({
         variant: 'destructive',
         title: 'Geolocation not supported',
         description: 'Your browser does not support geolocation.',
       });
+      setIsUpdating(false);
       return;
     }
 
-    setIsUpdating(true);
-
-    navigator.geolocation.getCurrentPosition(
+    const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
 
-        // In a real app, you would use a reverse geocoding service here.
         setLocation({
           city: 'Current Location',
           state: `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`,
           coords: { latitude, longitude },
         });
 
-        if (!availableDonations) {
-            setIsUpdating(false);
-            return;
+        if (isUpdating) {
+            toast({
+              title: 'Location Found',
+              description: 'Now tracking your live location for nearby donations.',
+            });
         }
+        setIsUpdating(false);
+      },
+      (error) => {
+        setIsUpdating(false);
+        if (location === null) {
+          toast({
+            variant: 'destructive',
+            title: 'Geolocation Error',
+            description:
+              'Could not retrieve your location. Please ensure you have granted location permissions.',
+          });
+        }
+        console.error('Geolocation error:', error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0,
+      }
+    );
 
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [isUpdating, location, toast]);
+
+
+  useEffect(() => {
+    if (location?.coords && availableDonations) {
         const donationsWithDistance = availableDonations
           .map((donation) => {
             const distance = getDistance(
-              latitude,
-              longitude,
+              location.coords!.latitude,
+              location.coords!.longitude,
               donation.lat!,
               donation.lng!
             );
@@ -118,28 +144,11 @@ export default function VolunteerDashboardPage() {
           .sort((a, b) => a.distance - b.distance);
 
         setNearbyDonations(donationsWithDistance);
-
-        setIsUpdating(false);
-        toast({
-          title: 'Location Updated',
-          description: 'Found nearby donations available for pickup.',
-        });
-      },
-      (error) => {
-        setIsUpdating(false);
-        toast({
-          variant: 'destructive',
-          title: 'Geolocation Error',
-          description:
-            'Could not retrieve your location. Please ensure you have granted location permissions.',
-        });
-        console.error('Geolocation error:', error);
-      }
-    );
-  };
+    }
+  }, [location, availableDonations]);
 
   const getDirectionsUrl = (donation: Donation) => {
-    if (!location.coords || !donation.lat || !donation.lng) return `https://www.google.com/maps/search/?api=1&query=${donation.location}`;
+    if (!location?.coords || !donation.lat || !donation.lng) return `https://www.google.com/maps/search/?api=1&query=${donation.location}`;
     return `https://www.google.com/maps/dir/?api=1&origin=${location.coords.latitude},${location.coords.longitude}&destination=${donation.lat},${donation.lng}`;
   }
 
@@ -151,39 +160,39 @@ export default function VolunteerDashboardPage() {
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle className="font-headline">Your Location</CardTitle>
+                <CardTitle className="font-headline">Your Live Location</CardTitle>
                 <CardDescription>
-                  Your current assigned area for deliveries.
+                  Your location updates in real-time to find the nearest tasks.
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
-                <div className="flex items-center gap-4">
-                  <MapPin className="h-8 w-8 text-primary" />
-                  <div>
-                    <p className="font-semibold text-lg">{location.city}</p>
-                    <p className="text-muted-foreground">{location.state}</p>
-                  </div>
-                </div>
-                <Button onClick={handleUpdateLocation} disabled={isUpdating}>
-                  {isUpdating ? (
+                {isUpdating ? (
+                    <div className='flex items-center gap-2 text-muted-foreground'>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Getting your location...</span>
+                    </div>
+                ) : location ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Updating...
+                    <div className="flex items-center gap-4">
+                        <MapPin className="h-8 w-8 text-primary" />
+                        <div>
+                        <p className="font-semibold text-lg">{location.city}</p>
+                        <p className="text-muted-foreground">{location.state}</p>
+                        </div>
+                    </div>
+                    
+                    <Link
+                        href={`https://www.google.com/maps/search/?api=1&query=${location.coords?.latitude},${location.coords?.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <Button variant="link" className="p-0">
+                        View on Google Maps
+                        </Button>
+                    </Link>
                     </>
-                  ) : (
-                    'Find Nearby Donations'
-                  )}
-                </Button>
-                {location.coords && (
-                  <Link
-                    href={`https://www.google.com/maps/search/?api=1&query=${location.coords.latitude},${location.coords.longitude}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button variant="link" className="p-0">
-                      View on Google Maps
-                    </Button>
-                  </Link>
+                ) : (
+                    <p className='text-destructive'>Location access denied.</p>
                 )}
               </CardContent>
             </Card>
@@ -195,12 +204,16 @@ export default function VolunteerDashboardPage() {
                   Nearby Pickup Locations
                 </CardTitle>
                 <CardDescription>
-                  Available donations near your current location, sorted by
-                  distance.
+                  Available donations near you, sorted by distance.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {nearbyDonations.length > 0 ? (
+                {isUpdating ? (
+                    <div className="text-center text-muted-foreground py-12">
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                        <p>Waiting for your location...</p>
+                    </div>
+                ) : nearbyDonations.length > 0 ? (
                   nearbyDonations.map((donation, index) => (
                     <div key={donation.id}>
                       {index > 0 && <Separator />}
@@ -230,9 +243,7 @@ export default function VolunteerDashboardPage() {
                 ) : (
                   <div className="text-center text-muted-foreground py-12">
                     <p>
-                      {isUpdating
-                        ? 'Searching for donations...'
-                        : 'Click the button to find donations near you.'}
+                      No available donations found near your location.
                     </p>
                   </div>
                 )}
