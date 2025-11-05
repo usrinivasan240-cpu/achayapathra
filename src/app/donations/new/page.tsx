@@ -42,6 +42,7 @@ import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firesto
 import { useRouter } from 'next/navigation';
 import { aiSafeFoodCheck, AISafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { Separator } from '@/components/ui/separator';
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -448,12 +449,23 @@ export default function NewDonationPage() {
                         </div>
                       )}
                       {aiState === 'safe' && aiResult && (
-                         <div className="flex items-center gap-4 text-green-600">
-                           <ShieldCheck className="h-8 w-8" />
-                           <div>
-                            <p className="font-bold text-lg">Food looks safe!</p>
-                            <p className="text-sm">Safety Score: {Math.round(aiResult.score * 100)}%. Submitting your donation...</p>
-                           </div>
+                         <div className="space-y-4">
+                            <div className="flex items-center gap-4 text-green-600">
+                               <ShieldCheck className="h-8 w-8" />
+                               <div>
+                                <p className="font-bold text-lg">Food looks safe!</p>
+                                <p className="text-sm">Safety Score: {Math.round(aiResult.score * 100)}%. Submitting your donation...</p>
+                               </div>
+                            </div>
+                            {aiResult.ingredients && (
+                                <>
+                                    <Separator />
+                                    <div>
+                                        <h4 className="font-semibold text-sm mb-2">Likely Ingredients:</h4>
+                                        <p className="text-sm text-muted-foreground">{aiResult.ingredients}</p>
+                                    </div>
+                                </>
+                            )}
                          </div>
                       )}
                        {aiState === 'unsafe' && aiResult && (
@@ -486,5 +498,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    

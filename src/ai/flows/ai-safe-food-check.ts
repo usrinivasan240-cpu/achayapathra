@@ -32,6 +32,7 @@ const AISafeFoodCheckOutputSchema = z.object({
   safe: z.boolean().describe('Whether the food is safe for donation or not.'),
   reason: z.string().describe('The reason for the safety determination.'),
   score: z.number().describe('A score indicating the confidence level of the safety determination.'),
+  ingredients: z.string().optional().describe('A comma-separated list of common ingredients found in the food, if identifiable.'),
 });
 
 export type AISafeFoodCheckOutput = z.infer<typeof AISafeFoodCheckOutputSchema>;
@@ -54,6 +55,9 @@ You will receive information about a food item and an image. Analyze them critic
 3.  **Information Consistency:** Check if the description and image are consistent.
 4.  **Err on the side of caution:** If there is any doubt, or if the image is blurry, poorly lit, or otherwise unclear, you must mark the food as unsafe and recommend a manual review.
 
+**Ingredient Analysis:**
+Based on the food name and image, identify the food and list its common ingredients. Use your knowledge of food to provide a general list. For example, for "Vegetable Curry", you might list "Mixed vegetables, coconut milk, spices, onion, tomato".
+
 **Input Data:**
 - Food Name: {{{foodName}}}
 - Food Type: {{{foodType}}}
@@ -67,6 +71,7 @@ Based on the criteria, determine if the food is safe. Respond with a JSON object
 - \`safe\`: \`true\` if you are highly confident it is safe, otherwise \`false\`.
 - \`reason\`: A clear, concise explanation for your decision. If unsafe, specify the exact concern (e.g., "Visible mold detected," "Packaging appears damaged," "Image is too blurry to assess safety").
 - \`score\`: A confidence score from 0.0 (certainly unsafe) to 1.0 (certainly safe). Give a score below 0.7 if you have any reservations.
+- \`ingredients\`: A comma-separated string of common ingredients if the food is identifiable. If not, state that ingredients could not be determined.
 `,
 });
 
