@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +14,8 @@ import {
   Phone,
   MapPin,
   Loader2,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import * as React from 'react';
 import { doc, setDoc } from 'firebase/firestore';
@@ -49,6 +52,7 @@ const formSchema = z.object({
 
 export default function SignUpPage() {
   const [isLoading, setIsLoading] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
@@ -189,12 +193,24 @@ export default function SignUpPage() {
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                          type="password"
+                          type={showPassword ? 'text' : 'password'}
                           placeholder="••••••••"
                           {...field}
-                          className="pl-10"
+                          className="pl-10 pr-10"
                           disabled={isLoading}
                         />
+                         <button
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            className="absolute inset-y-0 right-0 flex items-center pr-3"
+                            disabled={isLoading}
+                        >
+                            {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                        </button>
                       </div>
                     </FormControl>
                     <FormMessage />
