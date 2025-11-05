@@ -18,9 +18,9 @@ export default function ReceiverDashboardPage() {
   const { user, isUserLoading } = useUser();
 
   const availableDonationsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !user) return null;
     return query(collection(firestore, 'donations'), where('status', '==', 'Available'));
-  }, [firestore]);
+  }, [firestore, user]);
 
   const { data: donations, isLoading: donationsLoading, error } = useCollection<Donation>(availableDonationsQuery);
   
@@ -75,3 +75,10 @@ export default function ReceiverDashboardPage() {
         ) : (
             <DataTable
               columns={columns({ onClaim: handleClaimDonation })}
+              data={donations || []}
+            />
+        )}
+      </main>
+    </>
+  );
+}

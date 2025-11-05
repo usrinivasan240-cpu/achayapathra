@@ -13,15 +13,8 @@ import {
   Hand,
   Settings,
 } from 'lucide-react';
-import {
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarFooter,
-  SidebarNavItem,
-  SidebarNavSeparator,
-} from '@/components/ui/sidebar';
-import { UserNav } from '@/components/user-nav';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -35,51 +28,71 @@ const secondaryNavItems = [
     { href: '/volunteer-dashboard', label: 'Volunteer', icon: Hand },
 ]
 
-export function SidebarNav() {
+function NavItem({ href, label, icon: Icon, isActive }: { href: string, label: string, icon: React.ElementType, isActive: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+        isActive && 'bg-muted text-primary'
+      )}
+    >
+      <Icon className="h-4 w-4" />
+      {label}
+    </Link>
+  );
+}
+
+export function SidebarNavContent() {
   const pathname = usePathname();
 
   return (
-    <Sidebar>
-      <SidebarHeader>
-        <HeartHandshake className="h-6 w-6 text-primary" />
-        <span className="text-lg font-semibold font-headline">SharePlate</span>
-      </SidebarHeader>
-      <SidebarContent>
-        <nav className="flex flex-col gap-1 px-2 py-4 text-sm font-medium">
+    <>
+      <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+        <Link href="/" className="flex items-center gap-2 font-semibold font-headline">
+          <HeartHandshake className="h-6 w-6 text-primary" />
+          <span>SharePlate</span>
+        </Link>
+      </div>
+      <div className="flex-1">
+        <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
           {navItems.map((item) => (
-            <SidebarNavItem
+            <NavItem
               key={item.href}
               href={item.href}
-              icon={<item.icon className="h-4 w-4" />}
+              label={item.label}
+              icon={item.icon}
               isActive={pathname.startsWith(item.href)}
-            >
-              {item.label}
-            </SidebarNavItem>
+            />
           ))}
-          <SidebarNavSeparator />
-           {secondaryNavItems.map((item) => (
-            <SidebarNavItem
-              key={item.href}
-              href={item.href}
-              icon={<item.icon className="h-4 w-4" />}
-              isActive={pathname.startsWith(item.href)}
-            >
-              {item.label}
-            </SidebarNavItem>
+          <hr className="my-2" />
+          {secondaryNavItems.map((item) => (
+             <NavItem
+             key={item.href}
+             href={item.href}
+             label={item.label}
+             icon={item.icon}
+             isActive={pathname.startsWith(item.href)}
+           />
           ))}
-            <SidebarNavSeparator />
-             <SidebarNavItem
+           <hr className="my-2" />
+           <NavItem
                 href="/settings"
-                icon={<Settings className="h-4 w-4" />}
+                label="Settings"
+                icon={Settings}
                 isActive={pathname.startsWith('/settings')}
-                >
-                Settings
-            </SidebarNavItem>
+            />
         </nav>
-      </SidebarContent>
-      <SidebarFooter>
-        <UserNav />
-      </SidebarFooter>
-    </Sidebar>
+      </div>
+    </>
+  );
+}
+
+
+export function SidebarNav() {
+  return (
+    <div className="flex h-full max-h-screen flex-col gap-2">
+      <SidebarNavContent />
+    </div>
   );
 }

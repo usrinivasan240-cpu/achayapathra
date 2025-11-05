@@ -11,7 +11,6 @@ import {
   User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useSidebar } from '@/components/ui/sidebar';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -23,31 +22,25 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { setIsOpen } = useSidebar();
 
   return (
-    <div className="fixed bottom-0 left-0 z-50 w-full h-16 border-t bg-background md:hidden">
-      <div className="grid h-full max-w-lg grid-cols-5 mx-auto font-medium">
+    <div className="fixed inset-x-0 bottom-0 z-10 w-full border-t bg-background md:hidden">
+      <div className="grid h-16 grid-cols-5">
         {navItems.map((item) => {
-          const isActive =
-            item.href === '/dashboard'
-              ? pathname === item.href
-              : pathname.startsWith(item.href);
+          const isActive = pathname.startsWith(item.href);
           return (
             <Link
-              key={item.href}
+              key={item.label}
               href={item.href}
               className={cn(
-                'inline-flex flex-col items-center justify-center px-5 hover:bg-muted group',
+                'flex flex-col items-center justify-center gap-1 p-2 text-xs font-medium',
                 isActive
                   ? 'text-primary'
-                  : 'text-muted-foreground'
+                  : 'text-muted-foreground hover:text-primary'
               )}
             >
-              <item.icon
-                className={cn('w-5 h-5 mb-1', 'group-hover:text-primary')}
-              />
-              <span className="text-xs">{item.label}</span>
+              <item.icon className="h-5 w-5" />
+              {item.label}
             </Link>
           );
         })}

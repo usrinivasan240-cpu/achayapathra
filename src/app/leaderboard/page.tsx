@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserProfile } from '@/lib/types';
 import { Crown, Medal, Trophy, Loader2 } from 'lucide-react';
-import { mockUsers } from '@/lib/data';
 import React from 'react';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
 
 const UserRow = ({ user, rank }: { user: UserProfile; rank: number }) => {
   const rankIcon = () => {
@@ -34,15 +35,35 @@ const UserRow = ({ user, rank }: { user: UserProfile; rank: number }) => {
 };
 
 export default function LeaderboardPage() {
-  const [isLoading, setIsLoading] = React.useState(true);
+    const firestore = useFirestore();
 
-  // Sort users by points for both donors and volunteers
-  const topDonors = [...mockUsers].sort((a, b) => b.points - a.points).slice(0, 10);
-  const topVolunteers = [...mockUsers].sort((a, b) => b.points - a.points).slice(0, 10);
+    const topDonorsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(
+            collection(firestore, 'users'),
+            orderBy('points', 'desc'),
+            limit(10)
+        );
+    }, [firestore]);
 
-  React.useEffect(() => {
-    setTimeout(() => setIsLoading(false), 500);
-  }, []);
+    const { data: topDonors, isLoading: donorsLoading } = useCollection<UserProfile>(topDonorsQuery);
+
+    const topVolunteersQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        // This is a placeholder, as we don't have a separate volunteer score.
+        // In a real app, you might have a 'volunteerPoints' field.
+        return query(
+            collection(firestore, 'users'),
+            where('role', '==', 'volunteer'),
+            orderBy('points', 'desc'),
+            limit(10)
+        );
+    }, [firestore]);
+
+    const { data: topVolunteers, isLoading: volunteersLoading } = useCollection<UserProfile>(topVolunteersQuery);
+
+    const isLoading = donorsLoading || volunteersLoading;
+
 
   return (
     <>
@@ -88,10 +109,17 @@ export default function LeaderboardPage() {
                     <Loader2 className="h-8 w-8 animate-spin" />
                   </div>
                 ) : (
-                  topVolunteers?.map((user, index) => (
-                    <UserRow key={user.id} user={user} rank={index + 1} />
-                  ))
+                    topVolunteers && topVolunteers.length > 0 ? (
+                        topVolunteers?.map((user, index) => (
+                            <UserRow key={user.id} user={user} rank={index + 1} />
+                        ))
+                    ) : <p className="text-center text-muted-foreground py-8">No volunteer data available.</p>
                 )}
               </CardContent>
             </Card>
-          
+          </TabsContent>
+        </Tabs>
+      </main>
+    </>
+  );
+}

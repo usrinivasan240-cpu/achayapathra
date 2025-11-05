@@ -146,4 +146,11 @@ export default function SettingsPage() {
                   Receive reminders for your accepted volunteer tasks.
                 </p>
               </Label>
-              <Switch id
+              <Switch id="task-reminders" defaultChecked />
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    </>
+  );
+}

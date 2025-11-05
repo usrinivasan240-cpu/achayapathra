@@ -120,4 +120,11 @@ export default function DashboardPage() {
               <CardTitle>Recent Donations</CardTitle>
             </CardHeader>
             <CardContent>
-              <Recent
+              <RecentDonations />
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </>
+  );
+}

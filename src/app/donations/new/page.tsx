@@ -317,20 +317,13 @@ export default function NewDonationPage() {
                               <Calendar
                                 mode="single"
                                 selected={field.value}
-                                onSelect={field.onChange}
+                                onSelect={(date) => {
+                                  field.onChange(date);
+                                  setIsCalendarOpen(false);
+                                }}
                                 disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                                 initialFocus
                               />
-                               <Button
-                                    onClick={() => {
-                                        form.setValue('pickupDate', new Date());
-                                        setIsCalendarOpen(false);
-                                    }}
-                                    variant="ghost"
-                                    className="w-full rounded-t-none"
-                                >
-                                    Today
-                                </Button>
                             </PopoverContent>
                           </Popover>
                           <FormMessage />
@@ -443,3 +436,9 @@ export default function NewDonationPage() {
                 </Button>
               </form>
             </Form>
+          </CardContent>
+        </Card>
+      </main>
+    </>
+  );
+}

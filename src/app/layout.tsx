@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -30,11 +31,17 @@ export default function RootLayout({
       <body className={`${inter.className}`}>
         <FirebaseClientProvider>
           <SidebarProvider>
-            <div className="pb-16 md:pb-0">
-              <SidebarNav />
-              <SidebarInset>{children}</SidebarInset>
-              <BottomNav />
+            <div className="md:grid md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+              <div className="hidden border-r bg-muted/40 md:block">
+                <SidebarNav />
+              </div>
+              <div className="flex flex-col">
+                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+                  {children}
+                </main>
+              </div>
             </div>
+            <BottomNav />
           </SidebarProvider>
         </FirebaseClientProvider>
         <Toaster />
