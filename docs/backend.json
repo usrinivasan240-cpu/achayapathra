@@ -279,7 +279,7 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profiles. Only the user and admins can read/write their own profile.",
+          "description": "Stores user profiles. Only the user and admins can read their own profile. The leaderboard can list users by points.",
           "params": [
             {
               "name": "userId",

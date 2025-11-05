@@ -17,9 +17,11 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
     
-    // Users can only read/write their own data. Admins can read any user's data.
+    // Users can only read their own data. Admins can read any user's data.
+    // The leaderboard can list users by points.
     match /users/{userId} {
-      allow read: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow list: if isSignedIn() && request.query.orderBy == "points desc" && request.query.limit <= 10;
       allow write: if isSignedIn() && isOwner(userId);
     }
 
