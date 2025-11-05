@@ -199,12 +199,12 @@ export default function NewDonationPage() {
 
         router.push('/donations/list');
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error submitting donation:', error);
         toast({
             variant: 'destructive',
             title: 'Submission Failed',
-            description: 'There was an error submitting your donation.'
+            description: error.message || 'There was an error submitting your donation.'
         })
     } finally {
         setIsSubmitting(false);
@@ -497,6 +497,8 @@ export default function NewDonationPage() {
       </main>
     </>
   );
+
+    
 
     
 
