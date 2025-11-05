@@ -443,3 +443,9 @@ export default function NewDonationPage() {
                 </Button>
               </form>
             </Form>
+          </CardContent>
+        </Card>
+      </main>
+    </>
+  );
+}

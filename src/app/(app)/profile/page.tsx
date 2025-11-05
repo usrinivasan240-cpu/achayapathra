@@ -196,4 +196,9 @@ export default function ProfilePage() {
       </main>
       <EditProfileDialog 
         isOpen={isEditDialogOpen} 
-        onOpenChange
+        onOpenChange={setIsEditDialogOpen}
+        onProfileUpdate={handleProfileUpdate}
+      />
+    </>
+  );
+}

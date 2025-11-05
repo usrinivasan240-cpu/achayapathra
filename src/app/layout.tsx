@@ -3,6 +3,9 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { SidebarNav } from '@/components/layout/sidebar-nav';
+import { BottomNav } from '@/components/layout/bottom-nav';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,9 +27,15 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className}`}>
         <FirebaseClientProvider>
-          {children}
+          <SidebarProvider>
+            <div className="pb-16 md:pb-0">
+              <SidebarNav />
+              <SidebarInset>{children}</SidebarInset>
+              <BottomNav />
+            </div>
+          </SidebarProvider>
         </FirebaseClientProvider>
         <Toaster />
       </body>

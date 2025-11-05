@@ -94,4 +94,9 @@ export default function LeaderboardPage() {
                 )}
               </CardContent>
             </Card>
-          
+          </TabsContent>
+        </Tabs>
+      </main>
+    </>
+  );
+}

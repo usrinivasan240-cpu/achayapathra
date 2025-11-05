@@ -3,8 +3,8 @@
 
 import * as React from 'react';
 import { Header } from '@/components/layout/header';
-import { columns } from '@/app/donations/list/columns';
-import { DataTable } from '@/app/donations/list/data-table';
+import { columns } from '@/app/(app)/donations/list/columns';
+import { DataTable } from '@/app/(app)/donations/list/data-table';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw } from 'lucide-react';
@@ -75,3 +75,10 @@ export default function ReceiverDashboardPage() {
         ) : (
             <DataTable
               columns={columns({ onClaim: handleClaimDonation })}
+              data={donations || []}
+            />
+        )}
+      </main>
+    </>
+  );
+}

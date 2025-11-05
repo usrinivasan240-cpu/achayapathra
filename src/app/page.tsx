@@ -37,7 +37,7 @@ export default function AuthenticationPage() {
             alt="A person donating food at a food drive."
             width="1920"
             height="1080"
-            data-ai-hint="food donation drive"
+            data-ai-hint="food donation"
             className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
           />
         )}
