@@ -53,8 +53,19 @@ export const columns = (options: { onClaim: (id: string) => void }): ColumnDef<D
     accessorKey: 'expires',
     header: 'Expires',
     cell: ({ row }) => {
-      const timestamp = row.getValue('expires') as Timestamp;
-      const date = timestamp.toDate();
+      const expiresValue = row.getValue('expires');
+      let date: Date;
+      if (expiresValue instanceof Timestamp) {
+        date = expiresValue.toDate();
+      } else if (expiresValue instanceof Date) {
+        date = expiresValue;
+      } else if (typeof expiresValue === 'object' && expiresValue && 'seconds' in expiresValue && 'nanoseconds' in expiresValue) {
+        // Handle plain object representation of Timestamp during build
+        date = new Timestamp((expiresValue as any).seconds, (expiresValue as any).nanoseconds).toDate();
+      }
+      else {
+        return <span>Invalid date</span>;
+      }
       return <span>{date.toLocaleDateString()}</span>;
     },
   },

@@ -35,4 +35,6 @@ export type Donation = {
     avatarUrl: string;
   };
   donorId: string;
+  lat?: number;
+  lng?: number;
 };
