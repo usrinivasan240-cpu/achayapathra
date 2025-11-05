@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Donation } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -70,12 +70,13 @@ export function VolunteerContent() {
 
   const { toast } = useToast();
   const firestore = useFirestore();
+  const { user } = useUser();
   const watchIdRef = useRef<number | null>(null);
 
   const availableDonationsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !user) return null; // Don't query if not logged in
     return query(collection(firestore, 'donations'), where('status', '==', 'Available'));
-  }, [firestore]);
+  }, [firestore, user]);
 
   const { data: availableDonations, isLoading: donationsLoading } = useCollection<Donation>(availableDonationsQuery);
 
@@ -163,7 +164,7 @@ export function VolunteerContent() {
 
 
   useEffect(() => {
-    if (location?.coords && availableDonations) {
+    if (location?.coords && availableDonations && user) {
         const donationsWithDistance = availableDonations
           .map((donation) => {
             const distance = getDistance(
@@ -179,7 +180,7 @@ export function VolunteerContent() {
 
         setNearbyDonations(donationsWithDistance);
     }
-  }, [location, availableDonations, searchRadius]);
+  }, [location, availableDonations, searchRadius, user]);
 
   const getDirectionsUrl = (donation: Donation) => {
     if (!location?.coords || !donation.lat || !donation.lng) return `https://www.google.com/maps/search/?api=1&query=${donation.location}`;
