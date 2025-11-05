@@ -33,11 +33,11 @@ export default function AuthenticationPage() {
       <div className="hidden bg-muted lg:block">
         {loginImage && (
           <Image
-            src={loginImage.imageUrl}
-            alt={loginImage.description}
+            src="https://picsum.photos/seed/food-donation-drive/1920/1080"
+            alt="A person donating food at a food drive."
             width="1920"
             height="1080"
-            data-ai-hint={loginImage.imageHint}
+            data-ai-hint="food donation drive"
             className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
           />
         )}

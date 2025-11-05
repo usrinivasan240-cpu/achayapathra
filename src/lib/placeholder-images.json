@@ -1,15 +1,15 @@
 [
   {
     "id": "login-image",
-    "imageUrl": "https://picsum.photos/seed/giving-food/1920/1080",
-    "description": "A volunteer hands a bag of groceries to a person.",
-    "imageHint": "food donation"
+    "imageUrl": "https://picsum.photos/seed/food-donation-drive/1920/1080",
+    "description": "A person donating food at a food drive.",
+    "imageHint": "food donation drive"
   },
   {
     "id": "impact-hero",
-    "imageUrl": "https://picsum.photos/seed/community-gathering/1600/400",
-    "description": "A panoramic photo of a community food drive with many volunteers.",
-    "imageHint": "community food drive"
+    "imageUrl": "https://picsum.photos/seed/community-love/1600/400",
+    "description": "People sharing food and smiling.",
+    "imageHint": "people sharing food"
   },
   {
     "id": "impact-gallery-1",
