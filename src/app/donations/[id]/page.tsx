@@ -104,16 +104,6 @@ export default function DonationDetailsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="relative h-64 w-full mb-6">
-                    <Image
-                        src={`https://picsum.photos/seed/${donation.id}/800/600`}
-                        alt={donation.foodName}
-                        fill
-                        className="object-cover rounded-lg"
-                        data-ai-hint="donated food"
-                    />
-                </div>
-                
                 <div className="grid grid-cols-2 gap-6 text-sm">
                     <div className="flex items-start gap-3">
                         <Package className="h-5 w-5 text-primary mt-1" />
