@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Loader2, ShieldCheck, ShieldX, MapPin, ListChecks } from 'lucide-react';
+import { Calendar as CalendarIcon, Loader2, ShieldCheck, ShieldX, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -37,12 +37,12 @@ import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useUser } from '@/firebase';
+import { useFirestore, useUser, useFirebaseApp } from '@/firebase';
 import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { aiSafeFoodCheck, AISafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -68,7 +68,7 @@ const formSchema = z.object({
     ),
 });
 
-type AISafetyCheckState = 'idle' | 'checking' | 'safe' | 'unsafe';
+type AISafetyCheckState = 'idle' | 'checking' | 'safe' | 'unsafe' | 'submitting';
 
 type LocationCoords = {
     latitude: number;
@@ -80,7 +80,6 @@ export default function NewDonationPage() {
   const [aiResult, setAiResult] = React.useState<AISafeFoodCheckOutput | null>(null);
   const [progress, setProgress] = React.useState(0);
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [coords, setCoords] = React.useState<LocationCoords>(null);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
 
@@ -88,6 +87,7 @@ export default function NewDonationPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const router = useRouter();
+  const firebaseApp = useFirebaseApp();
 
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -112,11 +112,8 @@ export default function NewDonationPage() {
     setIsGettingLocation(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        // In a real app, you would use a reverse geocoding service here
-        // to convert lat/lng to a human-readable address.
         const { latitude, longitude } = position.coords;
         setCoords({latitude, longitude});
-        // This is a placeholder, a real app should use reverse geocoding
         const address = `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`;
         form.setValue('location', address);
         setIsGettingLocation(false);
@@ -138,9 +135,17 @@ export default function NewDonationPage() {
     );
   };
 
+  const fileToDataURI = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+  }
 
-  async function handleFinalSubmit(values: z.infer<typeof formSchema>) {
-    if (!firestore || !user) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!firestore || !user || !firebaseApp) {
         toast({
             variant: 'destructive',
             title: 'Error',
@@ -148,30 +153,65 @@ export default function NewDonationPage() {
         });
         return;
     }
+    
+    setAiState('checking');
+    setProgress(10);
 
-    setIsSubmitting(true);
+    const imageFile = values.image[0] as File;
+    const storage = getStorage(firebaseApp);
+    const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
 
     try {
-        // 1. Upload image to Firebase Storage
-        const imageFile = values.image[0] as File;
-        const storage = getStorage();
-        const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
-        
-        await uploadBytes(storageRef, imageFile);
-        const imageURL = await getDownloadURL(storageRef);
+        // Run AI check and image upload in parallel
+        const [aiCheckPromise, uploadPromise] = await Promise.allSettled([
+            (async () => {
+                const foodDataUri = await fileToDataURI(imageFile);
+                setProgress(p => p + 20);
+                const result = await aiSafeFoodCheck({ foodDataUri });
+                setProgress(p => p + 30);
+                return result;
+            })(),
+            (async () => {
+                const uploadResult = await uploadBytes(storageRef, imageFile);
+                setProgress(p => p + 40);
+                return getDownloadURL(uploadResult.ref);
+            })()
+        ]);
 
-        // 2. Prepare data for Firestore
-        const donationsCol = collection(firestore, 'donations');
-        
+        const aiCheckResult = aiCheckPromise.status === 'fulfilled' ? aiCheckPromise.value : null;
+        const imageUrl = uploadPromise.status === 'fulfilled' ? uploadPromise.value : null;
+
+        if (aiCheckPromise.status === 'rejected' || uploadPromise.status === 'rejected') {
+            console.error('AI Check or Upload failed:', { aiCheckPromise, uploadPromise });
+            throw new Error('Image analysis or upload failed.');
+        }
+
+        setAiResult(aiCheckResult);
+
+        if (!aiCheckResult?.isFood) {
+            setAiState('unsafe');
+            toast({
+                variant: 'destructive',
+                title: 'Image Analysis Failed',
+                description: aiCheckResult?.reason || "Could not confirm image contains food.",
+            });
+            // Clean up the uploaded image if it exists
+            if (imageUrl) {
+                await deleteObject(storageRef);
+            }
+            return;
+        }
+
+        // If we reach here, AI check is good and image is uploaded.
+        setAiState('safe');
+        setAiResult(aiCheckResult);
+
+        setAiState('submitting');
         const [hours, minutes] = values.cookedTime.split(':').map(Number);
         const cookedDateTime = new Date(values.pickupDate);
-        cookedDateTime.setHours(hours);
-        cookedDateTime.setMinutes(minutes);
-        cookedDateTime.setSeconds(0);
-        cookedDateTime.setMilliseconds(0);
+        cookedDateTime.setHours(hours, minutes, 0, 0);
 
-        // 3. Add document to Firestore
-        await addDoc(donationsCol, {
+        await addDoc(collection(firestore, 'donations'), {
             donorId: user.uid,
             foodName: values.foodName,
             foodType: values.foodType,
@@ -180,7 +220,7 @@ export default function NewDonationPage() {
             pickupBy: Timestamp.fromDate(values.pickupDate),
             description: values.description || '',
             location: values.location,
-            imageURL: imageURL,
+            imageURL: imageUrl,
             ...(coords && { lat: coords.latitude, lng: coords.longitude }),
             status: 'Available',
             createdAt: serverTimestamp(),
@@ -200,61 +240,13 @@ export default function NewDonationPage() {
         router.push('/donations/list');
 
     } catch (error: any) {
-        console.error('Error submitting donation:', error);
-        toast({
-            variant: 'destructive',
-            title: 'Submission Failed',
-            description: error.message || 'There was an error submitting your donation.'
-        })
-    } finally {
-        setIsSubmitting(false);
-    }
-  }
-
-
-  const fileToDataURI = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-  }
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setAiState('checking');
-    setProgress(30);
-
-    try {
-        const foodDataUri = await fileToDataURI(values.image[0]);
-        setProgress(60);
-
-        const result = await aiSafeFoodCheck({
-            foodDataUri,
-        });
-
-        setProgress(100);
-        setAiResult(result);
-        
-        if (result.isFood) {
-            setAiState('safe');
-            await handleFinalSubmit(values);
-        } else {
-            setAiState('unsafe');
-            toast({
-                variant: 'destructive',
-                title: 'Image Analysis Failed',
-                description: result.reason,
-            })
-        }
-    } catch (error) {
-        console.error("AI check failed:", error);
+        console.error('Donation submission error:', error);
         setAiState('idle');
         setProgress(0);
         toast({
             variant: 'destructive',
-            title: 'AI Check Error',
-            description: 'The image analysis could not be completed.'
+            title: 'Submission Failed',
+            description: error.message || 'There was an error submitting your donation.'
         });
     }
   }
@@ -445,14 +437,14 @@ export default function NewDonationPage() {
                 {aiState !== 'idle' && (
                   <Card className="mt-8">
                     <CardHeader>
-                      <CardTitle className="font-headline text-lg">AI Image Analysis</CardTitle>
+                      <CardTitle className="font-headline text-lg">AI Image Analysis & Upload</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {aiState === 'checking' && (
+                      {(aiState === 'checking' || aiState === 'submitting') && (
                         <div className="flex items-center gap-4">
                           <Loader2 className="h-6 w-6 animate-spin text-primary" />
                           <div>
-                            <p className="font-semibold">Analyzing image...</p>
+                            <p className="font-semibold">{aiState === 'checking' ? 'Analyzing and uploading...' : 'Finalizing submission...'}</p>
                             <Progress value={progress} className="w-full mt-2" />
                           </div>
                         </div>
@@ -462,7 +454,7 @@ export default function NewDonationPage() {
                             <div className="flex items-center gap-4 text-green-600">
                                <ShieldCheck className="h-8 w-8" />
                                <div>
-                                <p className="font-bold text-lg">Image contains food!</p>
+                                <p className="font-bold text-lg">Image Verified!</p>
                                 <p className="text-sm">{aiResult.reason} Submitting your donation...</p>
                                </div>
                             </div>
@@ -482,9 +474,9 @@ export default function NewDonationPage() {
                 )}
 
 
-                <Button type="submit" disabled={aiState === 'checking' || isSubmitting}>
-                  {(aiState === 'checking' || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isSubmitting
+                <Button type="submit" disabled={aiState === 'checking' || aiState === 'submitting'}>
+                  {(aiState === 'checking' || aiState === 'submitting') && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {aiState === 'submitting'
                     ? 'Submitting...'
                     : aiState === 'checking'
                     ? 'Analyzing...'
@@ -497,9 +489,6 @@ export default function NewDonationPage() {
       </main>
     </>
   );
-
-    
-
-    
+}
 
     
