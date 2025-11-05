@@ -14,29 +14,64 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Phone, Mail, MapPin, Award, History, Loader2, Edit } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useUser } from '@/firebase';
-import { mockDonations, mockUsers } from '@/lib/data';
+import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { EditProfileDialog } from '@/components/profile/edit-profile-dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { doc, collection, query, where, Timestamp } from 'firebase/firestore';
+import { UserProfile, Donation } from '@/lib/types';
+import { updateProfile } from 'firebase/auth';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { updateDoc } from 'firebase/firestore';
+
 
 export default function ProfilePage() {
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const { toast } = useToast();
   
-  const isLoading = false; // Replace with real loading state if needed
-  
-  // Find user profile and donations from mock data
-  const userProfile = mockUsers.find(u => u.email === user?.email);
-  const userDonations = mockDonations.filter(d => d.donorId === userProfile?.id);
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  const { data: userProfile, isLoading: profileLoading } = useDoc<UserProfile>(userDocRef);
+
+  const userDonationsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(collection(firestore, 'donations'), where('donorId', '==', user.uid));
+  }, [firestore, user]);
+  const { data: userDonations, isLoading: donationsLoading } = useCollection<Donation>(userDonationsQuery);
+
 
   const handleProfileUpdate = async (file: File) => {
-    // This is a mock implementation
-    console.log("Updating profile with file:", file.name);
-    toast({ title: 'Success!', description: 'Your profile picture has been updated (mock).' });
-    setIsEditDialogOpen(false);
+    if (!user || !firestore) {
+      toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
+      return;
+    }
+    
+    try {
+      const storage = getStorage();
+      const storageRef = ref(storage, `profile-pictures/${user.uid}`);
+      
+      await uploadBytes(storageRef, file);
+      const photoURL = await getDownloadURL(storageRef);
+
+      await updateProfile(user, { photoURL });
+      
+      const userRef = doc(firestore, 'users', user.uid);
+      await updateDoc(userRef, { photoURL });
+
+      toast({ title: 'Success!', description: 'Your profile picture has been updated.' });
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Upload failed', description: 'Could not update profile picture.' });
+    } finally {
+      setIsEditDialogOpen(false);
+    }
   }
+  
+  const isLoading = isUserLoading || profileLoading || donationsLoading;
 
   if (isLoading) {
     return (
@@ -138,7 +173,7 @@ export default function ProfilePage() {
                            <p className='text-sm text-muted-foreground'>{donation.location}</p>
                            {donation.pickupBy && (
                             <p className='text-sm text-muted-foreground'>
-                                Pickup By: {donation.pickupBy.toDate().toLocaleDateString()}
+                                Pickup By: {(donation.pickupBy as Timestamp).toDate().toLocaleDateString()}
                             </p>
                            )}
                         </div>

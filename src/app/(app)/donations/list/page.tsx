@@ -9,41 +9,50 @@ import { DataTable } from './data-table';
 import Link from 'next/link';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { mockDonations } from '@/lib/data';
 import { Loader2 } from 'lucide-react';
+import { useCollection, useFirestore, useUser } from '@/firebase';
+import { collection, doc, updateDoc } from 'firebase/firestore';
 
 export default function DonationsPage() {
   const { toast } = useToast();
-  const [donations, setDonations] = React.useState<Donation[]>(mockDonations);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
 
-  React.useEffect(() => {
-    // Simulate fetching data
-    setTimeout(() => {
-      setDonations(mockDonations);
-      setIsLoading(false);
-    }, 500);
-  }, []);
+  const {
+    data: donations,
+    isLoading: donationsLoading,
+  } = useCollection<Donation>(
+    firestore ? collection(firestore, 'donations') : null
+  );
 
-  const handleClaimDonation = (donationId: string) => {
-    setDonations(prevDonations =>
-      prevDonations.map(d =>
-        d.id === donationId ? { ...d, status: 'Claimed' } : d
-      )
-    );
-    toast({
-      title: 'Donation Claimed!',
-      description: 'You have successfully claimed the donation.',
-    });
+  const handleClaimDonation = async (donationId: string) => {
+    if (!firestore || !user) return;
+    try {
+      const donationRef = doc(firestore, 'donations', donationId);
+      await updateDoc(donationRef, { status: 'Claimed', claimedBy: user.uid });
+      toast({
+        title: 'Donation Claimed!',
+        description: 'You have successfully claimed the donation.',
+      });
+    } catch (error) {
+      console.error("Error claiming donation:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not claim the donation.'
+      })
+    }
   };
+
+  const isLoading = isUserLoading || donationsLoading;
 
   return (
     <>
-      <Header title="Donations" />
+      <Header title="All Donations" />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold font-headline">
-            Available Donations
+            All Community Donations
           </h2>
           <Link href="/donations/new">
             <Button>Add New Donation</Button>

@@ -7,38 +7,53 @@ import { columns } from '@/app/(app)/donations/list/columns';
 import { DataTable } from '@/app/(app)/donations/list/data-table';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { mockDonations } from '@/lib/data';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { collection, query, where, doc, updateDoc } from 'firebase/firestore';
 
 export default function ReceiverDashboardPage() {
   const { toast } = useToast();
-  const [donations, setDonations] = React.useState<Donation[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
 
-  const fetchDonations = React.useCallback(() => {
-    setIsLoading(true);
-    // Simulate fetching available donations
-    setTimeout(() => {
-      const available = mockDonations.filter(d => d.status === 'Available');
-      setDonations(available);
-      setIsLoading(false);
-    }, 500);
-  }, []);
+  const availableDonationsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'donations'), where('status', '==', 'Available'));
+  }, [firestore]);
 
-  React.useEffect(() => {
-    fetchDonations();
-  }, [fetchDonations]);
+  const { data: donations, isLoading: donationsLoading, error } = useCollection<Donation>(availableDonationsQuery);
   
-  const handleClaimDonation = (donationId: string) => {
-    // This is a mock implementation. In a real app, you'd update a shared state.
-    // For now, it just removes it from this local view.
-    setDonations(prevDonations => prevDonations.filter(d => d.id !== donationId));
+  const handleClaimDonation = async (donationId: string) => {
+    if (!firestore || !user) return;
+    try {
+      const donationRef = doc(firestore, 'donations', donationId);
+      await updateDoc(donationRef, { status: 'Claimed', claimedBy: user.uid });
+      toast({
+        title: 'Donation Claimed!',
+        description: 'You have successfully claimed the donation.',
+      });
+    } catch (e) {
+      console.error(e);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not claim the donation.'
+      });
+    }
+  };
+
+  // The hook now handles refreshing, so manual refresh logic is simpler.
+  // In a real app you might force a re-fetch, but onSnapshot does this.
+  // This button is now mostly for user feedback.
+  const handleRefresh = () => {
     toast({
-      title: 'Donation Claimed!',
-      description: 'You have successfully claimed the donation.',
+      title: 'Up to date!',
+      description: 'The donation list is updated in real-time.',
     });
   };
+  
+  const isLoading = isUserLoading || donationsLoading;
 
   return (
     <>
@@ -48,7 +63,7 @@ export default function ReceiverDashboardPage() {
           <h2 className="text-2xl font-semibold font-headline">
             Ready for Pickup
           </h2>
-          <Button variant="outline" onClick={fetchDonations} disabled={isLoading}>
+          <Button variant="outline" onClick={handleRefresh} disabled={isLoading}>
             <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>

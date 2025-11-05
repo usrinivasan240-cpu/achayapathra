@@ -1,6 +1,7 @@
+
 'use client';
 
-import { CreditCard, DollarSign, Package, Users } from 'lucide-react';
+import { CreditCard, DollarSign, Package, Users, Loader2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -10,17 +11,30 @@ import {
 import { Header } from '@/components/layout/header';
 import { Overview } from '@/components/dashboard/overview';
 import { RecentDonations } from '@/components/dashboard/recent-donations';
-import { useUser } from '@/firebase';
-import { mockDonations, mockUsers } from '@/lib/data';
-import { Loader2 } from 'lucide-react';
+import { useUser, useFirestore, useMemoFirebase, useCollection, useDoc } from '@/firebase';
+import { doc, collection, query, where } from 'firebase/firestore';
+import { Donation, UserProfile } from '@/lib/types';
+
 
 export default function DashboardPage() {
-  const { user } = useUser();
-  const isLoading = false; // Replace with real loading state if needed
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
 
-  const userProfile = mockUsers.find(u => u.email === user?.email);
-  const userDonations = mockDonations.filter(d => d.donorId === userProfile?.id);
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  const { data: userProfile, isLoading: profileLoading } = useDoc<UserProfile>(userDocRef);
 
+  const userDonationsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(collection(firestore, 'donations'), where('donorId', '==', user.uid));
+  }, [firestore, user]);
+
+  const { data: userDonations, isLoading: donationsLoading } = useCollection<Donation>(userDonationsQuery);
+
+  const isLoading = isUserLoading || profileLoading || donationsLoading;
+  
   if (isLoading) {
     return (
       <>

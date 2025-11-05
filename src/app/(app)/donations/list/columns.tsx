@@ -54,19 +54,12 @@ export const columns = (options: { onClaim: (id: string) => void }): ColumnDef<D
     accessorKey: 'pickupBy',
     header: 'Pickup By',
     cell: ({ row }) => {
-      const expiresValue = row.getValue('pickupBy');
-      let date: Date;
-      if (expiresValue instanceof Timestamp) {
-        date = expiresValue.toDate();
-      } else if (expiresValue instanceof Date) {
-        date = expiresValue;
-      } else if (typeof expiresValue === 'object' && expiresValue && 'seconds' in expiresValue && 'nanoseconds' in expiresValue) {
-        // Handle plain object representation of Timestamp during build
-        date = new Timestamp((expiresValue as any).seconds, (expiresValue as any).nanoseconds).toDate();
-      }
-      else {
-        return <span>Invalid date</span>;
-      }
+      const pickupBy = row.getValue('pickupBy') as Timestamp | undefined;
+      if (!pickupBy) return <span>N/A</span>;
+      // Firestore Timestamps are automatically converted to Date objects
+      // when they are used in a client component with the hooks.
+      // However, to be safe, we can handle both cases.
+      const date = pickupBy instanceof Timestamp ? pickupBy.toDate() : pickupBy;
       return <span>{date.toLocaleDateString()}</span>;
     },
   },
