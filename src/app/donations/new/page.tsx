@@ -162,8 +162,7 @@ export default function NewDonationPage() {
     const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
 
     try {
-        // Run AI check and image upload in parallel
-        const [aiCheckPromise, uploadPromise] = await Promise.allSettled([
+        const [aiCheckSettled, uploadSettled] = await Promise.allSettled([
             (async () => {
                 const foodDataUri = await fileToDataURI(imageFile);
                 setProgress(p => p + 20);
@@ -178,13 +177,15 @@ export default function NewDonationPage() {
             })()
         ]);
 
-        const aiCheckResult = aiCheckPromise.status === 'fulfilled' ? aiCheckPromise.value : null;
-        const imageUrl = uploadPromise.status === 'fulfilled' ? uploadPromise.value : null;
-
-        if (aiCheckPromise.status === 'rejected' || uploadPromise.status === 'rejected') {
-            console.error('AI Check or Upload failed:', { aiCheckPromise, uploadPromise });
-            throw new Error('Image analysis or upload failed.');
+        if (aiCheckSettled.status === 'rejected') {
+            throw new Error('Image analysis failed.');
         }
+        if (uploadSettled.status === 'rejected') {
+            throw new Error('Image upload failed.');
+        }
+
+        const aiCheckResult = aiCheckSettled.value;
+        const imageUrl = uploadSettled.value;
 
         setAiResult(aiCheckResult);
 
@@ -195,17 +196,13 @@ export default function NewDonationPage() {
                 title: 'Image Analysis Failed',
                 description: aiCheckResult?.reason || "Could not confirm image contains food.",
             });
-            // Clean up the uploaded image if it exists
-            if (imageUrl) {
-                await deleteObject(storageRef);
-            }
+            await deleteObject(storageRef);
             return;
         }
-
-        // If we reach here, AI check is good and image is uploaded.
+        
         setAiState('safe');
         setAiResult(aiCheckResult);
-
+        
         setAiState('submitting');
         const [hours, minutes] = values.cookedTime.split(':').map(Number);
         const cookedDateTime = new Date(values.pickupDate);
