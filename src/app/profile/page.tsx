@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Phone, Mail, MapPin, Award, History, Loader2, Edit } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser, useFirebaseApp } from '@/firebase';
 import { EditProfileDialog } from '@/components/profile/edit-profile-dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -27,7 +27,9 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const firebaseApp = useFirebaseApp();
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
   const { toast } = useToast();
   
   const userDocRef = useMemoFirebase(() => {
@@ -44,13 +46,14 @@ export default function ProfilePage() {
 
 
   const handleProfileUpdate = async (file: File) => {
-    if (!user || !firestore) {
+    if (!user || !firestore || !firebaseApp) {
       toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
       return;
     }
     
+    setIsUploading(true);
     try {
-      const storage = getStorage();
+      const storage = getStorage(firebaseApp);
       const storageRef = ref(storage, `profile-pictures/${user.uid}`);
       
       await uploadBytes(storageRef, file);
@@ -66,6 +69,7 @@ export default function ProfilePage() {
       console.error(error);
       toast({ variant: 'destructive', title: 'Upload failed', description: 'Could not update profile picture.' });
     } finally {
+      setIsUploading(false);
       setIsEditDialogOpen(false);
     }
   }
@@ -197,6 +201,7 @@ export default function ProfilePage() {
         isOpen={isEditDialogOpen} 
         onOpenChange={setIsEditDialogOpen}
         onProfileUpdate={handleProfileUpdate}
+        isUploading={isUploading}
       />
     </>
   );

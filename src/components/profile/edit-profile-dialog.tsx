@@ -44,14 +44,15 @@ interface EditProfileDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onProfileUpdate: (file: File) => Promise<void>;
+  isUploading: boolean;
 }
 
 export function EditProfileDialog({
   isOpen,
   onOpenChange,
   onProfileUpdate,
+  isUploading,
 }: EditProfileDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [preview, setPreview] = React.useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -75,11 +76,8 @@ export function EditProfileDialog({
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
     const file = values.image[0] as File;
     await onProfileUpdate(file);
-    setIsSubmitting(false);
-    onOpenChange(false);
   }
 
   React.useEffect(() => {
@@ -114,6 +112,7 @@ export function EditProfileDialog({
                         className="absolute w-full h-full opacity-0 cursor-pointer"
                         accept="image/png, image/jpeg, image/webp"
                         onChange={handleFileChange}
+                        disabled={isUploading}
                       />
                       {preview ? (
                         <img src={preview} alt="Image preview" className="h-full w-full object-cover rounded-lg" />
@@ -132,9 +131,9 @@ export function EditProfileDialog({
             />
 
             <DialogFooter>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save changes
+              <Button type="submit" disabled={isUploading}>
+                {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isUploading ? 'Saving...' : 'Save changes'}
               </Button>
             </DialogFooter>
           </form>
