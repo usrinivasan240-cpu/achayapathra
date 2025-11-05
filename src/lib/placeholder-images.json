@@ -1,9 +1,9 @@
 [
   {
     "id": "login-image",
-    "imageUrl": "https://picsum.photos/seed/food-donation/1920/1080",
+    "imageUrl": "https://picsum.photos/seed/food-donation-2/1920/1080",
     "description": "A person handing a box of food to another person.",
-    "imageHint": "person donating food"
+    "imageHint": "food donation"
   },
   {
     "id": "impact-hero",
