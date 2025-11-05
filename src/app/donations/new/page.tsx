@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Loader2, ShieldCheck, ShieldX, MapPin } from 'lucide-react';
+import { Calendar as CalendarIcon, Loader2, ShieldCheck, ShieldX, MapPin, ListChecks } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -178,7 +178,7 @@ export default function NewDonationPage() {
             pickupBy: Timestamp.fromDate(values.pickupDate),
             description: values.description || '',
             location: values.location,
-            imageURL: imageURL, // Save the image URL
+            imageURL: imageURL,
             ...(coords && { lat: coords.latitude, lng: coords.longitude }),
             status: 'Available',
             createdAt: serverTimestamp(),
@@ -495,5 +495,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    
