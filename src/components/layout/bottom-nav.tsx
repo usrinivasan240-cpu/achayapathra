@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -14,7 +15,7 @@ import { useSidebar } from '@/components/ui/sidebar';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/donations', label: 'Donate', icon: Gift },
+  { href: '/donations/new', label: 'Donate', icon: Gift },
   { href: '/impact', label: 'Impact', icon: BarChart },
   { href: '/leaderboard', label: 'Leaders', icon: Trophy },
   { href: '/profile', label: 'Profile', icon: User },
