@@ -8,14 +8,16 @@ import { DataTable } from '@/app/(app)/donations/list/data-table';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { mockDonations } from '@/lib/data';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function ReceiverDashboardPage() {
   const { toast } = useToast();
   const [donations, setDonations] = React.useState<Donation[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  React.useEffect(() => {
+  const fetchDonations = React.useCallback(() => {
+    setIsLoading(true);
     // Simulate fetching available donations
     setTimeout(() => {
       const available = mockDonations.filter(d => d.status === 'Available');
@@ -24,6 +26,10 @@ export default function ReceiverDashboardPage() {
     }, 500);
   }, []);
 
+  React.useEffect(() => {
+    fetchDonations();
+  }, [fetchDonations]);
+  
   const handleClaimDonation = (donationId: string) => {
     // This is a mock implementation. In a real app, you'd update a shared state.
     // For now, it just removes it from this local view.
@@ -42,6 +48,10 @@ export default function ReceiverDashboardPage() {
           <h2 className="text-2xl font-semibold font-headline">
             Ready for Pickup
           </h2>
+          <Button variant="outline" onClick={fetchDonations} disabled={isLoading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
         {isLoading ? (
             <div className="flex justify-center items-center h-64">
