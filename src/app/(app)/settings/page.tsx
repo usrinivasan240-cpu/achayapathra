@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Moon, Sun, Bell, TextSize } from 'lucide-react';
+import { Moon, Sun, Bell, ALargeSmall } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import {
   Card,
@@ -68,7 +68,7 @@ export default function SettingsPage() {
             <div className="space-y-4">
                 <Label className="flex items-center gap-3">
                     <div className='w-8 h-8 flex items-center justify-center bg-muted rounded-full'>
-                        <TextSize className="h-5 w-5" />
+                        <ALargeSmall className="h-5 w-5" />
                     </div>
                      <p>Font Size</p>
                 </Label>
