@@ -15,7 +15,7 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  avatarUrl: string;
+  photoURL: string;
   points: number;
   address: string;
   phone: string;
@@ -33,7 +33,7 @@ export type Donation = {
     id: string;
     name: string;
     email: string;
-    avatarUrl: string;
+    photoURL: string;
   };
   donorId: string;
   lat?: number;

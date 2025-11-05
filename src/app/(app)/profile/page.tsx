@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { Header } from '@/components/layout/header';
 import {
   Card,
@@ -10,16 +11,22 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Phone, Mail, MapPin, Award, History, Loader2 } from 'lucide-react';
+import { Phone, Mail, MapPin, Award, History, Loader2, Edit } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { collection, query, where, doc } from 'firebase/firestore';
+import { collection, query, where, doc, updateDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Donation, UserProfile } from '@/lib/types';
+import { EditProfileDialog } from '@/components/profile/edit-profile-dialog';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+  const { toast } = useToast();
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -35,6 +42,30 @@ export default function ProfilePage() {
   const { data: userDonations, isLoading: areDonationsLoading } = useCollection<Donation>(userDonationsQuery);
 
   const isLoading = isUserLoading || isProfileLoading || areDonationsLoading;
+
+  const handleProfileUpdate = async (file: File) => {
+    if (!user || !firestore) {
+        toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to update your profile.'});
+        return;
+    }
+
+    const storage = getStorage();
+    const storageRef = ref(storage, `profile-pictures/${user.uid}/${file.name}`);
+
+    try {
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        const userDocRef = doc(firestore, 'users', user.uid);
+        await updateDoc(userDocRef, { photoURL: downloadURL });
+
+        toast({ title: 'Success!', description: 'Your profile picture has been updated.' });
+
+    } catch (error) {
+        console.error("Error updating profile picture: ", error);
+        toast({ variant: 'destructive', title: 'Upload Failed', description: 'Could not update your profile picture.'});
+    }
+  }
+
 
   if (isLoading) {
     return (
@@ -63,10 +94,13 @@ export default function ProfilePage() {
       <Header title="My Profile" />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="grid gap-8 md:grid-cols-3">
-          {/* User Details Card */}
           <div className="md:col-span-1">
             <Card>
-              <CardHeader className="items-center text-center">
+              <CardHeader className="items-center text-center relative">
+                 <Button variant="ghost" size="icon" className="absolute top-4 right-4" onClick={() => setIsEditDialogOpen(true)}>
+                    <Edit className="h-4 w-4" />
+                    <span className="sr-only">Edit Profile</span>
+                </Button>
                 <Avatar className="h-24 w-24 mb-4">
                   <AvatarImage src={userProfile.photoURL} alt={userProfile.displayName} />
                   <AvatarFallback>
@@ -111,7 +145,6 @@ export default function ProfilePage() {
             </Card>
           </div>
 
-          {/* Donation History Card */}
           <div className="md:col-span-2">
             <Card>
               <CardHeader>
@@ -155,6 +188,11 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+      <EditProfileDialog 
+        isOpen={isEditDialogOpen} 
+        onOpenChange={setIsEditDialogOpen}
+        onProfileUpdate={handleProfileUpdate}
+      />
     </>
   );
 }

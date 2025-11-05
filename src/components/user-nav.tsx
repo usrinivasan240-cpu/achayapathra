@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -17,14 +18,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { doc } from 'firebase/firestore';
+import { UserProfile } from '@/lib/types';
 
 export function UserNav() {
     const { user, isUserLoading } = useUser();
     const auth = useAuth();
     const router = useRouter();
+    const firestore = useFirestore();
+
+    const userDocRef = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return doc(firestore, 'users', user.uid);
+      }, [firestore, user]);
+      const { data: userProfile } = useDoc<UserProfile>(userDocRef);
 
     const handleSignOut = async () => {
         if (auth) {
@@ -36,15 +46,12 @@ export function UserNav() {
     if (isUserLoading) {
         return (
             <div className="flex items-center space-x-4">
-                 <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
-                <div className="space-y-2">
-                    <div className="h-4 w-[150px] bg-gray-200 animate-pulse rounded"></div>
-                </div>
+                 <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
             </div>
         );
     }
     
-    if (!user) {
+    if (!user || !userProfile) {
         return (
             <Link href="/">
                 <Button>Sign In</Button>
@@ -57,15 +64,15 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
-            <AvatarFallback>{user.displayName ? user.displayName.substring(0, 2).toUpperCase() : 'U'}</AvatarFallback>
+            <AvatarImage src={userProfile.photoURL || ''} alt={userProfile.displayName || 'User'} />
+            <AvatarFallback>{userProfile.displayName ? userProfile.displayName.substring(0, 2).toUpperCase() : 'U'}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.displayName || 'User'}</p>
+            <p className="text-sm font-medium leading-none">{userProfile.displayName || 'User'}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
