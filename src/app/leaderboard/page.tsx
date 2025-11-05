@@ -8,7 +8,7 @@ import { UserProfile } from '@/lib/types';
 import { Crown, Medal, Trophy, Loader2 } from 'lucide-react';
 import React from 'react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 
 const UserRow = ({ user, rank }: { user: UserProfile; rank: number }) => {
   const rankIcon = () => {
