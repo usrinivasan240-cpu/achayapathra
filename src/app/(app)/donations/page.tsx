@@ -1,10 +1,11 @@
+
 'use client';
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/header';
-import { columns } from './columns';
-import { DataTable } from './data-table';
+import { columns } from '../list/columns';
+import { DataTable } from '../list/data-table';
 import Link from 'next/link';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';

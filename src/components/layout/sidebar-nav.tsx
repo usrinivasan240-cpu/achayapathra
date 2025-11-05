@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -24,7 +25,7 @@ import { UserNav } from '@/components/user-nav';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/donations', label: 'My Donations', icon: Gift },
+  { href: '/donations/list', label: 'My Donations', icon: Gift },
   { href: '/impact', label: 'Our Impact', icon: BarChart },
   { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
 ];
