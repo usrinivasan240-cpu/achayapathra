@@ -8,7 +8,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Header } from '@/components/layout/header';
-import { MapPin, Loader2, Utensils, Route } from 'lucide-react';
+import { MapPin, Loader2, Utensils, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import Link from 'next/link';
@@ -209,7 +209,7 @@ export default function VolunteerDashboardPage() {
                           </Badge>
                           <Button size="sm" asChild>
                             <Link href={getDirectionsUrl(donation)} target="_blank" rel="noopener noreferrer">
-                                <Route className='mr-2' />
+                                <Map className='mr-2 h-4 w-4' />
                                 View Route
                             </Link>
                           </Button>

@@ -12,13 +12,37 @@ import {
 import { Header } from '@/components/layout/header';
 import { mockDonations } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Phone, MapPin, Utensils, Calendar } from 'lucide-react';
+import { Phone, MapPin, Utensils, Calendar, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import * as React from 'react';
 
 export default function DonationDetailsPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  const donation = mockDonations.find((d) => d.id === id);
+
+  const [donation, setDonation] = React.useState(() => 
+    id ? mockDonations.find((d) => d.id === id) : undefined
+  );
+  const [isLoading, setIsLoading] = React.useState(true);
+  
+  React.useEffect(() => {
+    if (id) {
+      const foundDonation = mockDonations.find((d) => d.id === id);
+      setDonation(foundDonation);
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  if (isLoading) {
+    return (
+        <>
+            <Header title="Donation Details" />
+            <div className="flex flex-1 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        </>
+    )
+  }
 
   if (!donation) {
     notFound();
