@@ -2,8 +2,8 @@
 'use client';
 
 import * as React from 'react';
-import { useParams } from 'next/navigation';
-import { doc } from 'firebase/firestore';
+import { useParams, useRouter } from 'next/navigation';
+import { doc, updateDoc } from 'firebase/firestore';
 import Image from 'next/image';
 import {
   Loader2,
@@ -15,7 +15,7 @@ import {
   Clock,
 } from 'lucide-react';
 
-import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { Donation } from '@/lib/types';
 import { Header } from '@/components/layout/header';
 import {
@@ -29,11 +29,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DonationDetailsPage() {
   const params = useParams();
   const { id } = params;
   const firestore = useFirestore();
+  const { user } = useUser();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isClaiming, setIsClaiming] = React.useState(false);
+
 
   const donationDocRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -45,6 +51,37 @@ export default function DonationDetailsPage() {
     isLoading,
     error,
   } = useDoc<Donation>(donationDocRef);
+
+  const handleClaimDonation = async () => {
+    if (!firestore || !user || !id) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'You must be logged in to claim a donation.',
+        });
+        return;
+    };
+    setIsClaiming(true);
+    try {
+        const donationRef = doc(firestore, 'donations', id as string);
+        await updateDoc(donationRef, { status: 'Claimed', claimedBy: user.uid });
+        toast({
+            title: 'Donation Claimed!',
+            description: 'You have successfully claimed the donation.',
+        });
+        // The onSnapshot listener in useDoc will update the UI automatically
+    } catch (error) {
+        console.error('Error claiming donation:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not claim the donation.',
+        });
+    } finally {
+        setIsClaiming(false);
+    }
+  }
+
 
   if (isLoading) {
     return (
@@ -188,11 +225,19 @@ export default function DonationDetailsPage() {
             </Card>
 
              {donation.status === 'Available' && (
-                <Button size="lg" className="w-full">Claim This Donation</Button>
+                <Button size="lg" className="w-full" onClick={handleClaimDonation} disabled={isClaiming}>
+                    {isClaiming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isClaiming ? 'Claiming...' : 'Claim This Donation'}
+                </Button>
             )}
+             {donation.status === 'Claimed' && (
+                 <p className='text-center text-muted-foreground'>This donation has been claimed.</p>
+             )}
           </div>
         </div>
       </main>
     </>
   );
 }
+
+    
