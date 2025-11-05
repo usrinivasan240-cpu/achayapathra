@@ -14,31 +14,30 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Phone, MapPin, Utensils, Calendar, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import * as React from 'react';
-import { Donation } from '@/lib/types';
-import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { mockDonations } from '@/lib/data';
 
 export default function DonationDetailsPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  const firestore = useFirestore();
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const donationDocRef = useMemoFirebase(() => {
-    if (!firestore || !id) return null;
-    return doc(firestore, 'donations', id);
-  }, [firestore, id]);
+  // Find the donation from the mock data
+  const donation = mockDonations.find((d) => d.id === id);
 
-  const { data: donation, isLoading } = useDoc<Donation>(donationDocRef);
+  React.useEffect(() => {
+    // Simulate loading
+    setTimeout(() => setIsLoading(false), 300);
+  }, [id]);
 
   if (isLoading) {
     return (
-        <>
-            <Header title="Donation Details" />
-            <div className="flex flex-1 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-        </>
-    )
+      <>
+        <Header title="Donation Details" />
+        <div className="flex flex-1 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </>
+    );
   }
 
   if (!donation) {
@@ -76,56 +75,56 @@ export default function DonationDetailsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                    <CardHeader className='pb-2'>
-                        <CardTitle className='text-base font-medium flex items-center gap-2 text-muted-foreground'>
-                            <Phone className='h-4 w-4' />
-                            Contact Number
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className='text-lg font-semibold'>{donation.donor.phone || 'Not available'}</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className='pb-2'>
-                        <CardTitle className='text-base font-medium flex items-center gap-2 text-muted-foreground'>
-                           <MapPin className='h-4 w-4' />
-                           Pickup Location
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className='text-lg font-semibold'>{donation.location}</p>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader className='pb-2'>
-                        <CardTitle className='text-base font-medium flex items-center gap-2 text-muted-foreground'>
-                           <Utensils className='h-4 w-4' />
-                           Quantity
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className='text-lg font-semibold'>{donation.quantity}</p>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader className='pb-2'>
-                        <CardTitle className='text-base font-medium flex items-center gap-2 text-muted-foreground'>
-                           <Calendar className='h-4 w-4' />
-                           Pickup By
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className='text-lg font-semibold'>
-                            {donation.pickupBy ? donation.pickupBy.toDate().toLocaleDateString() : 'Not specified'}
-                        </p>
-                    </CardContent>
-                </Card>
+              <Card>
+                <CardHeader className='pb-2'>
+                  <CardTitle className='text-base font-medium flex items-center gap-2 text-muted-foreground'>
+                    <Phone className='h-4 w-4' />
+                    Contact Number
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className='text-lg font-semibold'>{donation.donor.phone || 'Not available'}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className='pb-2'>
+                  <CardTitle className='text-base font-medium flex items-center gap-2 text-muted-foreground'>
+                    <MapPin className='h-4 w-4' />
+                    Pickup Location
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className='text-lg font-semibold'>{donation.location}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className='pb-2'>
+                  <CardTitle className='text-base font-medium flex items-center gap-2 text-muted-foreground'>
+                    <Utensils className='h-4 w-4' />
+                    Quantity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className='text-lg font-semibold'>{donation.quantity}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className='pb-2'>
+                  <CardTitle className='text-base font-medium flex items-center gap-2 text-muted-foreground'>
+                    <Calendar className='h-4 w-4' />
+                    Pickup By
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className='text-lg font-semibold'>
+                    {donation.pickupBy ? donation.pickupBy.toDate().toLocaleDateString() : 'Not specified'}
+                  </p>
+                </CardContent>
+              </Card>
             </div>
-             <div className="flex items-center gap-2">
-                <span className="font-semibold">Status:</span>
-                <Badge>{donation.status}</Badge>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Status:</span>
+              <Badge>{donation.status}</Badge>
             </div>
 
           </CardContent>

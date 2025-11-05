@@ -1,19 +1,20 @@
 'use client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { Donation } from '@/lib/types';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { mockDonations } from '@/lib/data';
+import React from 'react';
 import { Loader2 } from 'lucide-react';
 
 export function RecentDonations() {
-  const firestore = useFirestore();
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const recentDonationsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'donations'), orderBy('createdAt', 'desc'), limit(5));
-  }, [firestore]);
+  // Sort donations by date and take the first 5
+  const recentDonations = [...mockDonations]
+    .sort((a, b) => b.pickupBy.toMillis() - a.pickupBy.toMillis())
+    .slice(0, 5);
 
-  const { data: recentDonations, isLoading } = useCollection<Donation>(recentDonationsQuery);
+  React.useEffect(() => {
+    setTimeout(() => setIsLoading(false), 500);
+  }, []);
 
   if (isLoading) {
     return (

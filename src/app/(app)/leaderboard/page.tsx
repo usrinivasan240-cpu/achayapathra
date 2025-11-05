@@ -5,8 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserProfile } from '@/lib/types';
 import { Crown, Medal, Trophy, Loader2 } from 'lucide-react';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, orderBy, query, limit } from 'firebase/firestore';
+import { mockUsers } from '@/lib/data';
+import React from 'react';
 
 const UserRow = ({ user, rank }: { user: UserProfile; rank: number }) => {
   const rankIcon = () => {
@@ -33,24 +33,15 @@ const UserRow = ({ user, rank }: { user: UserProfile; rank: number }) => {
 };
 
 export default function LeaderboardPage() {
-  const firestore = useFirestore();
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const donorsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'users'), orderBy('points', 'desc'), limit(10));
-  }, [firestore]);
+  // Sort users by points for both donors and volunteers
+  const topDonors = [...mockUsers].sort((a, b) => b.points - a.points).slice(0, 10);
+  const topVolunteers = [...mockUsers].sort((a, b) => b.points - a.points).slice(0, 10);
 
-  const { data: topDonors, isLoading: donorsLoading } = useCollection<UserProfile>(donorsQuery);
-
-  // For now, volunteers are also sorted by points. This can be changed later.
-  const volunteersQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'users'), orderBy('points', 'desc'), limit(10));
-  }, [firestore]);
-
-  const { data: topVolunteers, isLoading: volunteersLoading } = useCollection<UserProfile>(volunteersQuery);
-
-  const isLoading = donorsLoading || volunteersLoading;
+  React.useEffect(() => {
+    setTimeout(() => setIsLoading(false), 500);
+  }, []);
 
   return (
     <>

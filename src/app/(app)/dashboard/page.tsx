@@ -1,6 +1,6 @@
 'use client';
 
-import { CreditCard, DollarSign, Package, Users, Loader2 } from 'lucide-react';
+import { CreditCard, DollarSign, Package, Users } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -10,38 +10,26 @@ import {
 import { Header } from '@/components/layout/header';
 import { Overview } from '@/components/dashboard/overview';
 import { RecentDonations } from '@/components/dashboard/recent-donations';
-import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { collection, doc, query, where } from 'firebase/firestore';
-import { Donation, UserProfile } from '@/lib/types';
+import { useUser } from '@/firebase';
+import { mockDonations, mockUsers } from '@/lib/data';
+import { Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { user, isUserLoading } = useUser();
-  const firestore = useFirestore();
+  const { user } = useUser();
+  const isLoading = false; // Replace with real loading state if needed
 
-  const userDocRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
-  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
-
-  const userDonationsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return query(collection(firestore, 'donations'), where('donorId', '==', user.uid));
-  }, [firestore, user]);
-
-  const { data: userDonations, isLoading: areDonationsLoading } = useCollection<Donation>(userDonationsQuery);
-
-  const isLoading = isUserLoading || isProfileLoading || areDonationsLoading;
+  const userProfile = mockUsers.find(u => u.email === user?.email);
+  const userDonations = mockDonations.filter(d => d.donorId === userProfile?.id);
 
   if (isLoading) {
-      return (
-          <>
-            <Header title="Dashboard" />
-            <div className="flex flex-1 items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          </>
-        );
+    return (
+      <>
+        <Header title="Dashboard" />
+        <div className="flex flex-1 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </>
+    );
   }
 
   const activeDonations = userDonations?.filter(d => d.status === 'Available' || d.status === 'Pending');
@@ -83,9 +71,9 @@ export default function DashboardPage() {
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">N/A</div>
+              <div className="text-2xl font-bold">#5</div>
               <p className="text-xs text-muted-foreground">
-                Coming soon!
+                in the top 10%
               </p>
             </CardContent>
           </Card>

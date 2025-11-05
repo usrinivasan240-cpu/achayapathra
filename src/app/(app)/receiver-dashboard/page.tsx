@@ -6,39 +6,31 @@ import { columns } from '@/app/(app)/donations/columns';
 import { DataTable } from '@/app/(app)/donations/data-table';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where, doc, updateDoc } from 'firebase/firestore';
+import { mockDonations } from '@/lib/data';
 import { Loader2 } from 'lucide-react';
 
 export default function ReceiverDashboardPage() {
   const { toast } = useToast();
-  const firestore = useFirestore();
+  const [donations, setDonations] = React.useState<Donation[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const availableDonationsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'donations'), where('status', '==', 'Available'));
-  }, [firestore]);
+  React.useEffect(() => {
+    // Simulate fetching available donations
+    setTimeout(() => {
+      const available = mockDonations.filter(d => d.status === 'Available');
+      setDonations(available);
+      setIsLoading(false);
+    }, 500);
+  }, []);
 
-  const { data: donations, isLoading } = useCollection<Donation>(availableDonationsQuery);
-
-  const handleClaimDonation = async (donationId: string) => {
-    if (!firestore) return;
-    const donationRef = doc(firestore, 'donations', donationId);
-
-    try {
-      await updateDoc(donationRef, { status: 'Claimed' });
-      toast({
-        title: 'Donation Claimed!',
-        description: 'You have successfully claimed the donation.',
-      });
-    } catch (error) {
-       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not claim the donation. Please try again.',
-      });
-      console.error('Error claiming donation: ', error);
-    }
+  const handleClaimDonation = (donationId: string) => {
+    // This is a mock implementation. In a real app, you'd update a shared state.
+    // For now, it just removes it from this local view.
+    setDonations(prevDonations => prevDonations.filter(d => d.id !== donationId));
+    toast({
+      title: 'Donation Claimed!',
+      description: 'You have successfully claimed the donation.',
+    });
   };
 
   return (

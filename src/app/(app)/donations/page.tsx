@@ -8,39 +8,32 @@ import { DataTable } from './data-table';
 import Link from 'next/link';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, doc, updateDoc } from 'firebase/firestore';
+import { mockDonations } from '@/lib/data';
 import { Loader2 } from 'lucide-react';
 
 export default function DonationsPage() {
   const { toast } = useToast();
-  const firestore = useFirestore();
+  const [donations, setDonations] = React.useState<Donation[]>(mockDonations);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const donationsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'donations');
-  }, [firestore]);
+  React.useEffect(() => {
+    // Simulate fetching data
+    setTimeout(() => {
+      setDonations(mockDonations);
+      setIsLoading(false);
+    }, 500);
+  }, []);
 
-  const { data: donations, isLoading } = useCollection<Donation>(donationsQuery);
-
-  const handleClaimDonation = async (donationId: string) => {
-    if (!firestore) return;
-    const donationRef = doc(firestore, 'donations', donationId);
-
-    try {
-      await updateDoc(donationRef, { status: 'Claimed' });
-      toast({
-        title: 'Donation Claimed!',
-        description: 'You have successfully claimed the donation.',
-      });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not claim the donation. Please try again.',
-      });
-      console.error('Error claiming donation: ', error);
-    }
+  const handleClaimDonation = (donationId: string) => {
+    setDonations(prevDonations =>
+      prevDonations.map(d =>
+        d.id === donationId ? { ...d, status: 'Claimed' } : d
+      )
+    );
+    toast({
+      title: 'Donation Claimed!',
+      description: 'You have successfully claimed the donation.',
+    });
   };
 
   return (
