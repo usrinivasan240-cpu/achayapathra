@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { useCollection, useFirestore, useUser } from '@/firebase';
+import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { collection, doc, updateDoc } from 'firebase/firestore';
 
 export default function DonationsPage() {
@@ -18,12 +18,15 @@ export default function DonationsPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
 
+  const donationsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'donations');
+  }, [firestore]);
+
   const {
     data: donations,
     isLoading: donationsLoading,
-  } = useCollection<Donation>(
-    firestore ? collection(firestore, 'donations') : null
-  );
+  } = useCollection<Donation>(donationsQuery);
 
   const handleClaimDonation = async (donationId: string) => {
     if (!firestore || !user) return;
