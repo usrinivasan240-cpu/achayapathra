@@ -21,7 +21,6 @@ const AISafeFoodCheckInputSchema = z.object({
     ),
   foodName: z.string().describe('The name of the food being donated.'),
   foodType: z.string().describe('The type of food (e.g., cooked, raw, canned).'),
-  cookedExpiryTime: z.string().describe('The cooked/expiry time of the food.'),
   quantity: z.string().describe('The quantity of food being donated.'),
   description: z.string().optional().describe('Optional description of the food.'),
 });
@@ -51,9 +50,8 @@ You will receive information about a food item and an image. Analyze them critic
 
 **Safety Criteria:**
 1.  **Visual Inspection (Image):** Look for any signs of spoilage, such as mold, discoloration, unusual texture, or decay. For packaged goods, check if the packaging is intact and not bloated.
-2.  **Food Type & Time:** Consider the food type (e.g., cooked meals, baked goods, produce). Cooked meals and other perishables have a short shelf life.
-3.  **Information Consistency:** Check if the description and image are consistent.
-4.  **Err on the side of caution:** If there is any doubt, or if the image is blurry, poorly lit, or otherwise unclear, you must mark the food as unsafe and recommend a manual review.
+2.  **Information Consistency:** Check if the description, food type and image are consistent.
+3.  **Err on the side of caution:** If there is any doubt, or if the image is blurry, poorly lit, or otherwise unclear, you must mark the food as unsafe and recommend a manual review.
 
 **Ingredient Analysis:**
 Based on the food name and image, identify the food and list its common ingredients. Use your knowledge of food to provide a general list. For example, for "Vegetable Curry", you might list "Mixed vegetables, coconut milk, spices, onion, tomato".
@@ -61,7 +59,6 @@ Based on the food name and image, identify the food and list its common ingredie
 **Input Data:**
 - Food Name: {{{foodName}}}
 - Food Type: {{{foodType}}}
-- Cooked/Expiry Time: {{{cookedExpiryTime}}}
 - Quantity: {{{quantity}}}
 - Description: {{{description}}}
 - Image: {{media url=foodDataUri}}

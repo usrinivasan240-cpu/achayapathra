@@ -220,7 +220,6 @@ export default function NewDonationPage() {
             foodDataUri,
             foodName: values.foodName,
             foodType: values.foodType,
-            cookedExpiryTime: `${values.cookedTime} on ${values.pickupDate.toDateString()}`,
             quantity: values.quantity,
             description: values.description,
         });
