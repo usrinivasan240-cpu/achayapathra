@@ -64,6 +64,7 @@ export default function NewDonationPage() {
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [coords, setCoords] = React.useState<LocationCoords>(null);
+  const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
 
   const { toast } = useToast();
   const firestore = useFirestore();
@@ -165,7 +166,7 @@ export default function NewDonationPage() {
             description: 'Your donation has been successfully submitted.'
         });
 
-        router.push('/donations');
+        router.push('/donations/list');
 
     } catch (error) {
         console.error('Error submitting donation:', error);
@@ -292,7 +293,7 @@ export default function NewDonationPage() {
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
                           <FormLabel>Pickup By</FormLabel>
-                          <Popover>
+                          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
@@ -316,9 +317,19 @@ export default function NewDonationPage() {
                                 mode="single"
                                 selected={field.value}
                                 onSelect={field.onChange}
-                                disabled={(date) => date < new Date()}
+                                disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                                 initialFocus
                               />
+                               <Button
+                                    onClick={() => {
+                                        form.setValue('pickupDate', new Date());
+                                        setIsCalendarOpen(false);
+                                    }}
+                                    variant="ghost"
+                                    className="w-full rounded-t-none"
+                                >
+                                    Today
+                                </Button>
                             </PopoverContent>
                           </Popover>
                           <FormMessage />
