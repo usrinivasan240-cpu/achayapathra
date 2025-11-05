@@ -163,10 +163,12 @@ export default function NewDonationPage() {
         // 2. Prepare data for Firestore
         const donationsCol = collection(firestore, 'donations');
         
-        const [hours, minutes] = values.cookedTime.split(':');
-        const cookedDateTime = new Date();
-        cookedDateTime.setHours(parseInt(hours, 10));
-        cookedDateTime.setMinutes(parseInt(minutes, 10));
+        const [hours, minutes] = values.cookedTime.split(':').map(Number);
+        const cookedDateTime = new Date(values.pickupDate);
+        cookedDateTime.setHours(hours);
+        cookedDateTime.setMinutes(minutes);
+        cookedDateTime.setSeconds(0);
+        cookedDateTime.setMilliseconds(0);
 
         // 3. Add document to Firestore
         await addDoc(donationsCol, {
@@ -495,5 +497,7 @@ export default function NewDonationPage() {
       </main>
     </>
   );
+
+    
 
     
