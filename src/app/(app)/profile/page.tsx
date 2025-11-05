@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Phone, Mail, MapPin, Award, History, Loader2, Edit } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { useCollection, useDoc, useFirebaseApp, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, where, doc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Donation, UserProfile } from '@/lib/types';
@@ -25,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const firebaseApp = useFirebaseApp();
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const { toast } = useToast();
 
@@ -44,12 +45,12 @@ export default function ProfilePage() {
   const isLoading = isUserLoading || isProfileLoading || areDonationsLoading;
 
   const handleProfileUpdate = async (file: File) => {
-    if (!user || !firestore) {
+    if (!user || !firestore || !firebaseApp) {
         toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to update your profile.'});
         return;
     }
 
-    const storage = getStorage();
+    const storage = getStorage(firebaseApp);
     const storageRef = ref(storage, `profile-pictures/${user.uid}/${file.name}`);
 
     try {
