@@ -10,27 +10,27 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Header } from '@/components/layout/header';
-import { mockDonations } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Phone, MapPin, Utensils, Calendar, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import * as React from 'react';
 import { Donation } from '@/lib/types';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 export default function DonationDetailsPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const firestore = useFirestore();
 
-  const [donation, setDonation] = React.useState<Donation | undefined | null>(undefined);
-  
-  React.useEffect(() => {
-    if (id) {
-      const foundDonation = mockDonations.find((d) => d.id === id);
-      setDonation(foundDonation);
-    }
-  }, [id]);
+  const donationDocRef = useMemoFirebase(() => {
+    if (!firestore || !id) return null;
+    return doc(firestore, 'donations', id);
+  }, [firestore, id]);
 
-  if (donation === undefined) {
+  const { data: donation, isLoading } = useDoc<Donation>(donationDocRef);
+
+  if (isLoading) {
     return (
         <>
             <Header title="Donation Details" />
@@ -84,7 +84,7 @@ export default function DonationDetailsPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className='text-lg font-semibold'>{donation.donor.phone}</p>
+                        <p className='text-lg font-semibold'>{donation.donor.phone || 'Not available'}</p>
                     </CardContent>
                 </Card>
                 <Card>

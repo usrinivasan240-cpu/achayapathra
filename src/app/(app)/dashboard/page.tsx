@@ -1,4 +1,6 @@
-import { CreditCard, DollarSign, Package, Users } from 'lucide-react';
+'use client';
+
+import { CreditCard, DollarSign, Package, Users, Loader2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -8,10 +10,42 @@ import {
 import { Header } from '@/components/layout/header';
 import { Overview } from '@/components/dashboard/overview';
 import { RecentDonations } from '@/components/dashboard/recent-donations';
-import { mockUsers } from '@/lib/data';
+import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { collection, doc, query, where } from 'firebase/firestore';
+import { Donation, UserProfile } from '@/lib/types';
 
 export default function DashboardPage() {
-  const user = mockUsers[0];
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
+
+  const userDonationsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(collection(firestore, 'donations'), where('donorId', '==', user.uid));
+  }, [firestore, user]);
+
+  const { data: userDonations, isLoading: areDonationsLoading } = useCollection<Donation>(userDonationsQuery);
+
+  const isLoading = isUserLoading || isProfileLoading || areDonationsLoading;
+
+  if (isLoading) {
+      return (
+          <>
+            <Header title="Dashboard" />
+            <div className="flex flex-1 items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          </>
+        );
+  }
+
+  const activeDonations = userDonations?.filter(d => d.status === 'Available' || d.status === 'Pending');
+
   return (
     <>
       <Header title="Dashboard" />
@@ -23,9 +57,9 @@ export default function DashboardPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{user.points}</div>
+              <div className="text-2xl font-bold">{userProfile?.points || 0}</div>
               <p className="text-xs text-muted-foreground">
-                +20.1% from last month
+                Keep it up!
               </p>
             </CardContent>
           </Card>
@@ -37,9 +71,9 @@ export default function DashboardPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+12</div>
+              <div className="text-2xl font-bold">+{userDonations?.length || 0}</div>
               <p className="text-xs text-muted-foreground">
-                +180.1% from last month
+                Thank you for your generosity.
               </p>
             </CardContent>
           </Card>
@@ -49,9 +83,9 @@ export default function DashboardPage() {
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">#5</div>
+              <div className="text-2xl font-bold">N/A</div>
               <p className="text-xs text-muted-foreground">
-                Top 10% this month
+                Coming soon!
               </p>
             </CardContent>
           </Card>
@@ -63,9 +97,9 @@ export default function DashboardPage() {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+3</div>
+              <div className="text-2xl font-bold">+{activeDonations?.length || 0}</div>
               <p className="text-xs text-muted-foreground">
-                2 available, 1 pending
+                Currently available for pickup.
               </p>
             </CardContent>
           </Card>

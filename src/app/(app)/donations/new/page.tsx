@@ -37,7 +37,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser } from '@/firebase';
-import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, Timestamp, GeoPoint } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
@@ -53,11 +53,17 @@ const formSchema = z.object({
 
 type AISafetyCheckState = 'idle' | 'checking' | 'safe' | 'unsafe';
 
+type LocationCoords = {
+    latitude: number;
+    longitude: number;
+} | null;
+
 export default function NewDonationPage() {
   const [aiState, setAiState] = React.useState<AISafetyCheckState>('idle');
   const [progress, setProgress] = React.useState(0);
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [coords, setCoords] = React.useState<LocationCoords>(null);
 
   const { toast } = useToast();
   const firestore = useFirestore();
@@ -90,6 +96,8 @@ export default function NewDonationPage() {
         // In a real app, you would use a reverse geocoding service here
         // to convert lat/lng to a human-readable address.
         const { latitude, longitude } = position.coords;
+        setCoords({latitude, longitude});
+        // This is a placeholder, a real app should use reverse geocoding
         const address = `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`;
         form.setValue('location', address);
         setIsGettingLocation(false);
@@ -141,13 +149,14 @@ export default function NewDonationPage() {
             pickupBy: Timestamp.fromDate(values.pickupDate),
             description: values.description || '',
             location: values.location,
+            ...(coords && { lat: coords.latitude, lng: coords.longitude }),
             status: 'Available',
             createdAt: serverTimestamp(),
             donor: {
                 id: user.uid,
                 name: user.displayName || 'Anonymous',
                 email: user.email,
-                avatarUrl: user.photoURL || '',
+                photoURL: user.photoURL || '',
             }
         });
 
@@ -185,6 +194,12 @@ export default function NewDonationPage() {
                 setAiState(isSafe ? 'safe' : 'unsafe');
                 if (isSafe) {
                     handleFinalSubmit(values);
+                } else {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Safety Concern',
+                        description: 'AI check failed. This item cannot be listed.'
+                    })
                 }
             }, 500);
         }
@@ -357,7 +372,7 @@ export default function NewDonationPage() {
                             <FormItem>
                             <FormLabel>Food Image</FormLabel>
                             <FormControl>
-                                <Input type="file" accept="image/*" {...field} />
+                                <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files)} />
                             </FormControl>
                             <FormDescription>
                                 An AI check will be performed for food safety.

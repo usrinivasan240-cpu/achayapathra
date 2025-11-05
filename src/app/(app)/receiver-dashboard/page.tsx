@@ -4,31 +4,41 @@ import * as React from 'react';
 import { Header } from '@/components/layout/header';
 import { columns } from '@/app/(app)/donations/columns';
 import { DataTable } from '@/app/(app)/donations/data-table';
-import { mockDonations as initialDonations } from '@/lib/data';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where, doc, updateDoc } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
 
 export default function ReceiverDashboardPage() {
-  const [donations, setDonations] = React.useState<Donation[]>(() =>
-    initialDonations.filter((d) => d.status === 'Available')
-  );
   const { toast } = useToast();
+  const firestore = useFirestore();
 
-  // The claim logic is already implemented on the main donations page.
-  // This provides a handler to satisfy the columns function signature.
-  const handleClaimDonation = (donationId: string) => {
-    setDonations((prevDonations) =>
-      prevDonations.map((donation) => {
-        if (donation.id === donationId && donation.status === 'Available') {
-          toast({
-            title: 'Donation Claimed!',
-            description: `You have successfully claimed "${donation.foodName}".`,
-          });
-          return { ...donation, status: 'Claimed' };
-        }
-        return donation;
-      })
-    );
+  const availableDonationsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'donations'), where('status', '==', 'Available'));
+  }, [firestore]);
+
+  const { data: donations, isLoading } = useCollection<Donation>(availableDonationsQuery);
+
+  const handleClaimDonation = async (donationId: string) => {
+    if (!firestore) return;
+    const donationRef = doc(firestore, 'donations', donationId);
+
+    try {
+      await updateDoc(donationRef, { status: 'Claimed' });
+      toast({
+        title: 'Donation Claimed!',
+        description: 'You have successfully claimed the donation.',
+      });
+    } catch (error) {
+       toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not claim the donation. Please try again.',
+      });
+      console.error('Error claiming donation: ', error);
+    }
   };
 
   return (
@@ -40,10 +50,16 @@ export default function ReceiverDashboardPage() {
             Ready for Pickup
           </h2>
         </div>
-        <DataTable
-          columns={columns({ onClaim: handleClaimDonation })}
-          data={donations}
-        />
+        {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        ) : (
+            <DataTable
+              columns={columns({ onClaim: handleClaimDonation })}
+              data={donations || []}
+            />
+        )}
       </main>
     </>
   );

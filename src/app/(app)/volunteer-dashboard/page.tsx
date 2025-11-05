@@ -13,10 +13,11 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import { mockDonations } from '@/lib/data';
 import { Donation } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
 
 type LocationState = {
   city: string;
@@ -38,6 +39,7 @@ const getDistance = (
   lat2: number,
   lon2: number
 ) => {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return Infinity;
   const R = 6371; // Radius of the earth in km
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
@@ -66,6 +68,14 @@ export default function VolunteerDashboardPage() {
     DonationWithDistance[]
   >([]);
   const { toast } = useToast();
+  const firestore = useFirestore();
+
+  const availableDonationsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'donations'), where('status', '==', 'Available'));
+  }, [firestore]);
+
+  const { data: availableDonations } = useCollection<Donation>(availableDonationsQuery);
 
   const handleUpdateLocation = () => {
     if (!navigator.geolocation) {
@@ -90,18 +100,18 @@ export default function VolunteerDashboardPage() {
           coords: { latitude, longitude },
         });
 
-        // Find nearby donations
-        const availableDonations = mockDonations.filter(
-          (d) => d.status === 'Available'
-        );
+        if (!availableDonations) {
+            setIsUpdating(false);
+            return;
+        }
 
         const donationsWithDistance = availableDonations
           .map((donation) => {
             const distance = getDistance(
               latitude,
               longitude,
-              donation.lat,
-              donation.lng
+              donation.lat!,
+              donation.lng!
             );
             return { ...donation, distance };
           })
@@ -129,7 +139,7 @@ export default function VolunteerDashboardPage() {
   };
 
   const getDirectionsUrl = (donation: Donation) => {
-    if (!location.coords) return `https://www.google.com/maps/search/?api=1&query=${donation.lat},${donation.lng}`;
+    if (!location.coords || !donation.lat || !donation.lng) return `https://www.google.com/maps/search/?api=1&query=${donation.location}`;
     return `https://www.google.com/maps/dir/?api=1&origin=${location.coords.latitude},${location.coords.longitude}&destination=${donation.lat},${donation.lng}`;
   }
 
