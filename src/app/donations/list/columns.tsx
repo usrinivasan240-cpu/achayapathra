@@ -2,7 +2,7 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +26,11 @@ const statusVariantMap: { [key in Donation['status']]: 'default' | 'secondary' |
 };
 
 
-export const columns = (options: { onClaim: (id: string) => void, onMarkAsAvailable: (id: string) => void }): ColumnDef<Donation>[] => [
+export const columns = (options: { 
+    onClaim: (id: string) => void, 
+    onMarkAsAvailable: (id: string) => void,
+    onRemove: (id: string) => void 
+}): ColumnDef<Donation>[] => [
   {
     accessorKey: 'foodName',
     header: 'Food Item',
@@ -98,6 +102,14 @@ export const columns = (options: { onClaim: (id: string) => void, onMarkAsAvaila
                 disabled={donation.status === 'Available'}
             >
               Mark as Available
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+             <DropdownMenuItem
+              className="text-destructive focus:text-destructive focus:bg-destructive/10"
+              onClick={() => options.onRemove(donation.id)}
+            >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Remove donation
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -11,12 +11,23 @@ import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, doc, updateDoc } from 'firebase/firestore';
+import { collection, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function DonationsPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const [donationToRemove, setDonationToRemove] = React.useState<string | null>(null);
 
   const donationsQuery = useMemoFirebase(() => {
     // Only create the query if the user is logged in
@@ -67,6 +78,27 @@ export default function DonationsPage() {
     }
   };
 
+  const handleRemoveDonation = async () => {
+    if (!firestore || !donationToRemove) return;
+    try {
+      await deleteDoc(doc(firestore, 'donations', donationToRemove));
+      toast({
+        title: 'Donation Removed',
+        description: 'The donation has been successfully removed.',
+      });
+    } catch (error) {
+      console.error("Error removing donation:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not remove the donation.'
+      });
+    } finally {
+        setDonationToRemove(null);
+    }
+  };
+
+
   const isLoading = isUserLoading || donationsLoading;
 
   return (
@@ -87,11 +119,32 @@ export default function DonationsPage() {
           </div>
         ) : (
           <DataTable
-            columns={columns({ onClaim: handleClaimDonation, onMarkAsAvailable: handleMarkAsAvailable })}
+            columns={columns({ 
+                onClaim: handleClaimDonation, 
+                onMarkAsAvailable: handleMarkAsAvailable,
+                onRemove: setDonationToRemove 
+            })}
             data={donations || []}
           />
         )}
       </main>
+       <AlertDialog open={!!donationToRemove} onOpenChange={(open) => !open && setDonationToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this
+              donation record from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRemoveDonation}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
