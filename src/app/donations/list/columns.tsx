@@ -26,7 +26,7 @@ const statusVariantMap: { [key in Donation['status']]: 'default' | 'secondary' |
 };
 
 
-export const columns = (options: { onClaim: (id: string) => void }): ColumnDef<Donation>[] => [
+export const columns = (options: { onClaim: (id: string) => void, onMarkAsAvailable: (id: string) => void }): ColumnDef<Donation>[] => [
   {
     accessorKey: 'foodName',
     header: 'Food Item',
@@ -92,6 +92,12 @@ export const columns = (options: { onClaim: (id: string) => void }): ColumnDef<D
                 disabled={donation.status !== 'Available'}
             >
               Claim donation
+            </DropdownMenuItem>
+            <DropdownMenuItem
+                onClick={() => options.onMarkAsAvailable(donation.id)}
+                disabled={donation.status === 'Available'}
+            >
+              Mark as Available
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

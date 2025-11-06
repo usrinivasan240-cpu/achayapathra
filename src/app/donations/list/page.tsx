@@ -48,6 +48,25 @@ export default function DonationsPage() {
     }
   };
 
+  const handleMarkAsAvailable = async (donationId: string) => {
+    if (!firestore || !user) return;
+    try {
+      const donationRef = doc(firestore, 'donations', donationId);
+      await updateDoc(donationRef, { status: 'Available' });
+      toast({
+        title: 'Donation Updated!',
+        description: 'The donation is now marked as available.',
+      });
+    } catch (error) {
+      console.error("Error updating donation:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not update the donation status.'
+      })
+    }
+  };
+
   const isLoading = isUserLoading || donationsLoading;
 
   return (
@@ -68,7 +87,7 @@ export default function DonationsPage() {
           </div>
         ) : (
           <DataTable
-            columns={columns({ onClaim: handleClaimDonation })}
+            columns={columns({ onClaim: handleClaimDonation, onMarkAsAvailable: handleMarkAsAvailable })}
             data={donations || []}
           />
         )}
