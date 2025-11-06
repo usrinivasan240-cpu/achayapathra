@@ -207,23 +207,18 @@ export default function NewDonationPage() {
     const donationDocRef = doc(firestore, 'donations', donationId);
 
     try {
-      const [aiCheckSettled, uploadSettled] = await Promise.allSettled([
+      const [aiCheckResult, uploadResult] = await Promise.all([
         fileToDataURI(imageFile).then(foodDataUri => aiSafeFoodCheck({ foodDataUri })),
-        uploadBytes(storageRef, imageFile).then(uploadResult => getDownloadURL(uploadResult.ref)),
+        uploadBytes(storageRef, imageFile),
       ]);
 
-      if (aiCheckSettled.status === 'rejected' || uploadSettled.status === 'rejected') {
-        throw new Error('Background processing failed. AI check or upload error.');
-      }
-      
-      const aiResult = aiCheckSettled.value;
-      const imageUrl = uploadSettled.value;
+      const imageUrl = await getDownloadURL(uploadResult.ref);
 
-      if (!aiResult.isFood) {
+      if (!aiCheckResult.isFood) {
         // AI check failed, flag the donation and delete the image.
         await updateDoc(donationDocRef, {
           status: 'Rejected', // Or some other status to indicate failure
-          aiImageAnalysis: aiResult.reason,
+          aiImageAnalysis: aiCheckResult.reason,
         });
         await deleteObject(storageRef);
       } else {
