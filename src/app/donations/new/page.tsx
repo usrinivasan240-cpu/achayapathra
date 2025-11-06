@@ -37,7 +37,7 @@ import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser, useFirebaseApp } from '@/firebase';
-import { addDoc, collection, serverTimestamp, Timestamp, updateDoc, doc } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { aiSafeFoodCheck, AISafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
 import { ImageUpload } from '@/components/ui/image-upload';
@@ -151,14 +151,30 @@ export default function NewDonationPage() {
     }
     
     setIsSubmitting(true);
+    const imageFile = values.image[0] as File;
+    const storage = getStorage(firebaseApp);
+    const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
 
     try {
         const [hours, minutes] = values.cookedTime.split(':').map(Number);
         const cookedDateTime = new Date(values.pickupDate);
         cookedDateTime.setHours(hours, minutes, 0, 0);
 
-        // 1. Immediately create the donation document with "Pending" status
-        const donationDocRef = await addDoc(collection(firestore, 'donations'), {
+        // Perform AI check and upload in parallel
+        const [aiCheckResult, uploadResult] = await Promise.all([
+          fileToDataURI(imageFile).then(foodDataUri => aiSafeFoodCheck({ foodDataUri })),
+          uploadBytes(storageRef, imageFile),
+        ]);
+
+        if (!aiCheckResult.isFood) {
+          await deleteObject(storageRef); // Clean up uploaded image
+          throw new Error(`AI Validation Failed: ${aiCheckResult.reason}`);
+        }
+
+        const imageUrl = await getDownloadURL(uploadResult.ref);
+
+        // If everything is successful, add the document to Firestore
+        await addDoc(collection(firestore, 'donations'), {
             donorId: user.uid,
             foodName: values.foodName,
             foodType: values.foodType,
@@ -168,8 +184,10 @@ export default function NewDonationPage() {
             description: values.description || '',
             location: values.location,
             ...(coords && { lat: coords.latitude, lng: coords.longitude }),
-            status: 'Pending', // <-- New optimistic status
+            status: 'Available', // Set status directly to Available
             createdAt: serverTimestamp(),
+            imageURL: imageUrl,
+            aiImageAnalysis: 'Verified as food.',
             donor: {
                 id: user.uid,
                 name: user.displayName || 'Anonymous',
@@ -178,71 +196,23 @@ export default function NewDonationPage() {
             }
         });
 
-        // 2. Inform the user and navigate away
         toast({
-            title: 'Submission Received!',
-            description: 'Your donation is being processed and will be available shortly.'
+            title: 'Donation Submitted!',
+            description: 'Your donation has been successfully listed.'
         });
         router.push('/donations/list');
 
-        // 3. Start background processing (AI check and upload)
-        processDonationInBackground(donationDocRef.id, values.image[0]);
-
     } catch (error: any) {
         console.error('Donation submission error:', error);
-        setIsSubmitting(false);
         toast({
             variant: 'destructive',
             title: 'Submission Failed',
             description: error.message || 'There was an error submitting your donation.'
         });
+    } finally {
+        setIsSubmitting(false);
     }
   }
-
-  const processDonationInBackground = async (donationId: string, imageFile: File) => {
-    if (!firestore || !user || !firebaseApp) return;
-
-    const storage = getStorage(firebaseApp);
-    const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
-    const donationDocRef = doc(firestore, 'donations', donationId);
-
-    try {
-      const [aiCheckResult, uploadResult] = await Promise.all([
-        fileToDataURI(imageFile).then(foodDataUri => aiSafeFoodCheck({ foodDataUri })),
-        uploadBytes(storageRef, imageFile),
-      ]);
-
-      const imageUrl = await getDownloadURL(uploadResult.ref);
-
-      if (!aiCheckResult.isFood) {
-        // AI check failed, flag the donation and delete the image.
-        await updateDoc(donationDocRef, {
-          status: 'Rejected', // Or some other status to indicate failure
-          aiImageAnalysis: aiCheckResult.reason,
-        });
-        await deleteObject(storageRef);
-      } else {
-        // All good, update the donation to "Available"
-        await updateDoc(donationDocRef, {
-          status: 'Available',
-          imageURL: imageUrl,
-          aiImageAnalysis: 'Verified as food.',
-        });
-      }
-    } catch (error) {
-      console.error(`Error processing donation ${donationId} in background:`, error);
-      // If background processing fails, update the status to reflect that
-      try {
-        await updateDoc(donationDocRef, {
-          status: 'Failed', // Or some other error status
-          aiImageAnalysis: 'Processing failed unexpectedly.',
-        });
-      } catch (updateError) {
-        console.error(`Failed to update status for donation ${donationId} after background error:`, updateError);
-      }
-    }
-  };
-
 
   return (
     <>
@@ -439,3 +409,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
