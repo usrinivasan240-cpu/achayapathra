@@ -58,7 +58,7 @@ export default function FundingPage() {
           </CardContent>
           <CardFooter>
             <Button asChild size="lg" className="w-full">
-              <Link href="https://www.buymeacoffee.com/shareplate" target="_blank">
+              <Link href="/funding/qr">
                 Donate Now
               </Link>
             </Button>
