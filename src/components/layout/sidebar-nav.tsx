@@ -12,6 +12,7 @@ import {
   Users,
   Hand,
   Settings,
+  PiggyBank,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -91,6 +92,12 @@ export function SidebarNavContent() {
            />
           ))}
            <hr className="my-2" />
+           <NavItem
+                href="/funding"
+                label="Support Us"
+                icon={PiggyBank}
+                isActive={pathname.startsWith('/funding')}
+            />
            <NavItem
                 href="/settings"
                 label="Settings"
