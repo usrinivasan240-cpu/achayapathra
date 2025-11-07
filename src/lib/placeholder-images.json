@@ -13,19 +13,19 @@
   },
   {
     "id": "impact-gallery-1",
-    "imageUrl": "https://images.unsplash.com/photo-1595397351604-cf490cc38bf1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxnaXZpbmclMjBmb29kfGVufDB8fHx8MTc2MjUwNjI1MXww&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageUrl": "https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnaXZpbmclMjBmb29kfGVufDB8fHx8MTc2MjUwNjI1MXww&ixlib=rb-4.1.0&q=80&w=1080",
     "description": "A close-up of a volunteer handing a meal to a grateful recipient.",
     "imageHint": "giving food"
   },
   {
     "id": "impact-gallery-2",
-    "imageUrl": "https://images.unsplash.com/photo-1752652013652-169f303cb88a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjaGlsZCUyMGVhdGluZyUyMGhhcHB5fGVufDB8fHx8MTc2MjUwNjI1MXww&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageUrl": "https://images.unsplash.com/photo-1752652012704-565483c5d1fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjaGlsZCUyMGVhdGluZyUyMGhhcHB5fGVufDB8fHx8MTc2MjUwNjI1MXww&ixlib=rb-4.1.0&q=80&w=1080",
     "description": "A child smiling while eating a nutritious meal.",
     "imageHint": "child eating happy"
   },
   {
     "id": "impact-gallery-3",
-    "imageUrl": "https://images.unsplash.com/photo-1733809708507-e9f9c2b7bc53?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxoYXBweSUyMHZvbHVudGVlcnN8ZW58MHx8fHwxNzYyNDE1NjYwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "imageUrl": "https://images.unsplash.com/photo-1733809637989-46f9b310a6cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxoYXBweSUyMHZvbHVudGVlcnN8ZW58MHx8fHwxNzYyNDE1NjYwfDA&ixlib=rb-4.1.0&q=80&w=1080",
     "description": "A group of volunteers happily posing together.",
     "imageHint": "happy volunteers"
   }
