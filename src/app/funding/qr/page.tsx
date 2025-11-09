@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Header } from '@/components/layout/header';
@@ -43,7 +42,7 @@ export default function FundingQrPage() {
           <CardContent className="flex flex-col items-center gap-4">
             <div className="p-4 bg-white rounded-lg">
               <Image
-                src={qrCodeImage.imageUrl}
+                src={qrCodeImage.dataUri}
                 alt={qrCodeImage.description}
                 width={256}
                 height={256}

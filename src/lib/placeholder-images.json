@@ -31,8 +31,77 @@
   },
   {
     "id": "qr-code-image",
-    "imageUrl": "data:image/png;base64,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",
+    "dataUri": "data:image/png;base64,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",
     "description": "UPI QR Code for Srinivasan .U",
     "imageHint": "UPI QR code"
   }
+]]
 ]
+></content>
+  </change>
+  <change>
+    <file>src/app/funding/qr/page.tsx</file>
+    <content><![CDATA[
+'use client';
+
+import { Header } from '@/components/layout/header';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import Image from 'next/image';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import PlaceHolderImages from '@/lib/placeholder-images.json';
+
+export default function FundingQrPage() {
+  const qrCodeImage = PlaceHolderImages.find((img) => img.id === 'qr-code-image');
+
+  if (!qrCodeImage) {
+    return (
+      <>
+        <Header title="Donate" />
+        <main className="flex flex-1 flex-col items-center justify-center bg-muted/20 p-4 md:p-8">
+            <p>QR Code not found.</p>
+        </main>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <Header title="Donate" />
+      <main className="flex flex-1 flex-col items-center justify-center bg-muted/20 p-4 md:p-8">
+        <Card className="w-full max-w-sm">
+          <CardHeader className="items-center text-center">
+            <Avatar className="h-16 w-16 mb-2">
+              <AvatarFallback className="text-2xl bg-blue-500 text-white">
+                S
+              </AvatarFallback>
+            </Avatar>
+            <p className="font-semibold text-lg">Srinivasan .U</p>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4">
+            <div className="p-4 bg-white rounded-lg">
+              <Image
+                src={qrCodeImage.dataUri}
+                alt={qrCodeImage.description}
+                width={256}
+                height={256}
+              />
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">UPI ID:</p>
+              <p className="font-mono font-semibold">usrinivasan240@oksbi</p>
+            </div>
+          </CardContent>
+           <CardDescription className="p-6 pt-2 text-center text-sm">
+              Scan to pay with any UPI app
+            </CardDescription>
+        </Card>
+      </main>
+    </>
+  );
+}
