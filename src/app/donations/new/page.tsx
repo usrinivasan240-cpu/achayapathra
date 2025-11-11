@@ -39,7 +39,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser, useFirebaseApp } from '@/firebase';
 import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import { aiSafeFoodCheck, AISafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
@@ -161,15 +160,7 @@ export default function NewDonationPage() {
         cookedDateTime.setHours(hours, minutes, 0, 0);
 
         // Perform AI check and upload in parallel
-        const [aiCheckResult, uploadResult] = await Promise.all([
-          fileToDataURI(imageFile).then(foodDataUri => aiSafeFoodCheck({ foodDataUri })),
-          uploadBytes(storageRef, imageFile),
-        ]);
-
-        if (!aiCheckResult.isFood) {
-          await deleteObject(storageRef); // Clean up uploaded image
-          throw new Error(`AI Validation Failed: ${aiCheckResult.reason}`);
-        }
+        const uploadResult = await uploadBytes(storageRef, imageFile);
 
         const imageUrl = await getDownloadURL(uploadResult.ref);
 
@@ -209,6 +200,13 @@ export default function NewDonationPage() {
             title: 'Submission Failed',
             description: error.message || 'There was an error submitting your donation.'
         });
+        // Clean up uploaded image if submission fails
+        try {
+            await deleteObject(storageRef);
+        } catch (deleteError) {
+            console.error('Failed to clean up image after submission error:', deleteError);
+        }
+
     } finally {
         setIsSubmitting(false);
     }
@@ -387,9 +385,6 @@ export default function NewDonationPage() {
                                         onChange={(files) => field.onChange(files)}
                                     />
                                 </FormControl>
-                                <FormDescription>
-                                    An AI check will be performed to verify the image contains food.
-                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -409,5 +404,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    
