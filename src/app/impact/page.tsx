@@ -18,7 +18,7 @@ export default function ImpactPage() {
   
   const galleryImages: PlaceholderImage[] = galleryImageIds.map(id => {
     return PlaceHolderImages.find((img) => img.id === id);
-  }).filter((img): img is PlaceholderImage => img !== undefined);
+  }).filter((img): img is PlaceholderImage => !!img);
 
 
   const stats = [
