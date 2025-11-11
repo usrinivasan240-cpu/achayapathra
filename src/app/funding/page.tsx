@@ -22,7 +22,7 @@ export default function FundingPage() {
   ];
 
   const bankDetails = {
-    'Bank Name': 'SharePlate Community Bank',
+    'Bank Name': 'Indian Bank',
     'Account Name': 'Achayapathra Foundation',
     'Account Number': '123456789012',
     'IFSC Code': 'SPCB0000001',
