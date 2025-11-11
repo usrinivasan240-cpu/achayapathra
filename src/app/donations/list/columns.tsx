@@ -27,10 +27,10 @@ const statusVariantMap: { [key in Donation['status']]: 'default' | 'secondary' |
 
 
 export const columns = (options: { 
-    onClaim: (id: string) => void, 
-    onMarkAsAvailable: (id: string) => void,
-    onRemove: (id: string) => void 
-}): ColumnDef<Donation>[] => [
+    onClaim?: (id: string) => void, 
+    onMarkAsAvailable?: (id: string) => void,
+    onRemove?: (id: string) => void 
+} = {}): ColumnDef<Donation>[] => [
   {
     accessorKey: 'foodName',
     header: 'Food Item',
@@ -91,26 +91,34 @@ export const columns = (options: {
             <DropdownMenuItem asChild>
               <Link href={`/donations/${donation.id}`}>View details</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem
-                onClick={() => options.onClaim(donation.id)}
-                disabled={donation.status !== 'Available'}
-            >
-              Claim donation
-            </DropdownMenuItem>
-            <DropdownMenuItem
-                onClick={() => options.onMarkAsAvailable(donation.id)}
-                disabled={donation.status === 'Available'}
-            >
-              Mark as Available
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-             <DropdownMenuItem
-              className="text-destructive focus:text-destructive focus:bg-destructive/10"
-              onClick={() => options.onRemove(donation.id)}
-            >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Remove donation
-            </DropdownMenuItem>
+            {options.onClaim && (
+                <DropdownMenuItem
+                    onClick={() => options.onClaim?.(donation.id)}
+                    disabled={donation.status !== 'Available'}
+                >
+                Claim donation
+                </DropdownMenuItem>
+            )}
+            {options.onMarkAsAvailable && (
+                <DropdownMenuItem
+                    onClick={() => options.onMarkAsAvailable?.(donation.id)}
+                    disabled={donation.status === 'Available'}
+                >
+                Mark as Available
+                </DropdownMenuItem>
+            )}
+            {options.onRemove && (
+              <>
+                <DropdownMenuSeparator />
+                 <DropdownMenuItem
+                  className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                  onClick={() => options.onRemove?.(donation.id)}
+                >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Remove donation
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );
