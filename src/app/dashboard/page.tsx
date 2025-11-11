@@ -15,7 +15,7 @@ import { doc, collection, query, where } from 'firebase/firestore';
 import { Donation, UserProfile } from '@/lib/types';
 
 // Dynamically import the Overview component to prevent SSR hydration mismatch
-const Overview = dynamic(() => import('@/components/dashboard/overview').then(mod => mod.Overview), {
+const Overview = dynamic(() => import('@/components/dashboard/overview'), {
   ssr: false,
   loading: () => <div className="flex items-center justify-center h-[350px]"><Loader2 className="h-8 w-8 animate-spin" /></div>
 });
