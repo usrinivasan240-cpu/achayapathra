@@ -25,6 +25,7 @@ export type User = {
 export type Donation = {
   id: string;
   foodName: string;
+  foodType?: string;
   status: 'Available' | 'Claimed' | 'Delivered' | 'Pending';
   quantity: string;
   location: string;
