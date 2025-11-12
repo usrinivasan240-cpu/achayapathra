@@ -15,7 +15,7 @@
 import {z} from 'genkit';
 import {ai} from '../genkit';
 
-// Define the input schema using Zod.
+// Define the input schema for the flow.
 // It expects a single string which is a data URI of the food image.
 export const AiSafeFoodCheckInputSchema = z.string();
 export type AiSafeFoodCheckInput = z.infer<typeof AiSafeFoodCheckInputSchema>;
@@ -42,28 +42,29 @@ export async function aiSafeFoodCheck(
   return flowResponse;
 }
 
+// Define the input schema for the prompt itself.
+// This is separate from the flow's input to structure data for the model.
+const promptInputSchema = z.object({
+  photoDataUri: AiSafeFoodCheckInputSchema,
+});
+
 // Define the prompt that will be sent to the AI model.
-// This prompt provides the context and instructions for the AI.
-const aiSafeFoodCheckPrompt = ai.definePrompt(
-  {
-    name: 'aiSafeFoodCheckPrompt',
-    // We are using the Gemini 1.5 Flash model, which is fast and cost-effective.
-    model: 'gemini-1.5-flash',
-    // The output should conform to the schema we defined earlier.
-    output: {
-      schema: AiSafeFoodCheckOutputSchema,
-    },
-    // The prompt text itself. It instructs the AI to act as a food safety expert.
-    prompt: `You are a food safety expert. Based on the provided image, determine if the food looks safe to eat. Consider factors like mold, discoloration, or any signs of spoilage. Provide a clear "yes" or "no" for safety and a brief, one-sentence reason for your decision.`,
+const aiSafeFoodCheckPrompt = ai.definePrompt({
+  name: 'aiSafeFoodCheckPrompt',
+  // We are using the Gemini 1.5 Flash model, which is fast and cost-effective.
+  model: 'gemini-1.5-flash',
+  // The input schema for what gets passed into the handlebars template.
+  input: {
+    schema: promptInputSchema,
   },
-  // The second argument is a function that transforms the flow's input
-  // into the format the prompt expects. Here, we create a media part for the image.
-  async (photoDataUri: AiSafeFoodCheckInput) => {
-    return {
-      messages: [{media: [{url: photoDataUri}]}],
-    };
-  }
-);
+  // The output should conform to the schema we defined earlier.
+  output: {
+    schema: AiSafeFoodCheckOutputSchema,
+  },
+  // The prompt text itself. It instructs the AI to act as a food safety expert.
+  // The `{{media}}` helper is the correct way to include image data.
+  prompt: `You are a food safety expert. Based on the provided image, determine if the food looks safe to eat. Consider factors like mold, discoloration, or any signs of spoilage. Provide a clear "yes" or "no" for safety and a brief, one-sentence reason for your decision. Image: {{media url=photoDataUri}}`,
+});
 
 // Define the Genkit flow. A flow orchestrates one or more AI (or other) steps.
 const aiSafeFoodCheckFlow = ai.defineFlow(
@@ -73,8 +74,8 @@ const aiSafeFoodCheckFlow = ai.defineFlow(
     outputSchema: AiSafeFoodCheckOutputSchema,
   },
   async photoDataUri => {
-    // Call the prompt with the input data URI.
-    const {output} = await aiSafeFoodCheckPrompt(photoDataUri);
+    // Call the prompt, passing the input in the structure the prompt expects.
+    const {output} = await aiSafeFoodCheckPrompt({photoDataUri});
 
     // If the model doesn't return a valid output, throw an error.
     if (!output) {
