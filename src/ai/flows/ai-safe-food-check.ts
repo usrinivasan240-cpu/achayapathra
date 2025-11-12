@@ -3,8 +3,7 @@
  * @fileOverview An AI flow to determine if a food image is safe for consumption.
  *
  * This file defines a Genkit flow that uses a generative AI model to analyze
- * an image of food and determine if it appears safe to eat. It is designed
- to
+ * an image of food and determine if it appears safe to eat. It is designed to
  * act as a preliminary safety check for food donations.
  *
  * - aiSafeFoodCheck - The main server action that runs the safety check.
