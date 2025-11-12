@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to determine if a food image is safe for consumption.
@@ -8,7 +9,7 @@
  *
  * - aiSafeFoodCheck - The main server action that runs the safety check.
  * - AiSafeFoodCheckInput - The Zod schema for the input (image data URI).
- * - AiSafeFoodCheckOutput - The Zod schema for the output (safety status, reason).
+ * - AiSafe-food-check-output - The Zod schema for the output (safety status, reason).
  */
 
 import {z} from 'genkit';
@@ -59,9 +60,7 @@ const aiSafeFoodCheckPrompt = ai.definePrompt(
   // into the format the prompt expects. Here, we create a media part for the image.
   async (photoDataUri: AiSafeFoodCheckInput) => {
     return {
-      input: {
-        media: [{url: photoDataUri}],
-      },
+      messages: [{media: [{url: photoDataUri}]}],
     };
   }
 );
@@ -85,3 +84,4 @@ const aiSafeFoodCheckFlow = ai.defineFlow(
     return output;
   }
 );
+
