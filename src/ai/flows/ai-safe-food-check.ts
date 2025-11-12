@@ -84,4 +84,3 @@ const aiSafeFoodCheckFlow = ai.defineFlow(
     return output;
   }
 );
-
