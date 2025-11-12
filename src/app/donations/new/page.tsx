@@ -41,6 +41,8 @@ import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firesto
 import { useRouter } from 'next/navigation';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { aiSafeFoodCheck, AiSafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -77,6 +79,10 @@ export default function NewDonationPage() {
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
   const [coords, setCoords] = React.useState<LocationCoords>(null);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
+  const [aiCheckResult, setAiCheckResult] = React.useState<AiSafeFoodCheckOutput | null>(null);
+  const [aiCheckError, setAiCheckError] = React.useState<string | null>(null);
+  const [isAiChecking, setIsAiChecking] = React.useState(false);
+
 
   const { toast } = useToast();
   const firestore = useFirestore();
@@ -139,6 +145,26 @@ export default function NewDonationPage() {
     });
   }
 
+  const handleImageChange = async (files: FileList | null) => {
+    form.setValue('image', files);
+    setAiCheckResult(null);
+    setAiCheckError(null);
+    if (files && files.length > 0) {
+      setIsAiChecking(true);
+      try {
+        const dataUri = await fileToDataURI(files[0]);
+        const result = await aiSafeFoodCheck(dataUri);
+        setAiCheckResult(result);
+      } catch (error) {
+        console.error('AI check failed:', error);
+        setAiCheckError('The AI safety check could not be completed. Please try a different image or submit manually.');
+      } finally {
+        setIsAiChecking(false);
+      }
+    }
+  };
+
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!firestore || !user || !firebaseApp) {
         toast({
@@ -149,6 +175,15 @@ export default function NewDonationPage() {
         return;
     }
     
+    if (!aiCheckResult || !aiCheckResult.isSafe) {
+        toast({
+            variant: 'destructive',
+            title: 'Safety Check Failed',
+            description: 'Please upload an image that passes the AI food safety check before submitting.',
+        });
+        return;
+    }
+
     setIsSubmitting(true);
     const imageFile = values.image[0] as File;
     const storage = getStorage(firebaseApp);
@@ -159,12 +194,9 @@ export default function NewDonationPage() {
         const cookedDateTime = new Date(values.pickupDate);
         cookedDateTime.setHours(hours, minutes, 0, 0);
 
-        // Perform AI check and upload in parallel
         const uploadResult = await uploadBytes(storageRef, imageFile);
-
         const imageUrl = await getDownloadURL(uploadResult.ref);
 
-        // If everything is successful, add the document to Firestore
         await addDoc(collection(firestore, 'donations'), {
             donorId: user.uid,
             foodName: values.foodName,
@@ -175,10 +207,10 @@ export default function NewDonationPage() {
             description: values.description || '',
             location: values.location,
             ...(coords && { lat: coords.latitude, lng: coords.longitude }),
-            status: 'Available', // Set status directly to Available
+            status: 'Available',
             createdAt: serverTimestamp(),
             imageURL: imageUrl,
-            aiImageAnalysis: 'Verified as food.',
+            aiImageAnalysis: aiCheckResult.reason,
             donor: {
                 id: user.uid,
                 name: user.displayName || 'Anonymous',
@@ -382,17 +414,39 @@ export default function NewDonationPage() {
                                 <FormLabel>Food Image</FormLabel>
                                 <FormControl>
                                     <ImageUpload
-                                        onChange={(files) => field.onChange(files)}
+                                        onChange={handleImageChange}
                                     />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
+                     {isAiChecking && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>Analyzing image for safety...</span>
+                        </div>
+                    )}
+
+                    {aiCheckError && (
+                        <Alert variant="destructive">
+                            <ShieldX className="h-4 w-4" />
+                            <AlertTitle>AI Check Failed</AlertTitle>
+                            <AlertDescription>{aiCheckError}</AlertDescription>
+                        </Alert>
+                    )}
+
+                    {aiCheckResult && (
+                        <Alert variant={aiCheckResult.isSafe ? 'default' : 'destructive'}>
+                            {aiCheckResult.isSafe ? <ShieldCheck className="h-4 w-4" /> : <ShieldX className="h-4 w-4" />}
+                            <AlertTitle>{aiCheckResult.isSafe ? 'Safety Check Passed' : 'Safety Check Failed'}</AlertTitle>
+                            <AlertDescription>{aiCheckResult.reason}</AlertDescription>
+                        </Alert>
+                    )}
                     </div>
                 </div>
 
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting || isAiChecking || !aiCheckResult?.isSafe}>
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {isSubmitting ? 'Submitting...' : 'Submit Donation'}
                 </Button>
