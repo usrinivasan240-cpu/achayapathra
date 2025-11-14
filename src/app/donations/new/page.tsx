@@ -55,9 +55,11 @@ const formSchema = z.object({
   image: z
     .any()
     .refine((file) => file instanceof File, 'Image is required.')
-    .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine((file) => {
+      return file?.size <= MAX_FILE_SIZE;
+    }, `Max file size is 5MB.`)
     .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
       '.jpg, .jpeg, .png and .webp files are accepted.'
     ),
 });
