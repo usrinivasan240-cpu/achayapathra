@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserProfile } from '@/lib/types';
-import { Crown, Medal, Trophy, Loader2 } from 'lucide-react';
+import { Crown, Medal, Trophy } from 'lucide-react';
 import React from 'react';
 import { mockUsers } from '@/lib/data';
 
@@ -28,74 +28,62 @@ const UserRow = ({ user, rank }: { user: UserProfile; rank: number }) => {
         <p className="text-sm font-medium leading-none">{user.displayName}</p>
         <p className="text-sm text-muted-foreground">{user.email}</p>
       </div>
-      <div className="ml-auto font-medium">{user.points} pts</div>
+      <div className="ml-auto font-medium">{user.loyaltyPoints} pts</div>
     </div>
   );
 };
 
 export default function LeaderboardPage() {
-    
-    const isLoading = false; // Data is now static
+  const topFoodies = [...mockUsers]
+    .sort((a, b) => b.loyaltyPoints - a.loyaltyPoints)
+    .slice(0, 10);
 
-    const topDonors = [...mockUsers]
-        .sort((a, b) => b.points - a.points)
-        .slice(0, 10);
-
-    const topVolunteers = mockUsers
-        .filter(u => u.role === 'volunteer')
-        .sort((a, b) => b.points - a.points)
-        .slice(0, 10);
-
+  const campusChampions = [...mockUsers]
+    .filter((user) => user.notificationPreferences.pushReady)
+    .sort((a, b) => b.loyaltyPoints - a.loyaltyPoints)
+    .slice(0, 10);
 
   return (
     <>
       <Header title="Leaderboard" />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <Tabs defaultValue="donors" className="w-full">
+        <Tabs defaultValue="foodies" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="donors">Top Donors</TabsTrigger>
-            <TabsTrigger value="volunteers">Top Volunteers</TabsTrigger>
+            <TabsTrigger value="foodies">Top foodies</TabsTrigger>
+            <TabsTrigger value="champions">Campus champions</TabsTrigger>
           </TabsList>
-          <TabsContent value="donors">
+          <TabsContent value="foodies">
             <Card>
               <CardHeader>
-                <CardTitle className="font-headline">Top Donors</CardTitle>
+                <CardTitle className="font-headline">Most loyal diners</CardTitle>
                 <CardDescription>
-                  Our most generous contributors making a huge impact.
+                  Students with the highest loyalty points across all canteens.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {isLoading ? (
-                  <div className="flex justify-center p-8">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                  </div>
-                ) : (
-                  topDonors?.map((user, index) => (
-                    <UserRow key={user.id} user={user} rank={index + 1} />
-                  ))
-                )}
+                {topFoodies.map((user, index) => (
+                  <UserRow key={user.id} user={user} rank={index + 1} />
+                ))}
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="volunteers">
+          <TabsContent value="champions">
             <Card>
               <CardHeader>
-                <CardTitle className="font-headline">Top Volunteers</CardTitle>
+                <CardTitle className="font-headline">Notification-ready champions</CardTitle>
                 <CardDescription>
-                  Dedicated volunteers who power our deliveries.
+                  Students who opt in for ready alerts and dine frequently.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                 {isLoading ? (
-                  <div className="flex justify-center p-8">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                  </div>
+                {campusChampions.length > 0 ? (
+                  campusChampions.map((user, index) => (
+                    <UserRow key={user.id} user={user} rank={index + 1} />
+                  ))
                 ) : (
-                    topVolunteers && topVolunteers.length > 0 ? (
-                        topVolunteers?.map((user, index) => (
-                            <UserRow key={user.id} user={user} rank={index + 1} />
-                        ))
-                    ) : <p className="text-center text-muted-foreground py-8">No volunteer data available.</p>
+                  <p className="py-8 text-center text-muted-foreground">
+                    No champions recorded yet.
+                  </p>
                 )}
               </CardContent>
             </Card>

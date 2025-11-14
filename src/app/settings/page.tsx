@@ -130,23 +130,23 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
-              <Label htmlFor="donation-updates" className="flex-1">
-                <p>Donation Updates</p>
-                <p className="text-sm font-normal text-muted-foreground">
-                  Get notified when a new donation becomes available near you.
-                </p>
+              <Label htmlFor="order-updates" className="flex-1">
+               <p>Order status updates</p>
+               <p className="text-sm font-normal text-muted-foreground">
+                 Receive alerts on the device when your order moves to the next stage.
+               </p>
               </Label>
-              <Switch id="donation-updates" defaultChecked />
-            </div>
+              <Switch id="order-updates" defaultChecked />
+
             <Separator />
             <div className="flex items-center justify-between">
-              <Label htmlFor="task-reminders" className="flex-1">
-                <p>Task Reminders</p>
+              <Label htmlFor="summary-emails" className="flex-1">
+                <p>Weekly summary emails</p>
                 <p className="text-sm font-normal text-muted-foreground">
-                  Receive reminders for your accepted volunteer tasks.
+                  Highlights of spend, favourite dishes, and upcoming campus offers.
                 </p>
               </Label>
-              <Switch id="task-reminders" defaultChecked />
+              <Switch id="summary-emails" defaultChecked />
             </div>
           </CardContent>
         </Card>

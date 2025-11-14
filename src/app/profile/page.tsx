@@ -1,159 +1,221 @@
-
 'use client';
 
 import * as React from 'react';
+import { doc, updateDoc } from 'firebase/firestore';
+import { Loader2, MapPin, Phone, Save, UserCog } from 'lucide-react';
 import { Header } from '@/components/layout/header';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Phone, Mail, MapPin, Award, History, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { doc, collection, query, where, Timestamp } from 'firebase/firestore';
-import { UserProfile, Donation } from '@/lib/types';
-
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Textarea } from '@/components/ui/textarea';
+import { useUser, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
+import { useAppState } from '@/providers/app-state-provider';
+import { UserProfile } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
-  const { user, isUserLoading } = useUser();
+  const { user } = useUser();
   const firestore = useFirestore();
-  
+  const { state, toggleFavorite } = useAppState();
+  const { toast } = useToast();
+
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
-  const { data: userProfile, isLoading: profileLoading } = useDoc<UserProfile>(userDocRef);
 
-  const userDonationsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return query(collection(firestore, 'donations'), where('donorId', '==', user.uid));
-  }, [firestore, user]);
-  const { data: userDonations, isLoading: donationsLoading } = useCollection<Donation>(userDonationsQuery);
+  const { data: profile, isLoading } = useDoc<UserProfile>(userDocRef);
+  const [displayName, setDisplayName] = React.useState('');
+  const [phone, setPhone] = React.useState('');
+  const [address, setAddress] = React.useState('');
+  const [pushReady, setPushReady] = React.useState(true);
+  const [emailUpdates, setEmailUpdates] = React.useState(true);
+  const [isSaving, setIsSaving] = React.useState(false);
 
-  
-  const isLoading = isUserLoading || profileLoading || donationsLoading;
+  React.useEffect(() => {
+    if (!profile) return;
+    setDisplayName(profile.displayName);
+    setPhone(profile.phone);
+    setAddress(profile.address);
+    setPushReady(profile.notificationPreferences?.pushReady ?? true);
+    setEmailUpdates(profile.notificationPreferences?.emailUpdates ?? true);
+  }, [profile]);
 
-  if (isLoading) {
+  const favoriteIds = React.useMemo(() => {
+    if (!user) return [] as string[];
+    return state.favoriteMap[user.uid] ?? [];
+  }, [state.favoriteMap, user]);
+
+  const favoriteItems = React.useMemo(
+    () => state.menuItems.filter((item) => favoriteIds.includes(item.id)),
+    [state.menuItems, favoriteIds]
+  );
+
+  const handleSave = async () => {
+    if (!userDocRef) return;
+    setIsSaving(true);
+    try {
+      await updateDoc(userDocRef, {
+        displayName,
+        phone,
+        address,
+        notificationPreferences: {
+          pushReady,
+          emailUpdates,
+        },
+      });
+      toast({ title: 'Profile updated' });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: 'Unable to update profile',
+        description: 'Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading || !profile) {
     return (
-      <>
-        <Header title="My Profile" />
-        <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </>
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
-  }
-
-  if (!user || !userProfile) {
-    return (
-       <>
-        <Header title="My Profile" />
-        <div className="flex flex-1 items-center justify-center">
-            <p>Could not load user profile. Please sign in.</p>
-        </div>
-      </>
-    )
   }
 
   return (
     <>
-      <Header title="My Profile" />
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="grid gap-8 md:grid-cols-3">
-          <div className="md:col-span-1">
-            <Card>
-              <CardHeader className="items-center text-center relative">
-                <Avatar className="h-24 w-24 mb-4">
-                  <AvatarImage src={userProfile.photoURL} alt={userProfile.displayName} />
-                  <AvatarFallback>
-                    {userProfile.displayName.substring(0, 2)}
-                  </AvatarFallback>
+      <Header title="Profile" />
+      <main className="flex flex-1 flex-col gap-6 bg-muted/30 p-4 md:gap-8 md:p-8">
+        <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+          <Card className="border-slate-200">
+            <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={profile.photoURL} alt={profile.displayName} />
+                  <AvatarFallback>{profile.displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <CardTitle className="font-headline text-3xl">
-                  {userProfile.displayName}
-                </CardTitle>
-                <CardDescription>{userProfile.role}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <p className="text-sm font-medium">Email</p>
-                    <p className="text-muted-foreground">{userProfile.email}</p>
+                <div>
+                  <CardTitle className="text-2xl">{profile.displayName}</CardTitle>
+                  <CardDescription className="capitalize">{profile.role}</CardDescription>
+                </div>
+              </div>
+              <Badge variant="outline" className="px-3 py-1 text-sm">
+                Loyalty points: {profile.loyaltyPoints}
+              </Badge>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Full name
+                  </label>
+                  <Input value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Phone
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Input
+                      value={phone}
+                      onChange={(event) => setPhone(event.target.value)}
+                      className="pl-9"
+                    />
                   </div>
                 </div>
-                 <div className="flex items-start gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <p className="text-sm font-medium">Phone</p>
-                    <p className="text-muted-foreground">{userProfile.phone}</p>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Address
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Textarea
+                      value={address}
+                      onChange={(event) => setAddress(event.target.value)}
+                      className="min-h-[80px] pl-9"
+                    />
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <p className="text-sm font-medium">Address</p>
-                    <p className="text-muted-foreground">{userProfile.address}</p>
-                  </div>
-                </div>
-                 <div className="flex items-start gap-3">
-                  <Award className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <p className="text-sm font-medium">Reward Points</p>
-                    <p className="font-bold text-lg text-primary">{userProfile.points} pts</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
 
-          <div className="md:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <History className="h-6 w-6" />
-                  Donation History
-                </CardTitle>
-                <CardDescription>
-                  A record of all your generous contributions.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {userDonations && userDonations.length > 0 ? (
-                  userDonations.map((donation, index) => (
-                    <div key={donation.id}>
-                      {index > 0 && <Separator className="my-4" />}
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="col-span-2">
-                           <p className="font-semibold">{donation.foodName}</p>
-                           <p className='text-sm text-muted-foreground'>{donation.location}</p>
-                           {donation.pickupBy && (
-                            <p className='text-sm text-muted-foreground'>
-                                Pickup By: {(donation.pickupBy as Timestamp).toDate().toLocaleDateString()}
-                            </p>
-                           )}
-                        </div>
-                        <div className='text-right'>
-                            <Badge>{donation.status}</Badge>
-                            <p className='text-sm font-medium mt-2'>{donation.quantity}</p>
-                        </div>
-                      </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <p className="text-sm font-semibold text-slate-800">Notification preferences</p>
+                <div className="mt-3 flex flex-col gap-3 text-sm text-slate-600">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Ready for pickup alerts</p>
+                      <p className="text-xs text-slate-500">
+                        Receive real-time notifications when the counter marks an order ready.
+                      </p>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">
-                    You haven&apos;t made any donations yet.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                    <Switch checked={pushReady} onCheckedChange={setPushReady} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Email summaries</p>
+                      <p className="text-xs text-slate-500">
+                        Weekly digest of order history and upcoming offers.
+                      </p>
+                    </div>
+                    <Switch checked={emailUpdates} onCheckedChange={setEmailUpdates} />
+                  </div>
+                </div>
+              </div>
+
+              <Button className="w-full md:w-auto" onClick={handleSave} disabled={isSaving}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Save className="mr-2 h-4 w-4" /> Save changes
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <UserCog className="h-4 w-4 text-primary" /> Favourite dishes
+              </CardTitle>
+              <CardDescription>
+                Quickly reorder dishes you love. Tap to remove from favourites.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {favoriteItems.length === 0 ? (
+                <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-100 py-6 text-center text-sm text-slate-500">
+                  Mark dishes on the home screen to see them here.
+                </p>
+              ) : (
+                favoriteItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
+                  >
+                    <div>
+                      <p className="font-semibold text-slate-800">{item.name}</p>
+                      <p className="text-xs text-slate-500">
+                        ₹{item.price} • {item.category}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-rose-600 hover:text-rose-700"
+                      onClick={() => user && toggleFavorite({ userId: user.uid, menuItemId: item.id })}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </section>
       </main>
     </>
   );
