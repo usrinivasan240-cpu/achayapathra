@@ -142,19 +142,32 @@ export default function NewDonationPage() {
     }
     
     setIsSubmitting(true);
-    const imageFile = values.image[0] as File;
+    const imageFile = values.image?.[0];
+
+    if (!imageFile) {
+        toast({
+            variant: 'destructive',
+            title: 'Image Required',
+            description: 'Please upload an image for the donation.'
+        });
+        setIsSubmitting(false);
+        return;
+    }
+
     const storage = getStorage(firebaseApp);
     const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
 
     try {
+        // 1. Upload image to Firebase Storage
+        const uploadResult = await uploadBytes(storageRef, imageFile);
+        const imageURL = await getDownloadURL(uploadResult.ref);
+
+        // 2. Prepare Firestore document data
         const [hours, minutes] = values.cookedTime.split(':').map(Number);
         const cookedDateTime = new Date(values.pickupDate);
         cookedDateTime.setHours(hours, minutes, 0, 0);
 
-        const uploadResult = await uploadBytes(storageRef, imageFile);
-        const imageUrl = await getDownloadURL(uploadResult.ref);
-
-        await addDoc(collection(firestore, 'donations'), {
+        const donationData = {
             donorId: user.uid,
             foodName: values.foodName,
             foodType: values.foodType,
@@ -166,15 +179,18 @@ export default function NewDonationPage() {
             ...(coords && { lat: coords.latitude, lng: coords.longitude }),
             status: 'Available',
             createdAt: serverTimestamp(),
-            imageURL: imageUrl,
-            aiImageAnalysis: 'Image approved.',
+            imageURL: imageURL,
+            aiImageAnalysis: 'Image approved.', // Assuming auto-approval
             donor: {
                 id: user.uid,
                 name: user.displayName || 'Anonymous',
                 email: user.email,
                 photoURL: user.photoURL || '',
             }
-        });
+        };
+
+        // 3. Add document to Firestore
+        await addDoc(collection(firestore, 'donations'), donationData);
 
         toast({
             title: 'Donation Submitted!',
@@ -189,7 +205,7 @@ export default function NewDonationPage() {
             title: 'Submission Failed',
             description: error.message || 'There was an error submitting your donation.'
         });
-        // Clean up uploaded image if submission fails
+        // Attempt to clean up uploaded image if submission fails
         try {
             await deleteObject(storageRef);
         } catch (deleteError) {
@@ -372,9 +388,7 @@ export default function NewDonationPage() {
                                 <FormControl>
                                     <ImageUpload
                                         value={field.value}
-                                        onChange={(files) => {
-                                            field.onChange(files);
-                                        }}
+                                        onChange={field.onChange}
                                     />
                                 </FormControl>
                                 <FormMessage />
