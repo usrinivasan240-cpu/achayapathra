@@ -41,7 +41,6 @@ import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firesto
 import { useRouter } from 'next/navigation';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -51,7 +50,7 @@ const formSchema = z.object({
   foodType: z.string({ required_error: 'Please select a food type.' }),
   quantity: z.string().min(1, 'Quantity is required.'),
   cookedTime: z.string().min(1, 'Cooked time is required.'),
-  pickupDate: z.date({ required_error: 'Pickup date is required.' }),
+  pickupBy: z.date({ required_error: 'Pickup by date is required.' }),
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
   image: z
@@ -62,7 +61,6 @@ const formSchema = z.object({
       '.jpg, .jpeg, .png and .webp files are accepted.'
     ),
 });
-
 
 type LocationCoords = {
     latitude: number;
@@ -138,18 +136,8 @@ export default function NewDonationPage() {
     }
     
     setIsSubmitting(true);
+    
     const imageFile = values.image;
-
-    if (!imageFile) {
-        toast({
-            variant: 'destructive',
-            title: 'Image Required',
-            description: 'Please upload an image for the donation.'
-        });
-        setIsSubmitting(false);
-        return;
-    }
-
     const storage = getStorage(firebaseApp);
     const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
 
@@ -160,7 +148,8 @@ export default function NewDonationPage() {
 
         // 2. Prepare Firestore document data
         const [hours, minutes] = values.cookedTime.split(':').map(Number);
-        const cookedDateTime = new Date(values.pickupDate);
+        // Use the pickup date as the base, and set the time from the input.
+        const cookedDateTime = new Date(values.pickupBy);
         cookedDateTime.setHours(hours, minutes, 0, 0);
 
         const donationData = {
@@ -169,18 +158,18 @@ export default function NewDonationPage() {
             foodType: values.foodType,
             quantity: values.quantity,
             cookedTime: Timestamp.fromDate(cookedDateTime),
-            pickupBy: Timestamp.fromDate(values.pickupDate),
+            pickupBy: Timestamp.fromDate(values.pickupBy),
             description: values.description || '',
             location: values.location,
             ...(coords && { lat: coords.latitude, lng: coords.longitude }),
             status: 'Available',
             createdAt: serverTimestamp(),
             imageURL: imageURL,
-            aiImageAnalysis: 'Image approved.', // Assuming auto-approval
+            aiImageAnalysis: 'Image approved.', 
             donor: {
                 id: user.uid,
                 name: user.displayName || 'Anonymous',
-                email: user.email,
+                email: user.email || '',
                 photoURL: user.photoURL || '',
             }
         };
@@ -295,7 +284,7 @@ export default function NewDonationPage() {
                     />
                     <FormField
                       control={form.control}
-                      name="pickupDate"
+                      name="pickupBy"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
                           <FormLabel>Pickup By</FormLabel>
@@ -383,7 +372,7 @@ export default function NewDonationPage() {
                                 <FormLabel>Food Image</FormLabel>
                                 <FormControl>
                                     <ImageUpload
-                                        onChange={(file) => onChange(file)}
+                                        onChange={onChange}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -405,5 +394,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    
