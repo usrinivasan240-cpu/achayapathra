@@ -53,7 +53,8 @@ const formSchema = z.object({
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
   image: z
-    .instanceof(File, { message: 'Image is required.' })
+    .any()
+    .refine((file) => file instanceof File, 'Image is required.')
     .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
@@ -136,6 +137,16 @@ export default function NewDonationPage() {
     setIsSubmitting(true);
     
     const imageFile = values.image;
+    if (!(imageFile instanceof File)) {
+        toast({
+            variant: 'destructive',
+            title: 'Image Error',
+            description: 'The selected image is not valid. Please try again.'
+        });
+        setIsSubmitting(false);
+        return;
+    }
+
     const storage = getStorage(firebaseApp);
     const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
 
@@ -183,10 +194,12 @@ export default function NewDonationPage() {
             description: error.message || 'There was an error submitting your donation.'
         });
         // Attempt to clean up uploaded image if submission fails
-        try {
-            await deleteObject(storageRef);
-        } catch (deleteError) {
-            console.error('Failed to clean up image after submission error:', deleteError);
+        if (storageRef) {
+          try {
+              await deleteObject(storageRef);
+          } catch (deleteError) {
+              console.error('Failed to clean up image after submission error:', deleteError);
+          }
         }
 
     } finally {
@@ -371,5 +384,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    
