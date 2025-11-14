@@ -19,8 +19,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { doc, getDoc } from 'firebase/firestore';
 
 const formSchema = z.object({
   email: z.string().email({
@@ -35,6 +36,7 @@ export function UserAuthSigninForm() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const auth = useAuth();
+  const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -58,8 +60,24 @@ export function UserAuthSigninForm() {
         return;
     }
     try {
-      await signInWithEmailAndPassword(auth, values.email, values.password);
-      router.push('/dashboard');
+      const credential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      let destination = '/dashboard';
+
+      if (firestore) {
+        try {
+          const profileSnapshot = await getDoc(doc(firestore, 'users', credential.user.uid));
+          const role = (profileSnapshot.data()?.role as string | undefined) ?? 'student';
+          if (role === 'admin') {
+            destination = '/admin/dashboard';
+          } else if (role === 'super-admin') {
+            destination = '/super-admin/dashboard';
+          }
+        } catch (profileError) {
+          console.warn('Failed to load user profile for routing', profileError);
+        }
+      }
+
+      router.push(destination);
     } catch (error: any) {
         console.error('Sign in error:', error);
         toast({

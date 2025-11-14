@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useEffect } from 'react';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -10,6 +11,8 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { usePathname } from 'next/navigation';
+import { AppStateProvider } from '@/providers/app-state-provider';
+import { CartProvider, useCart } from '@/providers/cart-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,8 +20,13 @@ const inter = Inter({ subsets: ['latin'] });
 function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, isUserLoading } = useUser();
+  const { setCartOwner } = useCart();
 
-  const isPublicPage = ['/', '/signup'].includes(pathname);
+  useEffect(() => {
+    setCartOwner(user ? user.uid : null);
+  }, [user, setCartOwner]);
+
+  const isPublicPage = ['/', '/signup', '/login'].includes(pathname);
   const showNav = !isUserLoading && user && !isPublicPage;
 
   if (isPublicPage) {
@@ -64,7 +72,11 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className}`}>
         <FirebaseClientProvider>
-          <AppLayout>{children}</AppLayout>
+          <AppStateProvider>
+            <CartProvider>
+              <AppLayout>{children}</AppLayout>
+            </CartProvider>
+          </AppStateProvider>
         </FirebaseClientProvider>
         <Toaster />
       </body>

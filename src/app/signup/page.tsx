@@ -96,10 +96,17 @@ export default function SignUpPage() {
         displayName: values.name,
         phone: values.phone,
         address: values.address,
-        role: 'donor', // default role
+        role: 'student',
         verified: false,
-        points: 0,
+        loyaltyPoints: 0,
+        favorites: [],
         photoURL: '',
+        canteenId: 'canteen-central',
+        counterId: null,
+        notificationPreferences: {
+          pushReady: true,
+          emailUpdates: true,
+        },
       });
 
       toast({

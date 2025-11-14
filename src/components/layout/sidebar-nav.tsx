@@ -1,46 +1,96 @@
-
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  BarChart2,
+  Building2,
+  ChefHat,
+  ClipboardList,
   HeartHandshake,
-  LayoutDashboard,
-  Gift,
-  Trophy,
-  BarChart,
-  Users,
-  Hand,
+  History,
+  Home,
+  MessageSquareQuote,
+  ScrollText,
   Settings,
-  PiggyBank,
+  ShieldCheck,
+  ShoppingCart,
+  Timer,
+  User,
+  UserCog,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { useUser } from '@/firebase';
+import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { UserProfile, UserRole } from '@/lib/types';
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/donations/list', label: 'All Donations', icon: Gift },
-  { href: '/impact', label: 'Our Impact', icon: BarChart },
-  { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
-];
+const studentNav = {
+  primary: [
+    { href: '/dashboard', label: 'Home', icon: Home },
+    { href: '/orders', label: 'Track Orders', icon: Timer },
+    { href: '/cart', label: 'My Cart', icon: ShoppingCart },
+    { href: '/history', label: 'Order History', icon: History },
+  ],
+  secondary: [
+    { href: '/profile', label: 'Profile', icon: User },
+    { href: '/feedback', label: 'Feedback', icon: MessageSquareQuote },
+  ],
+};
 
-const secondaryNavItems = [
-    { href: '/receiver-dashboard', label: 'Find Food', icon: Users },
-    { href: '/volunteer-dashboard', label: 'Volunteer', icon: Hand },
-]
+const adminNav = {
+  primary: [
+    { href: '/admin/dashboard', label: 'Dashboard', icon: ShieldCheck },
+    { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
+    { href: '/admin/menu', label: 'Menu Items', icon: ChefHat },
+    { href: '/admin/reports', label: 'Reports', icon: BarChart2 },
+  ],
+  secondary: [{ href: '/admin/settings', label: 'Settings', icon: Settings }],
+};
 
-function NavItem({ href, label, icon: Icon, isActive }: { href: string, label: string, icon: React.ElementType, isActive: boolean }) {
+const superAdminNav = {
+  primary: [
+    { href: '/super-admin/dashboard', label: 'Overview', icon: ShieldCheck },
+    { href: '/super-admin/canteens', label: 'Canteens', icon: Building2 },
+    { href: '/super-admin/admins', label: 'Admins', icon: UserCog },
+    { href: '/super-admin/logs', label: 'Activity Logs', icon: ScrollText },
+  ],
+  secondary: [{ href: '/settings', label: 'Platform Settings', icon: Settings }],
+};
+
+type NavItemConfig = {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+};
+
+type NavSections = {
+  primary: NavItemConfig[];
+  secondary: NavItemConfig[];
+};
+
+const getNavForRole = (role: UserRole | undefined): NavSections => {
+  switch (role) {
+    case 'admin':
+      return adminNav;
+    case 'super-admin':
+      return superAdminNav;
+    case 'student':
+    default:
+      return studentNav;
+  }
+};
+
+function NavItem({ href, label, icon: Icon, isActive }: NavItemConfig & { isActive: boolean }) {
   return (
     <Link
       href={href}
       className={cn(
-        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-        isActive && 'bg-muted text-primary'
+        'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted/60 hover:text-foreground',
+        isActive && 'bg-primary/10 text-primary'
       )}
     >
       <Icon className="h-4 w-4" />
-      {label}
+      <span>{label}</span>
     </Link>
   );
 }
@@ -48,19 +98,15 @@ function NavItem({ href, label, icon: Icon, isActive }: { href: string, label: s
 export function SidebarNavContent() {
   const pathname = usePathname();
   const { user } = useUser();
+  const firestore = useFirestore();
 
-  if (!user) {
-    return (
-      <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-            <Link href="/" className="flex items-center gap-2 font-semibold font-headline">
-            <HeartHandshake className="h-6 w-6 text-primary" />
-            <span>achayapathra</span>
-            </Link>
-        </div>
-      </div>
-    );
-  }
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: profile } = useDoc<UserProfile>(userDocRef);
+  const sections = getNavForRole(profile?.role ?? (user ? 'student' : undefined));
 
   return (
     <>
@@ -71,45 +117,31 @@ export function SidebarNavContent() {
         </Link>
       </div>
       <div className="flex-1">
-        <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-          {navItems.map((item) => (
+        <nav className="grid items-start gap-2 px-2 text-sm font-medium lg:px-4">
+          {sections.primary.map((item) => (
             <NavItem
               key={item.href}
               href={item.href}
               label={item.label}
               icon={item.icon}
-              isActive={pathname.startsWith(item.href)}
+              isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
             />
           ))}
-          <hr className="my-2" />
-          {secondaryNavItems.map((item) => (
-             <NavItem
-             key={item.href}
-             href={item.href}
-             label={item.label}
-             icon={item.icon}
-             isActive={pathname.startsWith(item.href)}
-           />
+          {sections.secondary.length > 0 && <hr className="my-3" />}
+          {sections.secondary.map((item) => (
+            <NavItem
+              key={item.href}
+              href={item.href}
+              label={item.label}
+              icon={item.icon}
+              isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+            />
           ))}
-           <hr className="my-2" />
-           <NavItem
-                href="/funding"
-                label="Support Us"
-                icon={PiggyBank}
-                isActive={pathname.startsWith('/funding')}
-            />
-           <NavItem
-                href="/settings"
-                label="Settings"
-                icon={Settings}
-                isActive={pathname.startsWith('/settings')}
-            />
         </nav>
       </div>
     </>
   );
 }
-
 
 export function SidebarNav() {
   return (
