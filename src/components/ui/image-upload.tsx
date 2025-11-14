@@ -6,34 +6,46 @@ import { Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 interface ImageUploadProps {
+  value?: FileList | null;
   onChange: (files: FileList | null) => void;
 }
 
-export function ImageUpload({ onChange }: ImageUploadProps) {
+export function ImageUpload({ value, onChange }: ImageUploadProps) {
   const [preview, setPreview] = React.useState<string | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
+  React.useEffect(() => {
+    if (value && value.length > 0) {
+      const file = value[0];
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
-      onChange(files);
     } else {
       setPreview(null);
-      onChange(null);
     }
+  }, [value]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    onChange(files);
+  };
+  
+  const handleContainerClick = () => {
+    inputRef.current?.click();
   };
 
   return (
-    <div className="relative flex justify-center items-center w-full h-48 border-2 border-dashed rounded-lg">
+    <div 
+        className="relative flex justify-center items-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer"
+        onClick={handleContainerClick}
+    >
       <Input
         type="file"
         id="image-upload"
-        className="absolute w-full h-full opacity-0 cursor-pointer"
+        ref={inputRef}
+        className="sr-only" // Hidden from view but accessible
         accept="image/png, image/jpeg, image/webp"
         onChange={handleFileChange}
       />

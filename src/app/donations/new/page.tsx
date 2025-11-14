@@ -146,7 +146,6 @@ export default function NewDonationPage() {
   }
 
   const handleImageChange = async (files: FileList | null) => {
-    form.setValue('image', files);
     setAiCheckResult(null);
     setAiCheckError(null);
     if (files && files.length > 0) {
@@ -414,7 +413,11 @@ export default function NewDonationPage() {
                                 <FormLabel>Food Image</FormLabel>
                                 <FormControl>
                                     <ImageUpload
-                                        onChange={handleImageChange}
+                                        value={field.value}
+                                        onChange={(files) => {
+                                            field.onChange(files);
+                                            handleImageChange(files);
+                                        }}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -458,3 +461,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
