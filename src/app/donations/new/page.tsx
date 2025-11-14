@@ -49,7 +49,6 @@ const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),
   foodType: z.string({ required_error: 'Please select a food type.' }),
   quantity: z.string().min(1, 'Quantity is required.'),
-  cookedTime: z.string().min(1, 'Cooked time is required.'),
   pickupBy: z.date({ required_error: 'Pickup by date is required.' }),
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
@@ -86,7 +85,6 @@ export default function NewDonationPage() {
       foodName: '',
       quantity: '',
       location: '',
-      cookedTime: format(new Date(), 'HH:mm'),
     },
   });
 
@@ -147,17 +145,11 @@ export default function NewDonationPage() {
         const imageURL = await getDownloadURL(uploadResult.ref);
 
         // 2. Prepare Firestore document data
-        const [hours, minutes] = values.cookedTime.split(':').map(Number);
-        // Use the pickup date as the base, and set the time from the input.
-        const cookedDateTime = new Date(values.pickupBy);
-        cookedDateTime.setHours(hours, minutes, 0, 0);
-
         const donationData = {
             donorId: user.uid,
             foodName: values.foodName,
             foodType: values.foodType,
             quantity: values.quantity,
-            cookedTime: Timestamp.fromDate(cookedDateTime),
             pickupBy: Timestamp.fromDate(values.pickupBy),
             description: values.description || '',
             location: values.location,
@@ -268,21 +260,7 @@ export default function NewDonationPage() {
                         </FormItem>
                       )}
                     />
-                    <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="cookedTime"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Cooked Time</FormLabel>
-                          <FormControl>
-                            <Input type="time" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
+                     <FormField
                       control={form.control}
                       name="pickupBy"
                       render={({ field }) => (
@@ -324,7 +302,6 @@ export default function NewDonationPage() {
                         </FormItem>
                       )}
                     />
-                    </div>
                     </div>
                     <div className="space-y-8">
                      <FormField
@@ -394,3 +371,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
