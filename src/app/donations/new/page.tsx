@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Loader2, ShieldCheck, ShieldX, MapPin } from 'lucide-react';
+import { Calendar as CalendarIcon, Loader2, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -41,7 +41,6 @@ import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firesto
 import { useRouter } from 'next/navigation';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { aiSafeFoodCheck, AiSafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
@@ -79,11 +78,7 @@ export default function NewDonationPage() {
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
   const [coords, setCoords] = React.useState<LocationCoords>(null);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
-  const [aiCheckResult, setAiCheckResult] = React.useState<AiSafeFoodCheckOutput | null>(null);
-  const [aiCheckError, setAiCheckError] = React.useState<string | null>(null);
-  const [isAiChecking, setIsAiChecking] = React.useState(false);
-
-
+  
   const { toast } = useToast();
   const firestore = useFirestore();
   const { user } = useUser();
@@ -136,27 +131,6 @@ export default function NewDonationPage() {
     );
   };
 
-  const fileToDataURI = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-  }
-
-  const handleImageChange = async (files: FileList | null) => {
-    setAiCheckResult(null);
-    setAiCheckError(null);
-    if (files && files.length > 0) {
-      setIsAiChecking(true);
-      // Assume the image is always good
-      setAiCheckResult({ isSafe: true, reason: 'Image approved.' });
-      setIsAiChecking(false);
-    }
-  };
-
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!firestore || !user || !firebaseApp) {
         toast({
@@ -167,15 +141,6 @@ export default function NewDonationPage() {
         return;
     }
     
-    if (!aiCheckResult || !aiCheckResult.isSafe) {
-        toast({
-            variant: 'destructive',
-            title: 'Safety Check Required',
-            description: 'Please upload an image that passes the food safety check before submitting.',
-        });
-        return;
-    }
-
     setIsSubmitting(true);
     const imageFile = values.image[0] as File;
     const storage = getStorage(firebaseApp);
@@ -202,7 +167,7 @@ export default function NewDonationPage() {
             status: 'Available',
             createdAt: serverTimestamp(),
             imageURL: imageUrl,
-            aiImageAnalysis: aiCheckResult.reason,
+            aiImageAnalysis: 'Image approved.',
             donor: {
                 id: user.uid,
                 name: user.displayName || 'Anonymous',
@@ -409,7 +374,6 @@ export default function NewDonationPage() {
                                         value={field.value}
                                         onChange={(files) => {
                                             field.onChange(files);
-                                            handleImageChange(files);
                                         }}
                                     />
                                 </FormControl>
@@ -417,24 +381,10 @@ export default function NewDonationPage() {
                             </FormItem>
                         )}
                     />
-                     {isAiChecking && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>Analyzing image...</span>
-                        </div>
-                    )}
-
-                    {aiCheckResult && (
-                        <Alert variant={aiCheckResult.isSafe ? 'default' : 'destructive'}>
-                            {aiCheckResult.isSafe ? <ShieldCheck className="h-4 w-4" /> : <ShieldX className="h-4 w-4" />}
-                            <AlertTitle>{aiCheckResult.isSafe ? 'Safety Check Passed' : 'Safety Check Failed'}</AlertTitle>
-                            <AlertDescription>{aiCheckResult.reason}</AlertDescription>
-                        </Alert>
-                    )}
                     </div>
                 </div>
 
-                <Button type="submit" disabled={isSubmitting || isAiChecking || !aiCheckResult?.isSafe}>
+                <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {isSubmitting ? 'Submitting...' : 'Submit Donation'}
                 </Button>
@@ -446,3 +396,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
