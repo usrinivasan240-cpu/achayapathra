@@ -6,17 +6,16 @@ import { Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 interface ImageUploadProps {
-  value?: FileList | null;
-  onChange: (files: FileList | null) => void;
+  onChange: (file: File | null) => void;
 }
 
-export function ImageUpload({ value, onChange }: ImageUploadProps) {
+export function ImageUpload({ onChange }: ImageUploadProps) {
   const [preview, setPreview] = React.useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  React.useEffect(() => {
-    if (value && value.length > 0) {
-      const file = value[0];
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
@@ -25,11 +24,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
     } else {
       setPreview(null);
     }
-  }, [value]);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    onChange(files);
+    onChange(file);
   };
   
   const handleContainerClick = () => {
@@ -45,7 +40,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
         type="file"
         id="image-upload"
         ref={inputRef}
-        className="sr-only" // Hidden from view but accessible
+        className="sr-only"
         accept="image/png, image/jpeg, image/webp"
         onChange={handleFileChange}
       />
@@ -55,7 +50,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
         <div className="text-center p-4">
           <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
           <p className="mt-2 text-sm text-muted-foreground">Click or drag to upload</p>
-          <p className="text-xs text-muted-foreground">PNG, JPG, or WEBP (max 2MB)</p>
+          <p className="text-xs text-muted-foreground">PNG, JPG, or WEBP (max 5MB)</p>
         </div>
       )}
     </div>

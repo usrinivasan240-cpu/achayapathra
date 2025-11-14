@@ -43,7 +43,7 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024;
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 const formSchema = z.object({
@@ -55,14 +55,10 @@ const formSchema = z.object({
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
   image: z
-    .any()
-    .refine((files) => files?.length === 1, 'Image is required.')
+    .instanceof(File, { message: 'Image is required.' })
+    .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
-      (files) => files?.[0]?.size <= MAX_FILE_SIZE,
-      `Max file size is 2MB.`
-    )
-    .refine(
-      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
       '.jpg, .jpeg, .png and .webp files are accepted.'
     ),
 });
@@ -142,7 +138,7 @@ export default function NewDonationPage() {
     }
     
     setIsSubmitting(true);
-    const imageFile = values.image?.[0];
+    const imageFile = values.image;
 
     if (!imageFile) {
         toast({
@@ -327,7 +323,7 @@ export default function NewDonationPage() {
                                 mode="single"
                                 selected={field.value}
                                 onSelect={(date) => {
-                                  field.onChange(date);
+                                  if (date) field.onChange(date);
                                   setIsCalendarOpen(false);
                                 }}
                                 disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
@@ -382,13 +378,12 @@ export default function NewDonationPage() {
                     <FormField
                         control={form.control}
                         name="image"
-                        render={({ field }) => (
+                        render={({ field: { onChange, value, ...rest } }) => (
                             <FormItem>
                                 <FormLabel>Food Image</FormLabel>
                                 <FormControl>
                                     <ImageUpload
-                                        value={field.value}
-                                        onChange={field.onChange}
+                                        onChange={(file) => onChange(file)}
                                     />
                                 </FormControl>
                                 <FormMessage />
