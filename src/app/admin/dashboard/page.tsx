@@ -55,7 +55,8 @@ export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<OrderLite[]>([]);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
 
-  const fetchDashboard = async () => {
+  const fetchDashboard = useCallback(async () => {
+    if (!isAdmin) return;
     try {
       setLoadingDashboard(true);
       const [dailyRes, ordersRes] = await Promise.all([
@@ -69,13 +70,12 @@ export default function AdminDashboardPage() {
     } finally {
       setLoadingDashboard(false);
     }
-  };
+  }, [isAdmin, toast, user?.canteen]);
 
   useEffect(() => {
     if (!user || !isAdmin) return;
     fetchDashboard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.canteen, isAdmin]);
+  }, [user, isAdmin, fetchDashboard]);
 
   const chartData = useMemo(() => {
     if (!orders.length) {
