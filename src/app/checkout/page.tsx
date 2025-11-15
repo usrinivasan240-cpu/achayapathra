@@ -35,7 +35,7 @@ const availableCounters = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
   const { items, totals, applyCoupon, clearCart } = useCart();
 
@@ -54,10 +54,11 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
+    if (loading) return;
     if (!user) {
       router.replace('/login');
     }
-  }, [user, router]);
+  }, [loading, user, router]);
 
   const totalItems = useMemo(() => items.reduce((acc, item) => acc + item.qty, 0), [items]);
 
@@ -125,6 +126,14 @@ export default function CheckoutPage() {
       setIsPlacingOrder(false);
     }
   };
+
+  if (loading || !user) {
+    return (
+      <AppShell>
+        <div className="flex min-h-[60vh] items-center justify-center text-muted-foreground">Loading checkout...</div>
+      </AppShell>
+    );
+  }
 
   return (
     <>

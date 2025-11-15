@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Clock3, RefreshCw } from 'lucide-react';
 import apiClient from '@/lib/api-client';
-import { initializeSocket, joinRoom } from '@/lib/socket';
+import { getSocket, initializeSocket, joinRoom } from '@/lib/socket';
 import { AppShell } from '@/components/canteen/layout/app-shell';
 import { OrderStatusProgress, OrderStatus } from '@/components/canteen/orders/order-status-progress';
 import { Button } from '@/components/ui/button';
@@ -26,7 +27,8 @@ interface OrderResponse {
 }
 
 export default function TrackOrderPage() {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
   const [activeOrder, setActiveOrder] = useState<OrderResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,13 +53,23 @@ export default function TrackOrderPage() {
   };
 
   useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      router.replace('/login');
+      return;
+    }
     fetchActiveOrder();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, loading]);
 
   useEffect(() => {
     if (!activeOrder) return;
-    const socket = initializeSocket({ userId: user?.id, orderId: activeOrder._id });
+
+    let socket = getSocket();
+    if (!socket) {
+      socket = initializeSocket({ userId: user?.id, orderId: activeOrder._id }) ?? null;
+    }
+
     joinRoom(`order:${activeOrder._id}`);
 
     socket?.on('order:update', (order: OrderResponse) => {
@@ -80,6 +92,14 @@ export default function TrackOrderPage() {
       { label: 'Delivered', timestamp: activeOrder.timeline.deliveredAt },
     ];
   }, [activeOrder]);
+
+  if (loading || !user) {
+    return (
+      <AppShell>
+        <div className="flex min-h-[60vh] items-center justify-center text-muted-foreground">Loading live order status...</div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

@@ -72,7 +72,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       };
       setUser(normalizedUser);
       persistToken(sessionToken);
-      initializeSocket({ userId: normalizedUser.id?.toString(), canteenId: String(profile.canteen || '') });
+      const canteenId = Array.isArray(profile.canteen)
+        ? profile.canteen[0]?.toString?.()
+        : profile.canteen?.toString?.();
+      const socketPayload: { userId?: string; canteenId?: string } = {
+        userId: normalizedUser.id?.toString(),
+      };
+      if (canteenId) {
+        socketPayload.canteenId = canteenId;
+      }
+      initializeSocket(socketPayload);
     },
     [persistToken],
   );
@@ -92,6 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       persistToken(null);
       setUser(null);
+      initializeSocket();
     } finally {
       setLoading(false);
     }

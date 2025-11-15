@@ -48,6 +48,9 @@ export const AppHeader = () => {
               <Link href="/orders" className={pathname === '/orders' ? 'text-primary' : 'text-muted-foreground'}>
                 Order history
               </Link>
+              <Link href="/cart" className={pathname === '/cart' ? 'text-primary' : 'text-muted-foreground'}>
+                Cart
+              </Link>
               <Link href="/track-order" className={pathname.startsWith('/track-order') ? 'text-primary' : 'text-muted-foreground'}>
                 Track order
               </Link>
@@ -72,6 +75,9 @@ export const AppHeader = () => {
               </Link>
               <Link href="/admin/reports" className={pathname === '/admin/reports' ? 'text-primary' : 'text-muted-foreground'}>
                 Reports
+              </Link>
+              <Link href="/admin/settings" className={pathname === '/admin/settings' ? 'text-primary' : 'text-muted-foreground'}>
+                Settings
               </Link>
             </>
           )}

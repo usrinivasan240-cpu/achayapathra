@@ -55,7 +55,9 @@ const toggleFavorite = asyncHandler(async (req, res) => {
 
   await user.save();
 
-  return res.json({ success: true, favorites: user.favorites, isFavorite: !isFavorite });
+  const favorites = user.favorites.map((fav) => fav.toString());
+
+  return res.json({ success: true, favorites, isFavorite: !isFavorite });
 });
 
 const listFavorites = asyncHandler(async (req, res) => {

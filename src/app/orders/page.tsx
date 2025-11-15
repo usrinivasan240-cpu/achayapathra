@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, ChefHat, ReceiptIndianRupee } from 'lucide-react';
 import apiClient from '@/lib/api-client';
 import { AppShell } from '@/components/canteen/layout/app-shell';
@@ -38,9 +39,17 @@ const statusColor: Record<string, string> = {
 };
 
 export default function OrdersPage() {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
   const [orders, setOrders] = useState<OrderListItem[]>([]);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      router.replace('/login');
+    }
+  }, [loading, router, user]);
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -55,6 +64,14 @@ export default function OrdersPage() {
 
     loadOrders();
   }, [toast, user]);
+
+  if (loading || !user) {
+    return (
+      <AppShell>
+        <div className="flex min-h-[60vh] items-center justify-center text-muted-foreground">Loading your orders...</div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

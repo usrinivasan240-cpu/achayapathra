@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,8 +24,16 @@ const profileSchema = z.object({
 type ProfileValues = z.infer<typeof profileSchema>;
 
 export default function ProfilePage() {
-  const { user, refreshProfile } = useAuth();
+  const router = useRouter();
+  const { user, loading, refreshProfile } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      router.replace('/login');
+    }
+  }, [loading, router, user]);
 
   const form = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
@@ -59,6 +68,14 @@ export default function ProfilePage() {
       });
     }
   };
+
+  if (loading || !user) {
+    return (
+      <AppShell>
+        <div className="flex min-h-[60vh] items-center justify-center text-muted-foreground">Loading profile...</div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
