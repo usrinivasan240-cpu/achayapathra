@@ -1,72 +1,29 @@
-
-'use client';
-
+import { Inter, Playfair_Display } from 'next/font/google';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { FirebaseClientProvider, useUser } from '@/firebase/client-provider';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { SidebarNav } from '@/components/layout/sidebar-nav';
-import { BottomNav } from '@/components/layout/bottom-nav';
-import { usePathname } from 'next/navigation';
+import { AppProviders } from '@/components/providers/app-providers';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
+const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-headline' });
 
-// This is a client component because it uses usePathname and useUser
-function AppLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const { user, isUserLoading } = useUser();
-
-  const isPublicPage = ['/', '/signup'].includes(pathname);
-  const showNav = !isUserLoading && user && !isPublicPage;
-
-  if (isPublicPage) {
-    return <>{children}</>;
-  }
-
-  return (
-    <SidebarProvider>
-      <div className="md:grid md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-        {showNav && (
-          <div className="hidden border-r bg-muted/40 md:block">
-            <SidebarNav />
-          </div>
-        )}
-        <div className="flex flex-col">
-          <main className="flex flex-1 flex-col pb-16 md:pb-0">
-            {children}
-          </main>
-        </div>
-      </div>
-      {showNav && <BottomNav />}
-    </SidebarProvider>
-  );
-}
+export const metadata: Metadata = {
+  title: 'Canteen Ordering Platform',
+  description: 'Modern MERN powered platform for campus canteen ordering and management.',
+};
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const metadata: Metadata = {
-    title: 'SharePlate',
-    description: 'Building Humanity Through Sharing',
-  };
-
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=PT+Sans&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className={`${inter.className}`}>
-        <FirebaseClientProvider>
-          <AppLayout>{children}</AppLayout>
-        </FirebaseClientProvider>
-        <Toaster />
+      <body className={`${inter.variable} ${playfair.variable} bg-background text-foreground`}>
+        <AppProviders>
+          {children}
+          <Toaster />
+        </AppProviders>
       </body>
     </html>
   );

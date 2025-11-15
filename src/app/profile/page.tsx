@@ -1,160 +1,151 @@
-
 'use client';
 
-import * as React from 'react';
-import { Header } from '@/components/layout/header';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Phone, Mail, MapPin, Award, History, Loader2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { doc, collection, query, where, Timestamp } from 'firebase/firestore';
-import { UserProfile, Donation } from '@/lib/types';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import apiClient from '@/lib/api-client';
+import { AppShell } from '@/components/canteen/layout/app-shell';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/hooks/use-toast';
 
+const profileSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email(),
+  phone: z.string().min(10).max(15),
+  avatarUrl: z.string().url().optional().or(z.literal('')),
+});
+
+type ProfileValues = z.infer<typeof profileSchema>;
 
 export default function ProfilePage() {
-  const { user, isUserLoading } = useUser();
-  const firestore = useFirestore();
-  
-  const userDocRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
-  const { data: userProfile, isLoading: profileLoading } = useDoc<UserProfile>(userDocRef);
+  const router = useRouter();
+  const { user, loading, refreshProfile } = useAuth();
+  const { toast } = useToast();
 
-  const userDonationsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return query(collection(firestore, 'donations'), where('donorId', '==', user.uid));
-  }, [firestore, user]);
-  const { data: userDonations, isLoading: donationsLoading } = useCollection<Donation>(userDonationsQuery);
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      router.replace('/login');
+    }
+  }, [loading, router, user]);
 
-  
-  const isLoading = isUserLoading || profileLoading || donationsLoading;
+  const form = useForm<ProfileValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      avatarUrl: user?.avatarUrl || '',
+    },
+  });
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!user) return;
+    form.reset({
+      name: user.name,
+      email: user.email,
+      phone: user.phone || '',
+      avatarUrl: user.avatarUrl || '',
+    });
+  }, [form, user]);
+
+  const handleSubmit = async (values: ProfileValues) => {
+    try {
+      await apiClient.put('/users/me', values);
+      await refreshProfile();
+      toast({ title: 'Profile updated', description: 'Your changes have been saved.' });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Update failed',
+        description: error?.response?.data?.message || 'Could not update profile.',
+      });
+    }
+  };
+
+  if (loading || !user) {
     return (
-      <>
-        <Header title="My Profile" />
-        <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </>
+      <AppShell>
+        <div className="flex min-h-[60vh] items-center justify-center text-muted-foreground">Loading profile...</div>
+      </AppShell>
     );
   }
 
-  if (!user || !userProfile) {
-    return (
-       <>
-        <Header title="My Profile" />
-        <div className="flex flex-1 items-center justify-center">
-            <p>Could not load user profile. Please sign in.</p>
-        </div>
-      </>
-    )
-  }
-
   return (
-    <>
-      <Header title="My Profile" />
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="grid gap-8 md:grid-cols-3">
-          <div className="md:col-span-1">
-            <Card>
-              <CardHeader className="items-center text-center relative">
-                <Avatar className="h-24 w-24 mb-4">
-                  <AvatarImage src={userProfile.photoURL} alt={userProfile.displayName} />
-                  <AvatarFallback>
-                    {userProfile.displayName.substring(0, 2)}
-                  </AvatarFallback>
-                </Avatar>
-                <CardTitle className="font-headline text-3xl">
-                  {userProfile.displayName}
-                </CardTitle>
-                <CardDescription>{userProfile.role}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <p className="text-sm font-medium">Email</p>
-                    <p className="text-muted-foreground">{userProfile.email}</p>
-                  </div>
-                </div>
-                 <div className="flex items-start gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <p className="text-sm font-medium">Phone</p>
-                    <p className="text-muted-foreground">{userProfile.phone}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <p className="text-sm font-medium">Address</p>
-                    <p className="text-muted-foreground">{userProfile.address}</p>
-                  </div>
-                </div>
-                 <div className="flex items-start gap-3">
-                  <Award className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <p className="text-sm font-medium">Reward Points</p>
-                    <p className="font-bold text-lg text-primary">{userProfile.points} pts</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="md:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <History className="h-6 w-6" />
-                  Donation History
-                </CardTitle>
-                <CardDescription>
-                  A record of all your generous contributions.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {userDonations && userDonations.length > 0 ? (
-                  userDonations.map((donation, index) => (
-                    <div key={donation.id}>
-                      {index > 0 && <Separator className="my-4" />}
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="col-span-2">
-                           <p className="font-semibold">{donation.foodName}</p>
-                           <p className='text-sm text-muted-foreground'>{donation.location}</p>
-                           {donation.pickupBy && (
-                            <p className='text-sm text-muted-foreground'>
-                                Pickup By: {(donation.pickupBy as Timestamp).toDate().toLocaleDateString()}
-                            </p>
-                           )}
-                        </div>
-                        <div className='text-right'>
-                            <Badge>{donation.status}</Badge>
-                            <p className='text-sm font-medium mt-2'>{donation.quantity}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">
-                    You haven&apos;t made any donations yet.
-                  </p>
+    <AppShell>
+      <Card className="max-w-2xl border-muted/60">
+        <CardHeader>
+          <CardTitle className="text-3xl">Your profile</CardTitle>
+          <CardDescription>Update your contact details for faster order pickup and notifications.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </main>
-    </>
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} disabled />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="avatarUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Avatar URL</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="https://example.com/avatar.png" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full">
+                Save changes
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </AppShell>
   );
 }
