@@ -55,9 +55,7 @@ const formSchema = z.object({
   image: z
     .any()
     .refine((file): file is File => file instanceof File, 'Image is required.')
-    .refine((file) => {
-      return file.size <= MAX_FILE_SIZE;
-    }, `Max file size is 5MB.`)
+    .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
       '.jpg, .jpeg, .png and .webp files are accepted.'
@@ -140,6 +138,17 @@ export default function NewDonationPage() {
     
     const imageFile = values.image;
     
+    // This should not happen if validation passes, but as a safeguard.
+    if (!(imageFile instanceof File)) {
+        toast({
+            variant: 'destructive',
+            title: 'Invalid File',
+            description: 'The uploaded image is not a valid file.',
+        });
+        setIsSubmitting(false);
+        return;
+    }
+
     const storage = getStorage(firebaseApp);
     const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
 
