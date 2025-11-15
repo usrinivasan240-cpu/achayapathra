@@ -54,12 +54,12 @@ const formSchema = z.object({
   location: z.string().min(2, 'Location is required.'),
   image: z
     .any()
-    .refine((file) => file instanceof File, 'Image is required.')
+    .refine((file): file is File => file instanceof File, 'Image is required.')
     .refine((file) => {
-      return !file || file.size <= MAX_FILE_SIZE;
+      return file.size <= MAX_FILE_SIZE;
     }, `Max file size is 5MB.`)
     .refine(
-      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
       '.jpg, .jpeg, .png and .webp files are accepted.'
     ),
 });
@@ -139,16 +139,7 @@ export default function NewDonationPage() {
     setIsSubmitting(true);
     
     const imageFile = values.image;
-    if (!(imageFile instanceof File)) {
-        toast({
-            variant: 'destructive',
-            title: 'Image Error',
-            description: 'The selected image is not valid. Please try again.'
-        });
-        setIsSubmitting(false);
-        return;
-    }
-
+    
     const storage = getStorage(firebaseApp);
     const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
 
@@ -386,5 +377,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    
