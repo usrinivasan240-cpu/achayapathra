@@ -296,7 +296,7 @@ export default function NewDonationPage() {
                           <FormLabel>Time Cooked</FormLabel>
                            <FormControl>
                             <div className="p-2 rounded-md border">
-                               <TimePicker date={field.value} setDate={(newDate) => field.onChange(newDate)} />
+                               <TimePicker date={field.value} setDate={field.onChange} />
                              </div>
                            </FormControl>
                           <FormMessage />
@@ -402,5 +402,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    

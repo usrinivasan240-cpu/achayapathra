@@ -28,17 +28,32 @@ const DateSegment = ({ segment, ...props }: {segment: any, [key: string]: any}) 
 
 export function TimePicker({ date, setDate }: {date: Date | undefined, setDate: (date: Date) => void}) {
 
-  const onTimeChange = (time: Time | null) => {
-    if (!time) return;
-    // If date is undefined, create a new date, otherwise use the existing one
+  // A robust way to handle the time value, ensuring it's never null for the component
+  const timeValue = React.useMemo(() => {
+    if (date instanceof Date && !isNaN(date.getTime())) {
+      return new Time(date.getHours(), date.getMinutes());
+    }
+    // Return a default time (e.g., now) if the date is invalid or undefined
+    const now = new Date();
+    return new Time(now.getHours(), now.getMinutes());
+  }, [date]);
+
+
+  const onTimeChange = (newTime: Time | null) => {
+    if (!newTime) return;
+
+    // Use the existing date's date part, or default to today
     const newDate = date ? new Date(date) : new Date();
-    newDate.setHours(time.hour);
-    newDate.setMinutes(time.minute);
-    newDate.setSeconds(time.second || 0);
-    setDate(newDate);
+    newDate.setHours(newTime.hour);
+    newDate.setMinutes(newTime.minute);
+    newDate.setSeconds(newTime.second || 0);
+
+    // Only call setDate if the new date is valid
+    if (!isNaN(newDate.getTime())) {
+        setDate(newDate);
+    }
   }
 
-  const timeValue = date ? new Time(date.getHours(), date.getMinutes()) : null;
 
   return (
     <AriaTimeField
@@ -50,5 +65,3 @@ export function TimePicker({ date, setDate }: {date: Date | undefined, setDate: 
     </AriaTimeField>
   )
 }
-
-    
