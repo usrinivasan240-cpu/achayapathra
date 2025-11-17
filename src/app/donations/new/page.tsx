@@ -39,11 +39,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser, useFirebaseApp } from '@/firebase';
 import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import { ImageUpload } from '@/components/ui/image-upload';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),
@@ -52,18 +47,6 @@ const formSchema = z.object({
   pickupBy: z.date({ required_error: 'Pickup by date is required.' }),
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
-  image: z
-    .any()
-    // The main fix: Make validation conditional on the file's existence.
-    .refine((file) => file instanceof File, 'Image is required.')
-    .refine(
-      (file) => file && file.size <= MAX_FILE_SIZE,
-      `Max file size is 5MB.`
-    )
-    .refine(
-      (file) => file && ACCEPTED_IMAGE_TYPES.includes(file.type),
-      '.jpg, .jpeg, .png and .webp files are accepted.'
-    ),
 });
 
 type LocationCoords = {
@@ -140,27 +123,8 @@ export default function NewDonationPage() {
     
     setIsSubmitting(true);
     
-    const imageFile = values.image;
-    
-    if (!(imageFile instanceof File)) {
-        toast({
-            variant: 'destructive',
-            title: 'Invalid File',
-            description: 'The uploaded image is not a valid file.',
-        });
-        setIsSubmitting(false);
-        return;
-    }
-
-    const storage = getStorage(firebaseApp);
-    const storageRef = ref(storage, `donations-images/${user.uid}/${Date.now()}-${imageFile.name}`);
-
     try {
-        // 1. Upload image to Firebase Storage
-        const uploadResult = await uploadBytes(storageRef, imageFile);
-        const imageURL = await getDownloadURL(uploadResult.ref);
-
-        // 2. Prepare Firestore document data
+        // 1. Prepare Firestore document data
         const donationData = {
             donorId: user.uid,
             foodName: values.foodName,
@@ -172,8 +136,6 @@ export default function NewDonationPage() {
             ...(coords && { lat: coords.latitude, lng: coords.longitude }),
             status: 'Available',
             createdAt: serverTimestamp(),
-            imageURL: imageURL,
-            aiImageAnalysis: 'Image approved.', 
             donor: {
                 id: user.uid,
                 name: user.displayName || 'Anonymous',
@@ -182,7 +144,7 @@ export default function NewDonationPage() {
             }
         };
 
-        // 3. Add document to Firestore
+        // 2. Add document to Firestore
         await addDoc(collection(firestore, 'donations'), donationData);
 
         toast({
@@ -198,17 +160,6 @@ export default function NewDonationPage() {
             title: 'Submission Failed',
             description: error.message || 'There was an error submitting your donation.'
         });
-        
-        // Attempt to clean up the uploaded image if the Firestore write fails
-        if (storageRef) {
-          try {
-              await deleteObject(storageRef);
-              console.log("Cleaned up failed upload image.");
-          } catch (deleteError) {
-              console.error('Failed to clean up image after submission error:', deleteError);
-          }
-        }
-
     } finally {
         setIsSubmitting(false);
     }
@@ -353,28 +304,13 @@ export default function NewDonationPage() {
                             <Textarea
                               placeholder="Any additional details, like ingredients or allergens."
                               className="resize-none"
-                              rows={3}
+                              rows={5}
                               {...field}
                             />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="image"
-                        render={({ field: { onChange, value, ...rest } }) => (
-                            <FormItem>
-                                <FormLabel>Food Image</FormLabel>
-                                <FormControl>
-                                    <ImageUpload
-                                        onChange={onChange}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
                     />
                     </div>
                 </div>
@@ -391,4 +327,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-

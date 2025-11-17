@@ -104,15 +104,6 @@
           "type": "string",
           "description": "Location where the food can be picked up."
         },
-        "imageURL": {
-          "type": "string",
-          "description": "URL of the food image.",
-          "format": "uri"
-        },
-        "aiImageAnalysis": {
-          "type": "string",
-          "description": "Result of the AI image analysis for food safety."
-        },
         "status": {
           "type": "string",
           "description": "Status of the donation (e.g., available, picked up, delivered, pending)."
@@ -127,8 +118,6 @@
         "expiryTime",
         "quantity",
         "location",
-        "imageURL",
-        "aiImageAnalysis",
         "status"
       ]
     },
