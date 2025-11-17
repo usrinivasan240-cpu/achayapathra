@@ -6,10 +6,6 @@ import { Time } from "@internationalized/date"
 import { TimeField as AriaTimeField, DateSegment as AriaDateSegment, TimeFieldProps } from "react-aria-components"
 import { cn } from "@/lib/utils"
 
-interface CustomTimeFieldProps<T extends Time> extends TimeFieldProps<T> {
-  // You can add any other custom props here if needed
-}
-
 const DateSegment = ({ segment, ...props }: {segment: any, [key: string]: any}) => {
     return (
       <AriaDateSegment
