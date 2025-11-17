@@ -26,11 +26,12 @@ const DateSegment = ({ segment, ...props }: {segment: any, [key: string]: any}) 
 };
 
 
-export function TimePicker({ date, setDate }: {date: Date, setDate: (date: Date) => void}) {
+export function TimePicker({ date, setDate }: {date: Date | undefined, setDate: (date: Date) => void}) {
 
   const onTimeChange = (time: Time | null) => {
     if (!time) return;
-    const newDate = new Date(date);
+    // If date is undefined, create a new date, otherwise use the existing one
+    const newDate = date ? new Date(date) : new Date();
     newDate.setHours(time.hour);
     newDate.setMinutes(time.minute);
     newDate.setSeconds(time.second || 0);
@@ -49,3 +50,5 @@ export function TimePicker({ date, setDate }: {date: Date, setDate: (date: Date)
     </AriaTimeField>
   )
 }
+
+    
