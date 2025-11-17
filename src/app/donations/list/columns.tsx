@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Donation } from '@/lib/types';
 import { Timestamp } from 'firebase/firestore';
+import Image from 'next/image';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const statusVariantMap: { [key in Donation['status']]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
     Available: 'default',
@@ -34,9 +36,23 @@ export const columns = (options: {
   {
     accessorKey: 'foodName',
     header: 'Food Item',
-    cell: ({ row }) => (
-        <div className="font-medium">{row.getValue('foodName')}</div>
-      ),
+    cell: ({ row }) => {
+        const donation = row.original;
+        return (
+            <div className="flex items-center gap-3">
+                 <Avatar className="h-12 w-12 rounded-md">
+                    {donation.imageURL ? (
+                        <AvatarImage src={donation.imageURL} alt={donation.foodName} className="object-cover" />
+                    ) : (
+                        <AvatarFallback className="rounded-md">
+                            {donation.foodName.substring(0, 2)}
+                        </AvatarFallback>
+                    )}
+                </Avatar>
+                <div className="font-medium">{donation.foodName}</div>
+            </div>
+        )
+    },
   },
   {
     accessorKey: 'status',

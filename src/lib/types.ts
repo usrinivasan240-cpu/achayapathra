@@ -42,6 +42,6 @@ export type Donation = {
   donorId: string;
   lat?: number;
   lng?: number;
-  imageURL?: string;
+  imageURL: string;
   aiImageAnalysis?: string;
 };
