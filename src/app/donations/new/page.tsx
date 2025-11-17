@@ -57,11 +57,11 @@ const formSchema = z.object({
   image: z.any()
     .refine((file): file is File => file instanceof File, 'Image is required.')
     .refine(
-      (file) => file.size <= MAX_FILE_SIZE,
+      (file) => !file || file.size <= MAX_FILE_SIZE,
       `Max file size is 5MB.`
     )
     .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
       '.jpg, .jpeg, .png and .webp files are accepted.'
     ),
 }).refine(data => data.pickupBy > data.cookedTime, {
@@ -383,3 +383,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
