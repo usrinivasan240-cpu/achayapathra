@@ -57,7 +57,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
   image: z.any()
-    .refine((file): file is File => file instanceof File, 'Image is required.')
+    .refine((file): file is File => !!file, 'Image is required.')
     .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
@@ -141,12 +141,14 @@ export default function NewDonationPage() {
 
   const handlePickupDateSelect = (date: Date | undefined) => {
     if (date) {
-        form.setValue('pickupBy', date);
-        const currentCookedTime = form.getValues('cookedTime');
+        form.setValue('pickupBy', date, { shouldValidate: true });
+        
+        // Sync cookedTime's date part with the new pickup date
+        const currentCookedTime = form.getValues('cookedTime') || new Date();
         const newCookedTime = new Date(date);
         newCookedTime.setHours(currentCookedTime.getHours());
         newCookedTime.setMinutes(currentCookedTime.getMinutes());
-        form.setValue('cookedTime', newCookedTime);
+        form.setValue('cookedTime', newCookedTime, { shouldValidate: true });
     }
     setIsPickupCalendarOpen(false);
   };
@@ -290,11 +292,8 @@ export default function NewDonationPage() {
                         <FormItem>
                           <FormLabel>Time Cooked</FormLabel>
                            <FormControl>
-                             <div className="flex items-center gap-2">
-                               <span className="text-sm text-muted-foreground p-2 rounded-md border">
-                                {form.getValues('pickupBy') ? format(form.getValues('pickupBy'), 'PPP') : format(new Date(), 'PPP')}
-                               </span>
-                               <TimePicker date={field.value} setDate={field.onChange} />
+                            <div className="p-2 rounded-md border">
+                               <TimePicker date={field.value} setDate={(newDate) => field.onChange(newDate)} />
                              </div>
                            </FormControl>
                           <FormMessage />
@@ -400,5 +399,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    

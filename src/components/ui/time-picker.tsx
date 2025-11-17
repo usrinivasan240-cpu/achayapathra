@@ -1,10 +1,10 @@
+
 "use client"
 
 import * as React from "react"
-import { Label } from "@/components/ui/label"
-import { Time, getLocalTimeZone, today } from "@internationalized/date"
-import { TimeField } from "react-aria-components"
-import { DateField } from "react-aria-components"
+import { Time } from "@internationalized/date"
+import { TimeField as AriaTimeField, DateField as AriaDateField } from "react-aria-components"
+import { cn } from "@/lib/utils"
 
 interface TimePickerProps {
     date: Date;
@@ -13,7 +13,8 @@ interface TimePickerProps {
 
 export function TimePicker({ date, setDate }: TimePickerProps) {
 
-  const onTimeChange = (time: Time) => {
+  const onTimeChange = (time: Time | null) => {
+    if (!time) return;
     const newDate = new Date(date);
     newDate.setHours(time.hour);
     newDate.setMinutes(time.minute);
@@ -21,27 +22,28 @@ export function TimePicker({ date, setDate }: TimePickerProps) {
     setDate(newDate);
   }
 
+  const timeValue = date ? new Time(date.getHours(), date.getMinutes()) : null;
+
   return (
-    <TimeField
-      value={
-        new Time(date.getHours(), date.getMinutes())
-      }
+    <AriaTimeField
+      value={timeValue}
       onChange={onTimeChange}
-      className="flex items-center space-x-2"
+      className="flex items-center space-x-1"
     >
-      <DateField className="flex">
-        {(segment) => (
-          <div
-            className={`px-2 py-1.5 text-sm rounded-md transition-colors ${
-              segment.isFocused ? "bg-accent" : ""
-            }`}
-          >
-            {segment.text}
-          </div>
-        )}
-      </DateField>
-    </TimeField>
+        <AriaDateField>
+            {(segment) => (
+            <div
+                className={cn(
+                    "px-1.5 py-1 text-sm rounded-md transition-colors tabular-nums",
+                    "focus:outline-none focus:ring-2 focus:ring-ring focus:bg-accent",
+                    !segment.isEditable && "text-muted-foreground",
+                    segment.isPlaceholder && "text-muted-foreground"
+                )}
+            >
+                {segment.text}
+            </div>
+            )}
+        </AriaDateField>
+    </AriaTimeField>
   )
 }
-
-    
