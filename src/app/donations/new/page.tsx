@@ -50,9 +50,7 @@ const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),
   foodType: z.string({ required_error: 'Please select a food type.' }),
   quantity: z.string().min(1, 'Quantity is required.'),
-  cookedTime: z.date({ required_error: 'Cooked time is required.' }).refine(
-    (date) => date <= new Date(), { message: 'Cooked time cannot be in the future.' }
-  ),
+  cookedTime: z.date({ required_error: 'Cooked time is required.' }),
   pickupBy: z.date({ required_error: 'Pickup by date is required.' }),
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
@@ -67,7 +65,7 @@ const formSchema = z.object({
       '.jpg, .jpeg, .png and .webp files are accepted.'
     ),
 }).refine(data => data.pickupBy > data.cookedTime, {
-  message: 'Pickup date must be after cooked time.',
+  message: 'Pickup date and time must be after cooked time.',
   path: ['pickupBy'],
 });
 
@@ -81,7 +79,6 @@ export default function NewDonationPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
   const [coords, setCoords] = React.useState<LocationCoords>(null);
-  const [isPickupCalendarOpen, setIsPickupCalendarOpen] = React.useState(false);
   
   const { toast } = useToast();
   const firestore = useFirestore();
@@ -140,20 +137,6 @@ export default function NewDonationPage() {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-  };
-
-  const handlePickupDateSelect = (date: Date | undefined) => {
-    if (date) {
-        form.setValue('pickupBy', date, { shouldValidate: true });
-        
-        // Sync cookedTime's date part with the new pickup date
-        const currentCookedTime = form.getValues('cookedTime') || new Date();
-        const newCookedTime = new Date(date);
-        newCookedTime.setHours(currentCookedTime.getHours());
-        newCookedTime.setMinutes(currentCookedTime.getMinutes());
-        form.setValue('cookedTime', newCookedTime, { shouldValidate: true });
-    }
-    setIsPickupCalendarOpen(false);
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -288,21 +271,19 @@ export default function NewDonationPage() {
                         </FormItem>
                       )}
                      />
-                     <FormField
-                      control={form.control}
-                      name="cookedTime"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Time Cooked</FormLabel>
-                           <FormControl>
-                            <div className="p-2 rounded-md border">
+                      <FormField
+                        control={form.control}
+                        name="cookedTime"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Time Cooked</FormLabel>
+                            <FormControl>
                                <TimePicker date={field.value} setDate={field.onChange} />
-                             </div>
-                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                     />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
                     <div className="space-y-8">
                      <FormField
@@ -330,7 +311,7 @@ export default function NewDonationPage() {
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
                           <FormLabel>Pickup By Date</FormLabel>
-                          <Popover open={isPickupCalendarOpen} onOpenChange={setIsPickupCalendarOpen}>
+                          <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
@@ -353,7 +334,7 @@ export default function NewDonationPage() {
                               <Calendar
                                 mode="single"
                                 selected={field.value}
-                                onSelect={handlePickupDateSelect}
+                                onSelect={(date) => field.onChange(date)}
                                 disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                                 initialFocus
                               />
