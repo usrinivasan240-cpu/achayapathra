@@ -54,11 +54,8 @@ const formSchema = z.object({
   location: z.string().min(2, 'Location is required.'),
   image: z
     .any()
-    .refine((file): file is File => file instanceof File, 'Image is required.')
-    .refine(
-      (file) => file.size <= MAX_FILE_SIZE,
-      `Max file size is 5MB.`
-    )
+    .refine((file) => file instanceof File, 'Image is required.')
+    .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
       '.jpg, .jpeg, .png and .webp files are accepted.'
@@ -198,9 +195,11 @@ export default function NewDonationPage() {
             description: error.message || 'There was an error submitting your donation.'
         });
         
+        // Attempt to clean up the uploaded image if the Firestore write fails
         if (storageRef) {
           try {
               await deleteObject(storageRef);
+              console.log("Cleaned up failed upload image.");
           } catch (deleteError) {
               console.error('Failed to clean up image after submission error:', deleteError);
           }
@@ -388,3 +387,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
