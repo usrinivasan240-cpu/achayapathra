@@ -13,6 +13,8 @@ import {
   Package,
   User,
   Clock,
+  ShieldCheck,
+  ShieldAlert,
 } from 'lucide-react';
 
 import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
@@ -30,6 +32,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function DonationDetailsPage() {
   const params = useParams();
@@ -125,6 +128,8 @@ export default function DonationDetailsPage() {
       )}`;
     return `https://www.google.com/maps/dir/?api=1&destination=${donation.lat},${donation.lng}`;
   };
+  
+  const isAiSafe = donation.aiImageAnalysis?.toLowerCase().includes('safe');
 
   return (
     <>
@@ -133,7 +138,12 @@ export default function DonationDetailsPage() {
         <div className="grid gap-8 md:grid-cols-3">
           <div className="md:col-span-2 space-y-8">
             <Card>
-              <CardHeader>
+                {donation.imageURL && (
+                    <div className="relative w-full h-64">
+                         <Image src={donation.imageURL} alt={donation.foodName} fill style={{ objectFit: 'cover' }} className="rounded-t-lg" />
+                    </div>
+                )}
+              <CardHeader className={donation.imageURL ? 'pt-6' : ''}>
                 <div className="flex items-center justify-between">
                   <CardTitle className="font-headline text-3xl">
                     {donation.foodName}
@@ -142,6 +152,15 @@ export default function DonationDetailsPage() {
                 </div>
               </CardHeader>
               <CardContent>
+                 {donation.aiImageAnalysis && (
+                  <Alert variant={isAiSafe ? 'default' : 'destructive'} className="mb-6 bg-opacity-20">
+                    {isAiSafe ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
+                    <AlertTitle>AI Food Safety Analysis</AlertTitle>
+                    <AlertDescription>
+                      {donation.aiImageAnalysis}
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <div className="grid grid-cols-2 gap-6 text-sm">
                     <div className="flex items-start gap-3">
                         <Package className="h-5 w-5 text-primary mt-1" />

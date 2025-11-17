@@ -13,7 +13,6 @@ import { Calendar } from '@/components/ui/calendar';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -36,9 +35,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useUser, useFirebaseApp } from '@/firebase';
+import { useFirestore, useUser } from '@/firebase';
 import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ImageUpload } from '@/components/ui/image-upload';
+import { aiSafeFoodCheck } from '@/ai/flows/ai-safe-food-check';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),
@@ -47,7 +52,15 @@ const formSchema = z.object({
   pickupBy: z.date({ required_error: 'Pickup by date is required.' }),
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
+  image: z.any()
+    .refine((file): file is File => file instanceof File, 'Image is required.')
+    .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine(
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+      '.jpg, .jpeg, .png and .webp files are accepted.'
+    ),
 });
+
 
 type LocationCoords = {
     latitude: number;
@@ -64,8 +77,6 @@ export default function NewDonationPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const router = useRouter();
-  const firebaseApp = useFirebaseApp();
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -111,12 +122,21 @@ export default function NewDonationPage() {
     );
   };
 
+  const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!firestore || !user || !firebaseApp) {
+    if (!firestore || !user) {
         toast({
             variant: 'destructive',
             title: 'Error',
-            description: 'Could not connect to the database. Please try again.'
+            description: 'You must be logged in to create a donation.'
         });
         return;
     }
@@ -124,7 +144,17 @@ export default function NewDonationPage() {
     setIsSubmitting(true);
     
     try {
-        // 1. Prepare Firestore document data
+        const storage = getStorage();
+        const imageFile = values.image as File;
+        const imageRef = ref(storage, `donations/${user.uid}/${Date.now()}-${imageFile.name}`);
+        
+        await uploadBytes(imageRef, imageFile);
+        const imageURL = await getDownloadURL(imageRef);
+
+        const photoDataUri = await fileToDataUri(imageFile);
+        const aiResult = await aiSafeFoodCheck(photoDataUri);
+        const aiImageAnalysis = `${aiResult.isSafe ? 'Looks Safe' : 'Potential Issue'}: ${aiResult.reason}`;
+
         const donationData = {
             donorId: user.uid,
             foodName: values.foodName,
@@ -141,10 +171,11 @@ export default function NewDonationPage() {
                 name: user.displayName || 'Anonymous',
                 email: user.email || '',
                 photoURL: user.photoURL || '',
-            }
+            },
+            imageURL,
+            aiImageAnalysis,
         };
 
-        // 2. Add document to Firestore
         await addDoc(collection(firestore, 'donations'), donationData);
 
         toast({
@@ -312,6 +343,12 @@ export default function NewDonationPage() {
                         </FormItem>
                       )}
                     />
+                     <ImageUpload
+                        name="image"
+                        label="Food Image"
+                        accept={{ 'image/*': ['.jpeg', '.jpg', '.png', '.webp'] }}
+                        maxSize={MAX_FILE_SIZE}
+                      />
                     </div>
                 </div>
 

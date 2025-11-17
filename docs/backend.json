@@ -107,6 +107,14 @@
         "status": {
           "type": "string",
           "description": "Status of the donation (e.g., available, picked up, delivered, pending)."
+        },
+        "imageURL": {
+            "type": "string",
+            "description": "URL of the food donation image."
+        },
+        "aiImageAnalysis": {
+            "type": "string",
+            "description": "AI analysis result of the food image."
         }
       },
       "required": [
