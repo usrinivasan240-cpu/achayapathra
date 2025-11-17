@@ -71,15 +71,15 @@ export const columns = (options: {
     header: 'Location',
   },
   {
-    accessorKey: 'pickupBy',
-    header: 'Pickup By',
+    accessorKey: 'expiryTime',
+    header: 'Expires On',
     cell: ({ row }) => {
-      const pickupBy = row.getValue('pickupBy') as Timestamp | undefined;
-      if (!pickupBy) return <span>N/A</span>;
+      const expiryTime = row.getValue('expiryTime') as Timestamp | undefined;
+      if (!expiryTime) return <span>N/A</span>;
       // Firestore Timestamps are automatically converted to Date objects
       // when they are used in a client component with the hooks.
       // However, to be safe, we can handle both cases.
-      const date = pickupBy instanceof Timestamp ? pickupBy.toDate() : pickupBy;
+      const date = expiryTime instanceof Timestamp ? expiryTime.toDate() : expiryTime;
       return <span>{date.toLocaleDateString()}</span>;
     },
   },

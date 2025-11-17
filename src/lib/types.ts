@@ -29,7 +29,7 @@ export type Donation = {
   status: 'Available' | 'Claimed' | 'Delivered' | 'Pending';
   quantity: string;
   location: string;
-  pickupBy: Timestamp;
+  expiryTime: Timestamp;
   cookedTime?: Timestamp;
   description?: string;
   donor: {

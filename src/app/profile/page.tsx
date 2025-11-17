@@ -132,9 +132,9 @@ export default function ProfilePage() {
                         <div className="col-span-2">
                            <p className="font-semibold">{donation.foodName}</p>
                            <p className='text-sm text-muted-foreground'>{donation.location}</p>
-                           {donation.pickupBy && (
+                           {donation.expiryTime && (
                             <p className='text-sm text-muted-foreground'>
-                                Pickup By: {(donation.pickupBy as Timestamp).toDate().toLocaleDateString()}
+                                Expires On: {(donation.expiryTime as Timestamp).toDate().toLocaleDateString()}
                             </p>
                            )}
                         </div>

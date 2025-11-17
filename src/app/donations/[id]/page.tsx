@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -133,7 +134,7 @@ export default function DonationDetailsPage() {
   
   const isAiSafe = donation.aiImageAnalysis?.toLowerCase().includes('safe');
   const cookedTime = toDate(donation.cookedTime);
-  const pickupBy = toDate(donation.pickupBy);
+  const expiryTime = toDate(donation.expiryTime);
 
 
   return (
@@ -191,8 +192,8 @@ export default function DonationDetailsPage() {
                     <div className="flex items-start gap-3">
                         <Calendar className="h-5 w-5 text-primary mt-1" />
                         <div>
-                            <p className="font-semibold">Pickup By</p>
-                            <p className="text-muted-foreground">{pickupBy ? pickupBy.toLocaleDateString() : 'N/A'}</p>
+                            <p className="font-semibold">Expires On</p>
+                            <p className="text-muted-foreground">{expiryTime ? expiryTime.toLocaleDateString() : 'N/A'}</p>
                         </div>
                     </div>
                 </div>
@@ -263,5 +264,3 @@ export default function DonationDetailsPage() {
     </>
   );
 }
-
-    

@@ -51,11 +51,11 @@ const formSchema = z.object({
   foodType: z.string({ required_error: 'Please select a food type.' }),
   quantity: z.string().min(1, 'Quantity is required.'),
   cookedTime: z.date({ required_error: 'Cooked time is required.' }),
-  pickupBy: z.date({ required_error: 'Pickup by date is required.' }),
+  expiryTime: z.date({ required_error: 'Expiry date is required.' }),
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
   image: z.any()
-    .refine((file): file is File => file instanceof File, 'Image is required.')
+    .refine((file): file is File => !!file, 'Image is required.')
     .refine(
       (file) => !file || file.size <= MAX_FILE_SIZE,
       `Max file size is 5MB.`
@@ -64,9 +64,9 @@ const formSchema = z.object({
       (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
       '.jpg, .jpeg, .png and .webp files are accepted.'
     ),
-}).refine(data => data.pickupBy > data.cookedTime, {
-  message: 'Pickup date and time must be after cooked time.',
-  path: ['pickupBy'],
+}).refine(data => data.expiryTime > data.cookedTime, {
+  message: 'Expiry date and time must be after cooked time.',
+  path: ['expiryTime'],
 });
 
 
@@ -169,7 +169,7 @@ export default function NewDonationPage() {
             foodType: values.foodType,
             quantity: values.quantity,
             cookedTime: Timestamp.fromDate(values.cookedTime),
-            pickupBy: Timestamp.fromDate(values.pickupBy),
+            expiryTime: Timestamp.fromDate(values.expiryTime),
             description: values.description || '',
             location: values.location,
             ...(coords && { lat: coords.latitude, lng: coords.longitude }),
@@ -307,10 +307,10 @@ export default function NewDonationPage() {
                     />
                      <FormField
                       control={form.control}
-                      name="pickupBy"
+                      name="expiryTime"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>Pickup By Date</FormLabel>
+                          <FormLabel>Expiry Date & Time</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -383,5 +383,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    
