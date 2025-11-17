@@ -54,12 +54,16 @@ const formSchema = z.object({
   location: z.string().min(2, 'Location is required.'),
   image: z
     .any()
+    // The main fix: Make validation conditional on the file's existence.
     .refine((file) => file instanceof File, 'Image is required.')
-    .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
-      '.jpg, .jpeg, .png and .webp files are accepted.'
+      (file) => file && file.size <= MAX_FILE_SIZE,
+      `Max file size is 5MB.`
     )
+    .refine(
+      (file) => file && ACCEPTED_IMAGE_TYPES.includes(file.type),
+      '.jpg, .jpeg, .png and .webp files are accepted.'
+    ),
 });
 
 type LocationCoords = {
