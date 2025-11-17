@@ -173,7 +173,7 @@ export default function NewDonationPage() {
             description: values.description || '',
             location: values.location,
             ...(coords && { lat: coords.latitude, lng: coords.longitude }),
-            status: 'Available',
+            status: 'Pending',
             createdAt: serverTimestamp(),
             donor: {
                 id: user.uid,

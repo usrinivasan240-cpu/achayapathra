@@ -59,7 +59,7 @@ export const columns = (options: {
     header: 'Status',
     cell: ({ row }) => {
       const status = row.getValue('status') as Donation['status'];
-      return <Badge variant={statusVariantMap[status]}>{status}</Badge>;
+      return <Badge variant={statusVariantMap[status] || 'secondary'}>{status}</Badge>;
     },
   },
   {
