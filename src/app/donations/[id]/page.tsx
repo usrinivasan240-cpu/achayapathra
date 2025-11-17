@@ -1,9 +1,8 @@
-
 'use client';
 
 import * as React from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, Timestamp } from 'firebase/firestore';
 import Image from 'next/image';
 import {
   Loader2,
@@ -85,6 +84,9 @@ export default function DonationDetailsPage() {
     }
   }
 
+  const toDate = (timestamp: Timestamp | undefined) => {
+    return timestamp instanceof Timestamp ? timestamp.toDate() : undefined;
+  };
 
   if (isLoading) {
     return (
@@ -130,6 +132,9 @@ export default function DonationDetailsPage() {
   };
   
   const isAiSafe = donation.aiImageAnalysis?.toLowerCase().includes('safe');
+  const cookedTime = toDate(donation.cookedTime);
+  const pickupBy = toDate(donation.pickupBy);
+
 
   return (
     <>
@@ -180,14 +185,14 @@ export default function DonationDetailsPage() {
                         <Clock className="h-5 w-5 text-primary mt-1" />
                         <div>
                             <p className="font-semibold">Cooked Time</p>
-                            <p className="text-muted-foreground">{donation.cookedTime ? donation.cookedTime.toDate().toLocaleTimeString() : 'N/A'}</p>
+                            <p className="text-muted-foreground">{cookedTime ? cookedTime.toLocaleTimeString() : 'N/A'}</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-3">
                         <Calendar className="h-5 w-5 text-primary mt-1" />
                         <div>
                             <p className="font-semibold">Pickup By</p>
-                            <p className="text-muted-foreground">{donation.pickupBy.toDate().toLocaleDateString()}</p>
+                            <p className="text-muted-foreground">{pickupBy ? pickupBy.toLocaleDateString() : 'N/A'}</p>
                         </div>
                     </div>
                 </div>

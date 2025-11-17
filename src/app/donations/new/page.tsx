@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -41,6 +40,7 @@ import { useRouter } from 'next/navigation';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { aiSafeFoodCheck } from '@/ai/flows/ai-safe-food-check';
+import { TimePicker } from '@/components/ui/time-picker';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -49,11 +49,12 @@ const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),
   foodType: z.string({ required_error: 'Please select a food type.' }),
   quantity: z.string().min(1, 'Quantity is required.'),
+  cookedTime: z.date({ required_error: 'Cooked time is required.' }),
   pickupBy: z.date({ required_error: 'Pickup by date is required.' }),
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
   image: z.any()
-    .refine((file): file is File => file instanceof File, 'Image is required.')
+    .refine((file): file is File => !!file, 'Image is required.')
     .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
@@ -84,6 +85,7 @@ export default function NewDonationPage() {
       foodName: '',
       quantity: '',
       location: '',
+      cookedTime: new Date(),
     },
   });
 
@@ -160,6 +162,7 @@ export default function NewDonationPage() {
             foodName: values.foodName,
             foodType: values.foodType,
             quantity: values.quantity,
+            cookedTime: Timestamp.fromDate(values.cookedTime),
             pickupBy: Timestamp.fromDate(values.pickupBy),
             description: values.description || '',
             location: values.location,
@@ -264,10 +267,44 @@ export default function NewDonationPage() {
                     />
                      <FormField
                       control={form.control}
+                      name="cookedTime"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Time Cooked</FormLabel>
+                          <FormControl>
+                            <TimePicker date={field.value} setDate={field.onChange} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                     />
+                    </div>
+                    <div className="space-y-8">
+                     <FormField
+                      control={form.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Pickup Location</FormLabel>
+                           <div className="flex gap-2">
+                            <FormControl>
+                                <Input placeholder="e.g., 123 Main St, Anytown" {...field} />
+                            </FormControl>
+                            <Button type="button" variant="outline" size="icon" onClick={handleUseCurrentLocation} disabled={isGettingLocation}>
+                                {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
+                                <span className="sr-only">Use Current Location</span>
+                            </Button>
+                           </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
                       name="pickupBy"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>Pickup By</FormLabel>
+                          <FormLabel>Pickup By Date</FormLabel>
                           <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -300,27 +337,6 @@ export default function NewDonationPage() {
                               />
                             </PopoverContent>
                           </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    </div>
-                    <div className="space-y-8">
-                     <FormField
-                      control={form.control}
-                      name="location"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Pickup Location</FormLabel>
-                           <div className="flex gap-2">
-                            <FormControl>
-                                <Input placeholder="e.g., 123 Main St, Anytown" {...field} />
-                            </FormControl>
-                            <Button type="button" variant="outline" size="icon" onClick={handleUseCurrentLocation} disabled={isGettingLocation}>
-                                {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
-                                <span className="sr-only">Use Current Location</span>
-                            </Button>
-                           </div>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -364,3 +380,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
