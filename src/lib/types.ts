@@ -12,16 +12,6 @@ export type UserProfile = {
   role: string;
 };
 
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  photoURL: string;
-  points: number;
-  address: string;
-  phone: string;
-};
-
 export type Donation = {
   id: string;
   foodName: string;
@@ -37,7 +27,6 @@ export type Donation = {
     name: string;
     email: string;
     photoURL: string;
-    phone?: string;
   };
   donorId: string;
   lat?: number;
