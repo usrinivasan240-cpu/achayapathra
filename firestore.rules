@@ -43,6 +43,14 @@ service cloud.firestore {
                           request.resource.data.status == 'Claimed' &&
                           request.resource.data.claimedBy == request.auth.uid &&
                           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'claimedBy'])
+                        ) ||
+                        // A user can un-claim a donation they claimed
+                        (
+                          resource.data.status == 'Claimed' &&
+                          resource.data.claimedBy == request.auth.uid &&
+                          request.resource.data.status == 'Available' &&
+                          !('claimedBy' in request.resource.data) &&
+                          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'claimedBy'])
                         )
                       );
         allow delete: if isSignedIn() && resource.data.donorId == request.auth.uid;

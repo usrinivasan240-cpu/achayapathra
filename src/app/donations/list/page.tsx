@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -18,7 +17,13 @@ import {
   errorEmitter,
   FirestorePermissionError,
 } from '@/firebase';
-import { collection, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  updateDoc,
+  deleteDoc,
+  deleteField,
+} from 'firebase/firestore';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,7 +78,7 @@ export default function DonationsPage() {
   const handleMarkAsAvailable = (donationId: string) => {
     if (!firestore || !user) return;
     const donationRef = doc(firestore, 'donations', donationId);
-    const updateData = { status: 'Available' };
+    const updateData = { status: 'Available', claimedBy: deleteField() };
     updateDoc(donationRef, updateData)
       .then(() => {
         toast({
