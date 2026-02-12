@@ -38,7 +38,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser } from '@/firebase';
 import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { aiSafeFoodCheck } from '@/ai/flows/ai-safe-food-check';
 import { TimePicker } from '@/components/ui/time-picker';
@@ -55,7 +54,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   location: z.string().min(2, 'Location is required.'),
   image: z.any()
-    .refine((file): file is File => !!file, 'Image is required.')
+    .refine((file): file is File => file instanceof File, 'Image is required.')
     .refine(
       (file) => !file || file.size <= MAX_FILE_SIZE,
       `Max file size is 5MB.`
@@ -152,17 +151,12 @@ export default function NewDonationPage() {
     setIsSubmitting(true);
     
     try {
-        const storage = getStorage();
         const imageFile = values.image as File;
-        const imageRef = ref(storage, `donations/${user.uid}/${Date.now()}-${imageFile.name}`);
-        
-        await uploadBytes(imageRef, imageFile);
-        const imageURL = await getDownloadURL(imageRef);
+        const imageDataUri = await fileToDataUri(imageFile);
 
         let aiImageAnalysis = 'AI analysis could not be performed.';
         try {
-          const photoDataUri = await fileToDataUri(imageFile);
-          const aiResult = await aiSafeFoodCheck(photoDataUri);
+          const aiResult = await aiSafeFoodCheck(imageDataUri);
           aiImageAnalysis = `${aiResult.isSafe ? 'Looks Safe' : 'Potential Issue'}: ${aiResult.reason}`;
         } catch (e) {
           console.error("AI check failed", e);
@@ -187,7 +181,7 @@ export default function NewDonationPage() {
                 email: user.email || '',
                 photoURL: user.photoURL || '',
             },
-            imageURL,
+            imageURL: imageDataUri,
             aiImageAnalysis,
         };
 
