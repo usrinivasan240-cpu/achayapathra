@@ -49,8 +49,8 @@ service cloud.firestore {
                           resource.data.status == 'Claimed' &&
                           resource.data.claimedBy == request.auth.uid &&
                           request.resource.data.status == 'Available' &&
-                          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'claimedBy']) &&
-                          !('claimedBy' in request.resource.data)
+                          !('claimedBy' in request.resource.data) &&
+                          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'claimedBy'])
                         )
                       );
         allow delete: if isSignedIn() && (resource.data.donorId == request.auth.uid || isAdmin());
