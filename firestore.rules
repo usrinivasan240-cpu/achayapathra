@@ -29,7 +29,7 @@ service cloud.firestore {
     // Creation requires ownership and a "Pending" status.
     // Updates are allowed by the owner.
     // A non-owner can claim an available donation, which only updates status and claimedBy.
-    // Deletes are restricted to the owner.
+    // Deletes are restricted to the owner or an admin.
     match /donations/{donationId} {
         allow read: if isSignedIn();
         allow create: if isSignedIn() && request.resource.data.donorId == request.auth.uid && request.resource.data.status == 'Pending';
@@ -49,10 +49,11 @@ service cloud.firestore {
                           resource.data.status == 'Claimed' &&
                           resource.data.claimedBy == request.auth.uid &&
                           request.resource.data.status == 'Available' &&
+                          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'claimedBy']) &&
                           !('claimedBy' in request.resource.data)
                         )
                       );
-        allow delete: if isSignedIn() && resource.data.donorId == request.auth.uid;
+        allow delete: if isSignedIn() && (resource.data.donorId == request.auth.uid || isAdmin());
     }
     
     // Any signed-in user can create, read, and update volunteer tasks. Deletion is restricted to owners or admins.
