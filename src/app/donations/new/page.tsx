@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Loader2, MapPin } from 'lucide-react';
+import { CalendarIcon, Loader2, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -159,15 +159,14 @@ export default function NewDonationPage() {
         await uploadBytes(imageRef, imageFile);
         const imageURL = await getDownloadURL(imageRef);
 
-        // This AI check can hang, preventing submission. Bypassing temporarily.
-        const aiImageAnalysis = 'AI analysis will be performed shortly.';
-        // try {
-        //   const photoDataUri = await fileToDataUri(imageFile);
-        //   const aiResult = await aiSafeFoodCheck(photoDataUri);
-        //   aiImageAnalysis = `${aiResult.isSafe ? 'Looks Safe' : 'Potential Issue'}: ${aiResult.reason}`;
-        // } catch (e) {
-        //   console.error("AI check failed", e);
-        // }
+        let aiImageAnalysis = 'AI analysis could not be performed.';
+        try {
+          const photoDataUri = await fileToDataUri(imageFile);
+          const aiResult = await aiSafeFoodCheck(photoDataUri);
+          aiImageAnalysis = `${aiResult.isSafe ? 'Looks Safe' : 'Potential Issue'}: ${aiResult.reason}`;
+        } catch (e) {
+          console.error("AI check failed", e);
+        }
 
 
         const donationData = {
