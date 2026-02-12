@@ -33,4 +33,5 @@ export type Donation = {
   lng?: number;
   imageURL: string;
   aiImageAnalysis?: string;
+  claimedBy?: string;
 };

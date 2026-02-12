@@ -115,6 +115,10 @@
         "aiImageAnalysis": {
             "type": "string",
             "description": "AI analysis result of the food image."
+        },
+        "claimedBy": {
+          "type": "string",
+          "description": "ID of the user who claimed the donation."
         }
       },
       "required": [

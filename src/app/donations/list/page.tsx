@@ -10,7 +10,14 @@ import Link from 'next/link';
 import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
+import {
+  useCollection,
+  useFirestore,
+  useUser,
+  useMemoFirebase,
+  errorEmitter,
+  FirestorePermissionError,
+} from '@/firebase';
 import { collection, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import {
   AlertDialog,
@@ -27,7 +34,9 @@ export default function DonationsPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
-  const [donationToRemove, setDonationToRemove] = React.useState<string | null>(null);
+  const [donationToRemove, setDonationToRemove] = React.useState<string | null>(
+    null
+  );
 
   const donationsQuery = useMemoFirebase(() => {
     // Only create the query if the user is logged in
@@ -35,69 +44,78 @@ export default function DonationsPage() {
     return collection(firestore, 'donations');
   }, [firestore, user]);
 
-  const {
-    data: donations,
-    isLoading: donationsLoading,
-  } = useCollection<Donation>(donationsQuery);
+  const { data: donations, isLoading: donationsLoading } =
+    useCollection<Donation>(donationsQuery);
 
-  const handleClaimDonation = async (donationId: string) => {
+  const handleClaimDonation = (donationId: string) => {
     if (!firestore || !user) return;
-    try {
-      const donationRef = doc(firestore, 'donations', donationId);
-      await updateDoc(donationRef, { status: 'Claimed', claimedBy: user.uid });
-      toast({
-        title: 'Donation Claimed!',
-        description: 'You have successfully claimed the donation.',
-      });
-    } catch (error) {
-      console.error("Error claiming donation:", error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not claim the donation.'
+    const donationRef = doc(firestore, 'donations', donationId);
+    const updateData = { status: 'Claimed', claimedBy: user.uid };
+    updateDoc(donationRef, updateData)
+      .then(() => {
+        toast({
+          title: 'Donation Claimed!',
+          description: 'You have successfully claimed the donation.',
+        });
       })
-    }
+      .catch((error) => {
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: donationRef.path,
+            operation: 'update',
+            requestResourceData: updateData,
+          })
+        );
+      });
   };
 
-  const handleMarkAsAvailable = async (donationId: string) => {
+  const handleMarkAsAvailable = (donationId: string) => {
     if (!firestore || !user) return;
-    try {
-      const donationRef = doc(firestore, 'donations', donationId);
-      await updateDoc(donationRef, { status: 'Available' });
-      toast({
-        title: 'Donation Updated!',
-        description: 'The donation is now marked as available.',
-      });
-    } catch (error) {
-      console.error("Error updating donation:", error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not update the donation status.'
+    const donationRef = doc(firestore, 'donations', donationId);
+    const updateData = { status: 'Available' };
+    updateDoc(donationRef, updateData)
+      .then(() => {
+        toast({
+          title: 'Donation Updated!',
+          description: 'The donation is now marked as available.',
+        });
       })
-    }
+      .catch((error) => {
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: donationRef.path,
+            operation: 'update',
+            requestResourceData: updateData,
+          })
+        );
+      });
   };
 
-  const handleRemoveDonation = async () => {
+  const handleRemoveDonation = () => {
     if (!firestore || !donationToRemove) return;
-    try {
-      await deleteDoc(doc(firestore, 'donations', donationToRemove));
-      toast({
-        title: 'Donation Removed',
-        description: 'The donation has been successfully removed.',
-      });
-    } catch (error) {
-      console.error("Error removing donation:", error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not remove the donation.'
-      });
-    } finally {
+    const donationRef = doc(firestore, 'donations', donationToRemove);
+    deleteDoc(donationRef)
+      .then(() => {
+        toast({
+          title: 'Donation Removed',
+          description: 'The donation has been successfully removed.',
+        });
+      })
+      .catch((error) => {
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: donationRef.path,
+            operation: 'delete',
+          })
+        );
+      })
+      .finally(() => {
         setDonationToRemove(null);
-    }
+      });
   };
-
 
   const isLoading = isUserLoading || donationsLoading;
 
@@ -119,16 +137,19 @@ export default function DonationsPage() {
           </div>
         ) : (
           <DataTable
-            columns={columns({ 
-                onClaim: handleClaimDonation, 
-                onMarkAsAvailable: handleMarkAsAvailable,
-                onRemove: setDonationToRemove 
+            columns={columns({
+              onClaim: handleClaimDonation,
+              onMarkAsAvailable: handleMarkAsAvailable,
+              onRemove: setDonationToRemove,
             })}
             data={donations || []}
           />
         )}
       </main>
-       <AlertDialog open={!!donationToRemove} onOpenChange={(open) => !open && setDonationToRemove(null)}>
+      <AlertDialog
+        open={!!donationToRemove}
+        onOpenChange={(open) => !open && setDonationToRemove(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>

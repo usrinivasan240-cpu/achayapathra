@@ -9,7 +9,14 @@ import { Donation } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import {
+  useCollection,
+  useFirestore,
+  useMemoFirebase,
+  useUser,
+  errorEmitter,
+  FirestorePermissionError,
+} from '@/firebase';
 import { collection, query, where, doc, updateDoc } from 'firebase/firestore';
 
 export default function ReceiverDashboardPage() {
@@ -19,28 +26,39 @@ export default function ReceiverDashboardPage() {
 
   const availableDonationsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    return query(collection(firestore, 'donations'), where('status', '==', 'Available'));
+    return query(
+      collection(firestore, 'donations'),
+      where('status', '==', 'Available')
+    );
   }, [firestore, user]);
 
-  const { data: donations, isLoading: donationsLoading, error } = useCollection<Donation>(availableDonationsQuery);
-  
-  const handleClaimDonation = async (donationId: string) => {
+  const {
+    data: donations,
+    isLoading: donationsLoading,
+    error,
+  } = useCollection<Donation>(availableDonationsQuery);
+
+  const handleClaimDonation = (donationId: string) => {
     if (!firestore || !user) return;
-    try {
-      const donationRef = doc(firestore, 'donations', donationId);
-      await updateDoc(donationRef, { status: 'Claimed', claimedBy: user.uid });
-      toast({
-        title: 'Donation Claimed!',
-        description: 'You have successfully claimed the donation.',
+    const donationRef = doc(firestore, 'donations', donationId);
+    const updateData = { status: 'Claimed', claimedBy: user.uid };
+    updateDoc(donationRef, updateData)
+      .then(() => {
+        toast({
+          title: 'Donation Claimed!',
+          description: 'You have successfully claimed the donation.',
+        });
+      })
+      .catch((e) => {
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: donationRef.path,
+            operation: 'update',
+            requestResourceData: updateData,
+          })
+        );
       });
-    } catch (e) {
-      console.error(e);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not claim the donation.'
-      });
-    }
   };
 
   // The hook now handles refreshing, so manual refresh logic is simpler.
@@ -52,7 +70,7 @@ export default function ReceiverDashboardPage() {
       description: 'The donation list is updated in real-time.',
     });
   };
-  
+
   const isLoading = isUserLoading || donationsLoading;
 
   return (
@@ -63,20 +81,26 @@ export default function ReceiverDashboardPage() {
           <h2 className="text-2xl font-semibold font-headline">
             Ready for Pickup
           </h2>
-          <Button variant="outline" onClick={handleRefresh} disabled={isLoading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={isLoading}
+          >
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+            />
             Refresh
           </Button>
         </div>
         {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
         ) : (
-            <DataTable
-              columns={columns({ onClaim: handleClaimDonation })}
-              data={donations || []}
-            />
+          <DataTable
+            columns={columns({ onClaim: handleClaimDonation })}
+            data={donations || []}
+          />
         )}
       </main>
     </>
