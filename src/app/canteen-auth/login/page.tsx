@@ -25,17 +25,6 @@ export default function LoginPage() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Test Credentials Info */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-xs font-semibold text-blue-900 mb-2">Test Credentials:</p>
-            <p className="text-xs text-blue-800">
-              <strong>User:</strong> user@test.com / password123
-            </p>
-            <p className="text-xs text-blue-800">
-              <strong>Admin:</strong> admin@test.com / admin123
-            </p>
-          </div>
         </div>
       </div>
       <div className="hidden bg-gradient-to-br from-orange-400 to-orange-600 lg:flex items-center justify-center">
