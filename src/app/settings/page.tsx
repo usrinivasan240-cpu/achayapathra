@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Moon, Sun, Bell, ALargeSmall, Loader2 } from 'lucide-react';
+import { Moon, Sun, ALargeSmall, Loader2, Palette } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import {
   Card,
@@ -13,26 +13,60 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 
+const themeOptions = [
+  {
+    value: 'light',
+    label: 'Light',
+    description: 'Bright, neutral interface',
+    icon: Sun,
+  },
+  {
+    value: 'dark',
+    label: 'Dark',
+    description: 'Low-light friendly contrast',
+    icon: Moon,
+  },
+  {
+    value: 'violet',
+    label: 'Violet',
+    description: 'Vibrant violet accents',
+    icon: Palette,
+  },
+] as const;
+
+type ThemeOption = (typeof themeOptions)[number]['value'];
+
 export default function SettingsPage() {
-  const [theme, setTheme] = React.useState('light');
+  const [theme, setTheme] = React.useState<ThemeOption>('light');
   const [fontSize, setFontSize] = React.useState('medium');
   const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
     setIsMounted(true);
-    const storedTheme = localStorage.getItem('theme') || 'light';
-    const storedFontSize = localStorage.getItem('fontSize') || 'medium';
-    setTheme(storedTheme);
-    setFontSize(storedFontSize);
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme && themeOptions.some((option) => option.value === storedTheme)) {
+      setTheme(storedTheme as ThemeOption);
+    }
+    const storedFontSize = localStorage.getItem('fontSize');
+    if (storedFontSize && ['small', 'medium', 'large'].includes(storedFontSize)) {
+      setFontSize(storedFontSize);
+    }
   }, []);
 
   React.useEffect(() => {
     if (isMounted) {
       const root = window.document.documentElement;
-      root.classList.remove('light', 'dark');
+      root.classList.remove('light', 'dark', 'violet');
       root.classList.add(theme);
       localStorage.setItem('theme', theme);
     }
@@ -45,6 +79,10 @@ export default function SettingsPage() {
       localStorage.setItem('fontSize', fontSize);
     }
   }, [fontSize, isMounted]);
+
+  const activeTheme =
+    themeOptions.find((option) => option.value === theme) ?? themeOptions[0];
+  const ThemeIcon = activeTheme.icon;
 
   if (!isMounted) {
     return (
@@ -69,25 +107,48 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="theme-switcher" className="flex items-center gap-3">
-                <div className='w-8 h-8 flex items-center justify-center bg-muted rounded-full'>
-                    {theme === 'light' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <Label
+                htmlFor="theme-select"
+                className="flex items-center gap-3"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                  <ThemeIcon className="h-5 w-5" />
                 </div>
                 <div>
-                    <p>Theme</p>
-                    <p className='text-sm text-muted-foreground'>
-                        {theme === 'light' ? 'Light Mode' : 'Dark Mode'}
-                    </p>
+                  <p>Theme</p>
+                  <p className="text-sm text-muted-foreground">
+                    {activeTheme.description}
+                  </p>
                 </div>
               </Label>
-              <Switch
-                id="theme-switcher"
-                checked={theme === 'dark'}
-                onCheckedChange={(checked) =>
-                  setTheme(checked ? 'dark' : 'light')
-                }
-              />
+              <div className="w-full sm:w-[220px]">
+                <Select
+                  value={theme}
+                  onValueChange={(value) => {
+                    const nextTheme = themeOptions.find(
+                      (option) => option.value === value
+                    );
+                    if (nextTheme) {
+                      setTheme(nextTheme.value);
+                    }
+                  }}
+                >
+                  <SelectTrigger id="theme-select">
+                    <SelectValue placeholder="Select theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {themeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <span className="flex items-center gap-2">
+                          <option.icon className="h-4 w-4" />
+                          {option.label}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <Separator />
             <div className="space-y-4">

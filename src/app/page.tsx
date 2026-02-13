@@ -1,46 +1,32 @@
+'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
-import PlaceHolderImages from '@/lib/placeholder-images.json';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { UserAuthSigninForm } from '@/components/auth/user-auth-signin-form';
+export default function HomePage() {
+  const router = useRouter();
+  const { user, loading } = useAuth();
 
-export default function AuthenticationPage() {
-  const loginImage = PlaceHolderImages.find((img) => img.id === 'login-image');
+  useEffect(() => {
+    if (!loading) {
+      if (user) {
+        if (user.role === 'admin' || user.role === 'super_admin') {
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/canteen/home');
+        }
+      } else {
+        router.push('/canteen-auth/login');
+      }
+    }
+  }, [user, loading, router]);
 
   return (
-    <div className="w-full h-screen lg:grid lg:grid-cols-2">
-      <div className="flex items-center justify-center p-8">
-        <div className="mx-auto w-full max-w-md">
-            <Card>
-                <CardHeader className="text-center">
-                    <CardTitle className="text-3xl font-headline">Sign In</CardTitle>
-                    <CardDescription>Enter your email below to sign in to your account</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <UserAuthSigninForm />
-                     <div className="mt-4 text-center text-sm">
-                        Don&apos;t have an account?{' '}
-                        <Link href="/signup" className="underline">
-                            Sign up
-                        </Link>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-      </div>
-      <div className="hidden bg-muted lg:block">
-        {loginImage && (
-          <Image
-            src="https://picsum.photos/seed/food-donation-drive/1920/1080"
-            alt="A person donating food at a food drive."
-            width="1920"
-            height="1080"
-            data-ai-hint="food donation"
-            className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          />
-        )}
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">🍽️ Canteen Ordering System</h1>
+        <p className="text-xl text-gray-600">Loading...</p>
       </div>
     </div>
   );
