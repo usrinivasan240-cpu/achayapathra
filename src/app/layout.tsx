@@ -10,6 +10,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { usePathname } from 'next/navigation';
+import { Toaster as HotToaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -18,10 +19,19 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, isUserLoading } = useUser();
 
+  const isAuthPage = pathname.startsWith('/canteen-auth');
+  const isCanteenAppPage = pathname.startsWith('/canteen') || pathname.startsWith('/admin');
+
+  // Pages that should render without any wrapper layout
+  if (isAuthPage || isCanteenAppPage) {
+    return <>{children}</>;
+  }
+  
+  // The original Firebase-based app layout
   const isPublicPage = ['/', '/signup'].includes(pathname);
   const showNav = !isUserLoading && user && !isPublicPage;
 
-  if (isPublicPage) {
+  if (isPublicPage && !user) {
     return <>{children}</>;
   }
 
@@ -67,6 +77,7 @@ export default function RootLayout({
           <AppLayout>{children}</AppLayout>
         </FirebaseClientProvider>
         <Toaster />
+        <HotToaster />
       </body>
     </html>
   );
