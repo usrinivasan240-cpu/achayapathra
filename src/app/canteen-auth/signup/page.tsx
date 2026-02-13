@@ -12,7 +12,7 @@ export default function SignupPage() {
             <CardHeader className="text-center">
               <CardTitle className="text-3xl font-bold">Create Account</CardTitle>
               <CardDescription>
-                Sign up to start ordering from our canteen
+                Join the Achayapathra community to share and receive
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -29,13 +29,13 @@ export default function SignupPage() {
       </div>
       <div className="hidden bg-gradient-to-br from-orange-400 to-orange-600 lg:flex items-center justify-center">
         <div className="text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">🍽️ Welcome to Our Canteen</h2>
-          <p className="text-xl mb-8">Fresh food, quick service, best prices</p>
+          <h2 className="text-4xl font-bold mb-4">🍽️ Welcome to Achayapathra</h2>
+          <p className="text-xl mb-8">Building Humanity Through Sharing</p>
           <div className="space-y-4 text-lg">
-            <p>✅ Easy ordering</p>
-            <p>✅ Real-time tracking</p>
-            <p>✅ Great discounts</p>
-            <p>✅ Fast delivery</p>
+            <p>✅ Reduce food waste</p>
+            <p>✅ Help your neighbours</p>
+            <p>✅ Earn reward points</p>
+            <p>✅ Make a difference</p>
           </div>
         </div>
       </div>

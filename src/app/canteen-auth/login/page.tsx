@@ -12,7 +12,7 @@ export default function LoginPage() {
             <CardHeader className="text-center">
               <CardTitle className="text-3xl font-bold">Welcome Back</CardTitle>
               <CardDescription>
-                Sign in to your canteen account
+                Sign in to your Achayapathra account
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -29,13 +29,13 @@ export default function LoginPage() {
       </div>
       <div className="hidden bg-gradient-to-br from-orange-400 to-orange-600 lg:flex items-center justify-center">
         <div className="text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">🍽️ Canteen Ordering</h2>
-          <p className="text-xl mb-8">Fast • Fresh • Delicious</p>
+          <h2 className="text-4xl font-bold mb-4">🍽️ Achayapathra</h2>
+          <p className="text-xl mb-8">Building Humanity Through Sharing</p>
           <div className="space-y-4 text-lg">
-            <p>🚀 Quick ordering</p>
-            <p>📍 Real-time tracking</p>
-            <p>💰 Best prices</p>
-            <p>🎉 Special discounts</p>
+            <p>🚀 Donate surplus food</p>
+            <p>📍 Find nearby donations</p>
+            <p>💪 Volunteer to deliver</p>
+            <p>🎉 Join the community</p>
           </div>
         </div>
       </div>
