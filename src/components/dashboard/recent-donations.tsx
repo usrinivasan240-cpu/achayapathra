@@ -3,22 +3,23 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import React from 'react';
 import { Loader2 } from 'lucide-react';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Donation } from '@/lib/types';
 
 
 export function RecentDonations() {
   const firestore = useFirestore();
+  const { user } = useUser();
 
   const recentDonationsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !user) return null;
     return query(
         collection(firestore, 'donations'), 
         orderBy('createdAt', 'desc'), 
         limit(5)
     );
-  }, [firestore]);
+  }, [firestore, user]);
 
   const { data: recentDonations, isLoading } = useCollection<Donation>(recentDonationsQuery);
 
