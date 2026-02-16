@@ -17,7 +17,4 @@ export const ai: Genkit = genkit({
       // apiVersion: 'v1beta',
     }),
   ],
-  // Store flow states in memory. In a production app, you would want
-  // to use a persistent store like Firestore.
-  flowStateStore: 'memory',
 });

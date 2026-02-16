@@ -10,7 +10,7 @@ import { Donation } from '@/lib/types';
 
 export function RecentDonations() {
   const firestore = useFirestore();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
 
   const recentDonationsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -21,13 +21,22 @@ export function RecentDonations() {
     );
   }, [firestore, user]);
 
-  const { data: recentDonations, isLoading } = useCollection<Donation>(recentDonationsQuery);
+  const { data: recentDonations, isLoading: donationsLoading } = useCollection<Donation>(recentDonationsQuery);
 
+  const isLoading = isUserLoading || donationsLoading;
 
   if (isLoading) {
     return (
         <div className="flex justify-center items-center h-40">
             <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+    )
+  }
+
+  if (!user) {
+    return (
+        <div className="flex justify-center items-center h-40">
+            <p className="text-sm text-muted-foreground">Sign in to view recent donations.</p>
         </div>
     )
   }

@@ -10,9 +10,9 @@ export default function SignupPage() {
         <div className="mx-auto w-full max-w-md">
           <Card>
             <CardHeader className="text-center">
-              <CardTitle className="text-3xl font-bold">Create Account</CardTitle>
+              <CardTitle className="text-3xl font-bold">Join Achayapathra</CardTitle>
               <CardDescription>
-                Join the Achayapathra community to share and receive
+                Join our community to share and receive
               </CardDescription>
             </CardHeader>
             <CardContent>
