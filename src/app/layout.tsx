@@ -10,7 +10,6 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { usePathname } from 'next/navigation';
-import { Toaster as HotToaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,21 +18,17 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, isUserLoading } = useUser();
 
-  const isAuthPage = pathname.startsWith('/canteen-auth');
-  const isCanteenAppPage = pathname.startsWith('/canteen') || pathname.startsWith('/admin');
-
-  // Pages that should render without any wrapper layout
-  if (isAuthPage || isCanteenAppPage) {
-    return <>{children}</>;
-  }
-  
-  // The original Firebase-based app layout
   const isPublicPage = ['/', '/signup'].includes(pathname);
-  const showNav = !isUserLoading && user && !isPublicPage;
 
+  // On public pages, if user is not logged in (or we're checking),
+  // render the page without the main app layout.
+  // The page components themselves will redirect if a logged-in user visits.
   if (isPublicPage && !user) {
     return <>{children}</>;
   }
+
+  // For all authenticated pages, show the full layout.
+  const showNav = !isUserLoading && user;
 
   return (
     <SidebarProvider>
@@ -77,7 +72,6 @@ export default function RootLayout({
           <AppLayout>{children}</AppLayout>
         </FirebaseClientProvider>
         <Toaster />
-        <HotToaster />
       </body>
     </html>
   );
