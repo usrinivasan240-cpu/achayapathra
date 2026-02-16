@@ -146,6 +146,7 @@ export default function DonationsPage() {
               onClaim: handleClaimDonation,
               onMarkAsAvailable: handleMarkAsAvailable,
               onRemove: setDonationToRemove,
+              currentUser: user,
             })}
             data={donations || []}
           />

@@ -1,9 +1,9 @@
-
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { type User } from 'firebase/auth';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,8 @@ const statusVariantMap: { [key in Donation['status']]: 'default' | 'secondary' |
 export const columns = (options: { 
     onClaim?: (id: string) => void, 
     onMarkAsAvailable?: (id: string) => void,
-    onRemove?: (id: string) => void 
+    onRemove?: (id: string) => void,
+    currentUser?: User | null
 } = {}): ColumnDef<Donation>[] => [
   {
     accessorKey: 'foodName',
@@ -87,6 +88,7 @@ export const columns = (options: {
     id: 'actions',
     cell: ({ row }) => {
       const donation = row.original;
+      const isOwner = options.currentUser?.uid === donation.donorId;
 
       return (
         <DropdownMenu>
@@ -123,7 +125,7 @@ export const columns = (options: {
                 Mark as Available
                 </DropdownMenuItem>
             )}
-            {options.onRemove && (
+            {options.onRemove && isOwner && (
               <>
                 <DropdownMenuSeparator />
                  <DropdownMenuItem
