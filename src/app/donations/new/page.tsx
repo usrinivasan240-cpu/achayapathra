@@ -43,7 +43,7 @@ import { aiSafeFoodCheck } from '@/ai/flows/ai-safe-food-check';
 import { TimePicker } from '@/components/ui/time-picker';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 const formSchema = z.object({
   foodName: z.string().min(2, 'Food name must be at least 2 characters.'),

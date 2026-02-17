@@ -139,11 +139,22 @@ export function ImageUpload({ name, label, accept, maxSize }: ImageUploadProps) 
   const [isCameraOpen, setIsCameraOpen] = React.useState(false);
 
   const processFile = React.useCallback((file: File) => {
-    // Validate file type
-    const acceptedTypes = accept ? Object.values(accept).flat() : [];
-    if (acceptedTypes.length > 0 && !acceptedTypes.includes(file.type)) {
-      setError(name, { type: 'manual', message: 'Invalid file type.' });
-      return;
+    // Validate file type against the `accept` prop, which contains MIME types.
+    const acceptedMimeTypes = accept ? Object.keys(accept) : [];
+    if (acceptedMimeTypes.length > 0) {
+        const fileType = file.type;
+        const isAllowed = acceptedMimeTypes.some(pattern => {
+            // Handle wildcards like 'image/*'
+            if (pattern.endsWith('/*')) {
+                return fileType.startsWith(pattern.slice(0, -1));
+            }
+            return fileType === pattern;
+        });
+
+        if (!isAllowed) {
+             setError(name, { type: 'manual', message: 'Invalid file type.' });
+             return;
+        }
     }
 
     // Validate file size
