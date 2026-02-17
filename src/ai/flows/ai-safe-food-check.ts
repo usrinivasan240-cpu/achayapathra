@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview An AI flow to determine if a food image is safe for consumption.
