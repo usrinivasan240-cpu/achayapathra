@@ -2,11 +2,129 @@
 
 import * as React from 'react';
 import { useDropzone, FileRejection, Accept } from 'react-dropzone';
-import { UploadCloud as ImageIcon, X } from 'lucide-react';
+import { UploadCloud as ImageIcon, X, Camera } from 'lucide-react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 import Image from 'next/image';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from './alert';
+
+// CameraCapture component defined inside image-upload.tsx
+const CameraCapture = ({
+  onCapture,
+  onClose,
+}: {
+  onCapture: (file: File) => void;
+  onClose: () => void;
+}) => {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = React.useState<MediaStream | null>(null);
+  const [hasCameraPermission, setHasCameraPermission] = React.useState<boolean | null>(null);
+  const { toast } = useToast();
+
+  React.useEffect(() => {
+    const getCameraPermission = async () => {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Camera API not supported in this browser.');
+        }
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+        setStream(mediaStream);
+        setHasCameraPermission(true);
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        setHasCameraPermission(false);
+        toast({
+          variant: 'destructive',
+          title: 'Camera Access Denied',
+          description:
+            'Please enable camera permissions in your browser settings.',
+        });
+        onClose();
+      }
+    };
+
+    getCameraPermission();
+
+    return () => {
+      stream?.getTracks().forEach((track) => track.stop());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleCapture = () => {
+    if (videoRef.current && canvasRef.current && stream) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+          onCapture(file);
+        }
+        onClose();
+      }, 'image/jpeg');
+
+      stream?.getTracks().forEach((track) => track.stop());
+    }
+  };
+
+  if (hasCameraPermission === false) {
+    return (
+        <Alert variant="destructive">
+            <AlertTitle>Camera Access Required</AlertTitle>
+            <AlertDescription>
+            Could not access the camera. Please ensure you have granted permission in your browser settings.
+            </AlertDescription>
+        </Alert>
+    );
+  }
+
+  if (hasCameraPermission === null) {
+      return <div className="flex items-center justify-center h-48">Requesting camera access...</div>
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="relative">
+        <video
+          ref={videoRef}
+          className="w-full aspect-video rounded-md bg-muted"
+          autoPlay
+          muted
+          playsInline
+        />
+        <canvas ref={canvasRef} className="hidden" />
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={handleCapture}>Capture Photo</Button>
+      </div>
+    </div>
+  );
+};
+
 
 interface ImageUploadProps {
   name: string;
@@ -18,6 +136,32 @@ interface ImageUploadProps {
 export function ImageUpload({ name, label, accept, maxSize }: ImageUploadProps) {
   const { control, setValue, setError, clearErrors, formState: { errors } } = useFormContext();
   const [preview, setPreview] = React.useState<string | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = React.useState(false);
+
+  const processFile = React.useCallback((file: File) => {
+    // Validate file type
+    const acceptedTypes = accept ? Object.values(accept).flat() : [];
+    if (acceptedTypes.length > 0 && !acceptedTypes.includes(file.type)) {
+      setError(name, { type: 'manual', message: 'Invalid file type.' });
+      return;
+    }
+
+    // Validate file size
+    if (maxSize && file.size > maxSize) {
+        setError(name, { type: 'manual', message: `File is too large (max ${maxSize / 1024 / 1024}MB).` });
+        return;
+    }
+
+    setValue(name, file, { shouldValidate: true });
+    clearErrors(name);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name, accept, maxSize, setValue, setError, clearErrors]);
+
 
   const onDrop = React.useCallback(
     (acceptedFiles: File[], fileRejections: FileRejection[]) => {
@@ -28,23 +172,19 @@ export function ImageUpload({ name, label, accept, maxSize }: ImageUploadProps) 
         setPreview(null);
       } else if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
-        setValue(name, file, { shouldValidate: true });
-        clearErrors(name);
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
+        processFile(file);
       }
     },
-    [name, setValue, setError, clearErrors]
+    [name, processFile, setError, setValue]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open: openFileDialog } = useDropzone({
     onDrop,
     accept,
     maxSize,
     multiple: false,
+    noClick: true, // We manage clicks ourselves
+    noKeyboard: true,
   });
 
   const handleRemoveImage = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -54,6 +194,10 @@ export function ImageUpload({ name, label, accept, maxSize }: ImageUploadProps) 
     clearErrors(name);
   };
 
+  const handleCameraCapture = (file: File) => {
+    processFile(file);
+  }
+
   const errorMessage = errors[name]?.message as string | undefined;
 
   return (
@@ -62,7 +206,7 @@ export function ImageUpload({ name, label, accept, maxSize }: ImageUploadProps) 
       <Controller
         name={name}
         control={control}
-        render={() => (
+        render={({ field }) => (
           <div
             {...getRootProps()}
             className={cn(
@@ -92,12 +236,32 @@ export function ImageUpload({ name, label, accept, maxSize }: ImageUploadProps) 
                 </Button>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                <ImageIcon className="w-10 h-10 mb-3 text-muted-foreground" />
-                <p className="mb-2 text-sm text-muted-foreground">
-                  <span className="font-semibold">Click to upload</span> or drag and drop
-                </p>
-                <p className="text-xs text-muted-foreground">PNG, JPG, or WEBP (MAX. 5MB)</p>
+              <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center w-full">
+                <button type="button" onClick={openFileDialog} className="flex flex-col items-center p-4">
+                    <ImageIcon className="w-10 h-10 mb-3 text-muted-foreground" />
+                    <p className="mb-2 text-sm text-muted-foreground">
+                    <span className="font-semibold">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG, or WEBP (MAX. 5MB)</p>
+                </button>
+                <div className="relative flex items-center my-2 w-full px-8">
+                  <div className="flex-grow border-t border-muted-foreground/30"></div>
+                  <span className="flex-shrink mx-4 text-muted-foreground text-xs">OR</span>
+                  <div className="flex-grow border-t border-muted-foreground/30"></div>
+                </div>
+                <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>
+                    <DialogTrigger asChild>
+                        <Button type="button" variant="outline" onClick={(e) => { e.stopPropagation(); setIsCameraOpen(true); } }>
+                            <Camera className="mr-2 h-4 w-4" /> Use Camera
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent onClick={(e) => e.stopPropagation()} className="max-w-xl">
+                        <DialogHeader>
+                            <DialogTitle>Capture Food Image</DialogTitle>
+                        </DialogHeader>
+                        {isCameraOpen && <CameraCapture onCapture={handleCameraCapture} onClose={() => setIsCameraOpen(false)} />}
+                    </DialogContent>
+                </Dialog>
               </div>
             )}
           </div>
