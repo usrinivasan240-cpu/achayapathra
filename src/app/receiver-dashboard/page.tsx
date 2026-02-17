@@ -17,12 +17,32 @@ import {
   errorEmitter,
   FirestorePermissionError,
 } from '@/firebase';
-import { collection, query, where, doc, updateDoc } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  where,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from 'firebase/firestore';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function ReceiverDashboardPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const [donationToRemove, setDonationToRemove] = React.useState<string | null>(
+    null
+  );
 
   const availableDonationsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -58,6 +78,30 @@ export default function ReceiverDashboardPage() {
             requestResourceData: updateData,
           })
         );
+      });
+  };
+
+  const handleRemoveDonation = () => {
+    if (!firestore || !donationToRemove) return;
+    const donationRef = doc(firestore, 'donations', donationToRemove);
+    deleteDoc(donationRef)
+      .then(() => {
+        toast({
+          title: 'Donation Removed',
+          description: 'The donation has been successfully removed.',
+        });
+      })
+      .catch((error) => {
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: donationRef.path,
+            operation: 'delete',
+          })
+        );
+      })
+      .finally(() => {
+        setDonationToRemove(null);
       });
   };
 
@@ -98,11 +142,35 @@ export default function ReceiverDashboardPage() {
           </div>
         ) : (
           <DataTable
-            columns={columns({ onClaim: handleClaimDonation })}
+            columns={columns({
+              onClaim: handleClaimDonation,
+              onRemove: setDonationToRemove,
+              currentUser: user,
+            })}
             data={donations || []}
           />
         )}
       </main>
+      <AlertDialog
+        open={!!donationToRemove}
+        onOpenChange={(open) => !open && setDonationToRemove(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this
+              donation record from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRemoveDonation}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
