@@ -21,11 +21,14 @@ export async function setDocumentNonBlocking(
   } catch (err: any) {
     // Check if the error is a Firestore permission-denied error.
     if (err.code === 'permission-denied') {
-      // Get the current user ID from the auth instance.
-      const userId = firestore.app.options.auth?.currentUser?.uid || null;
-
       // Create a custom error object with details about the operation.
-      const permissionError = new FirestorePermissionError('set', path, userId);
+      // The FirestorePermissionError constructor now correctly handles fetching
+      // the user details internally.
+      const permissionError = new FirestorePermissionError({
+        operation: 'write',
+        path: path,
+        requestResourceData: data
+      });
 
       // Emit a global 'permission-error' event for a global error boundary to catch.
       errorEmitter.emit('permission-error', permissionError);
