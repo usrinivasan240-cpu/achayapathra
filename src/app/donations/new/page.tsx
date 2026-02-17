@@ -157,7 +157,9 @@ export default function NewDonationPage() {
         let aiImageAnalysis = 'AI analysis could not be performed.';
         try {
           const aiResult = await aiSafeFoodCheck(imageDataUri);
-          aiImageAnalysis = `${aiResult.isSafe ? 'Looks Safe' : 'Potential Issue'}: ${aiResult.reason}`;
+          const safetyStatus = aiResult.isSafe ? 'Looks Safe' : 'Potential Issue';
+          // Construct a more detailed, multi-line analysis string.
+          aiImageAnalysis = `Identification: ${aiResult.foodName}\nSafety: ${safetyStatus} - ${aiResult.reason}\nNote: ${aiResult.description}`;
         } catch (e) {
           console.error("AI check failed", e);
         }

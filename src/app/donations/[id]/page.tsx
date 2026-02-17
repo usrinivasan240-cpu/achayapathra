@@ -189,7 +189,7 @@ export default function DonationDetailsPage() {
                       <ShieldAlert className="h-4 w-4" />
                     )}
                     <AlertTitle>AI Food Safety Analysis</AlertTitle>
-                    <AlertDescription>
+                    <AlertDescription className="whitespace-pre-wrap">
                       {donation.aiImageAnalysis}
                     </AlertDescription>
                   </Alert>
