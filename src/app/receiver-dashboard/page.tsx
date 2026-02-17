@@ -35,11 +35,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useAdmin } from '@/hooks/useAdmin';
 
 export default function ReceiverDashboardPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const { isAdmin, isAdminLoading } = useAdmin();
   const [donationToRemove, setDonationToRemove] = React.useState<string | null>(
     null
   );
@@ -115,7 +117,7 @@ export default function ReceiverDashboardPage() {
     });
   };
 
-  const isLoading = isUserLoading || donationsLoading;
+  const isLoading = isUserLoading || donationsLoading || isAdminLoading;
 
   return (
     <>
@@ -146,6 +148,7 @@ export default function ReceiverDashboardPage() {
               onClaim: handleClaimDonation,
               onRemove: setDonationToRemove,
               currentUser: user,
+              isAdmin: isAdmin
             })}
             data={donations || []}
           />

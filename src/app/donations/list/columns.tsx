@@ -32,7 +32,8 @@ export const columns = (options: {
     onClaim?: (id: string) => void, 
     onMarkAsAvailable?: (id: string) => void,
     onRemove?: (id: string) => void,
-    currentUser?: User | null
+    currentUser?: User | null,
+    isAdmin?: boolean
 } = {}): ColumnDef<Donation>[] => [
   {
     accessorKey: 'foodName',
@@ -89,6 +90,7 @@ export const columns = (options: {
     cell: ({ row }) => {
       const donation = row.original;
       const isOwner = options.currentUser?.uid === donation.donorId;
+      const canRemove = isOwner || options.isAdmin;
 
       return (
         <DropdownMenu>
@@ -125,7 +127,7 @@ export const columns = (options: {
                 Mark as Available
                 </DropdownMenuItem>
             )}
-            {options.onRemove && isOwner && (
+            {options.onRemove && canRemove && (
               <>
                 <DropdownMenuSeparator />
                  <DropdownMenuItem
