@@ -17,11 +17,11 @@ import {ai} from '../genkit';
 
 // Define the input schema for the flow.
 // It expects a single string which is a data URI of the food image.
-export const AiSafeFoodCheckInputSchema = z.string();
+const AiSafeFoodCheckInputSchema = z.string();
 export type AiSafeFoodCheckInput = z.infer<typeof AiSafeFoodCheckInputSchema>;
 
 // Define the expanded output schema for a more detailed analysis.
-export const AiSafeFoodCheckOutputSchema = z.object({
+const AiSafeFoodCheckOutputSchema = z.object({
   foodName: z
     .string()
     .describe(
