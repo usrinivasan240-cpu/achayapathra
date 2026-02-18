@@ -27,8 +27,7 @@ service cloud.firestore {
 
     // Any signed-in user can view donations.
     // Creation requires ownership and a "Pending" status.
-    // Updates are allowed by the owner.
-    // A non-owner can claim an available donation, which only updates status and claimedBy.
+    // Updates are allowed by the owner, an admin, or the user claiming/un-claiming.
     // Deletes are restricted to the owner or an admin.
     match /donations/{donationId} {
         allow read: if isSignedIn();
@@ -36,7 +35,9 @@ service cloud.firestore {
         allow update: if isSignedIn() && 
                       (
                         // Owner can update their own donation
-                        resource.data.donorId == request.auth.uid || 
+                        resource.data.donorId == request.auth.uid ||
+                        // Admin can update any donation
+                        isAdmin() ||
                         // A user can claim an available donation
                         (
                           resource.data.status == 'Available' &&

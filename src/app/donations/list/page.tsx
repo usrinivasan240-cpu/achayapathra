@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -89,12 +90,15 @@ export default function DonationsPage() {
         });
       })
       .catch((error) => {
+        // Create a serializable representation of the update data for error reporting.
+        // Using `deleteField()` directly in the error payload would cause a crash.
+        const serializableUpdateData = { status: 'Available', claimedBy: null };
         errorEmitter.emit(
           'permission-error',
           new FirestorePermissionError({
             path: donationRef.path,
             operation: 'update',
-            requestResourceData: updateData,
+            requestResourceData: serializableUpdateData,
           })
         );
       });
