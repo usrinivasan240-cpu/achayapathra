@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview An AI flow to analyze a food image for identification and safety.
@@ -70,7 +69,7 @@ const aiSafeFoodCheckPrompt = ai.definePrompt({
     schema: AiSafeFoodCheckOutputSchema,
   },
   // The updated prompt instructs the AI to perform a more detailed analysis.
-  prompt: `You are an expert food safety inspector and a culinary historian. Your task is to analyze the provided image of a food item.
+  prompt: `You are an expert food safety inspector and a culinary historian. Your task is to analyze the provided image of a food item. Compare what you see in the image to your extensive knowledge of food imagery to perform the following analysis.
     
 **Analysis Steps:**
 1.  **Identify the Food:** Clearly and specifically identify the food item in the image. If it's a dish, name it (e.g., "Chicken Biryani," not just "rice"). If it's a baked good, be specific (e.g., "Chocolate Croissant").
