@@ -35,8 +35,8 @@ export const mockUsers: UserProfile[] = [
   },
   {
     id: '4',
-    displayName: 'Meena Kumari',
-    email: 'meena@example.com',
+    displayName: 'subathra srinivasan',
+    email: 'subathra@example.com',
     photoURL: 'https://picsum.photos/seed/user4/100/100',
     points: 1500,
     address: '101 Gandhi Road, Trichy',
@@ -83,8 +83,8 @@ export const mockDonations: Donation[] = [
     expiryTime: Timestamp.fromDate(new Date(Date.now() + 1 * 24 * 60 * 60 * 1000)),
     donor: {
       id: '4',
-      name: 'Meena Kumari',
-      email: 'meena@example.com',
+      name: 'subathra srinivasan',
+      email: 'subathra@example.com',
       photoURL: 'https://picsum.photos/seed/user4/100/100',
     },
     donorId: '4',
@@ -119,8 +119,8 @@ export const mockDonations: Donation[] = [
     expiryTime: Timestamp.fromDate(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)),
     donor: {
       id: '4',
-      name: 'Meena Kumari',
-      email: 'meena@example.com',
+      name: 'subathra srinivasan',
+      email: 'subathra@example.com',
       photoURL: 'https://picsum.photos/seed/user4/100/100',
     },
     donorId: '4',
