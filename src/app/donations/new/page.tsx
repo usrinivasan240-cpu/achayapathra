@@ -132,18 +132,19 @@ export default function NewDonationPage() {
                         duration: 8000,
                     });
                 }
-            } catch (e) {
+            } catch (e: any) {
                 console.error('AI analysis failed', e);
+                const errorMessage = e.message || 'An unknown error occurred during AI analysis.';
                 toast({
                     variant: 'destructive',
                     title: 'AI Analysis Failed',
-                    description: 'Could not analyze the food image. Please try another image.',
+                    description: errorMessage,
                 });
                 // Set a mock analysis result to block submission
                 setAiAnalysis({
                     isSafe: false,
                     foodName: 'Unknown',
-                    reason: 'AI analysis could not be performed.',
+                    reason: `Analysis failed: ${errorMessage}`,
                     description: '',
                 });
             } finally {
@@ -441,7 +442,7 @@ export default function NewDonationPage() {
                         </div>
                       )}
                       {aiAnalysis && (
-                        <Alert variant={aiAnalysis.isSafe ? 'default' : 'destructive'} className='bg-opacity-20'>
+                        <Alert variant={aiAnalysis.isSafe ? 'default' : 'destructive'}>
                             {aiAnalysis.isSafe ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
                             <AlertTitle>AI Safety Analysis</AlertTitle>
                             <AlertDescription>
@@ -464,5 +465,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    
