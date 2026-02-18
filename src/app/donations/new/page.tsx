@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -60,13 +61,56 @@ const formSchema = z.object({
       `Max file size is 5MB.`
     )
     .refine(
-      (file) => !(file instanceof File) || file.type.startsWith('image/'),
-      'Only image files are accepted. Please upload a JPG, PNG, or WEBP.'
+      (file) => !(file instanceof File) || ACCEPTED_IMAGE_TYPES.includes(file.type),
+      'Only JPG, PNG, and WEBP formats are supported.'
     ),
 }).refine(data => data.expiryTime > data.cookedTime, {
   message: 'Expiry date and time must be after cooked time.',
   path: ['expiryTime'],
 });
+
+const resizeImage = (file: File, maxSize: number): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let { width, height } = img;
+  
+          if (width > height) {
+            if (width > maxSize) {
+              height = Math.round(height * (maxSize / width));
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = Math.round(width * (maxSize / height));
+              height = maxSize;
+            }
+          }
+  
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            return reject(new Error('Could not get canvas context'));
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          resolve(canvas.toDataURL('image/jpeg', 0.9)); // Use JPEG for better compression
+        };
+        img.onerror = (err) => reject(err);
+        if (event.target?.result) {
+          img.src = event.target.result as string;
+        } else {
+            reject(new Error("Couldn't read file for resizing"));
+        }
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  };
 
 
 type LocationCoords = {
@@ -98,15 +142,6 @@ export default function NewDonationPage() {
 
   const imageFile = form.watch('image');
 
-  const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   React.useEffect(() => {
     // Clear analysis if image is removed
     if (!imageFile) {
@@ -120,8 +155,8 @@ export default function NewDonationPage() {
             setIsAnalyzing(true);
             setAiAnalysis(null); // Reset previous result
             try {
-                const imageDataUri = await fileToDataUri(imageFile);
-                const result = await aiSafeFoodCheck(imageDataUri);
+                const resizedImageDataUri = await resizeImage(imageFile, 1024);
+                const result = await aiSafeFoodCheck(resizedImageDataUri);
                 setAiAnalysis(result);
                 if (!result.isSafe) {
                     toast({
@@ -214,7 +249,7 @@ export default function NewDonationPage() {
     
     try {
         const imageFile = values.image as File;
-        const imageDataUri = await fileToDataUri(imageFile);
+        const resizedImageDataUri = await resizeImage(imageFile, 1024);
 
         const donationData = {
             donorId: user.uid,
@@ -234,7 +269,7 @@ export default function NewDonationPage() {
                 email: user.email || '',
                 photoURL: user.photoURL || '',
             },
-            imageURL: imageDataUri,
+            imageURL: resizedImageDataUri,
             aiImageAnalysis: aiAnalysis,
         };
 
@@ -462,3 +497,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
