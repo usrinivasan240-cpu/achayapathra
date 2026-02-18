@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -149,8 +148,8 @@ export default function DonationDetailsPage() {
     <>
       <Header title="Donation Details" />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="grid gap-8 md:grid-cols-3">
-          <div className="md:col-span-2 space-y-8">
+        <div className="grid gap-8 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-8">
             <Card>
               {donation.imageURL && (
                 <div className="relative w-full h-64">
@@ -270,7 +269,7 @@ export default function DonationDetailsPage() {
             </Card>
           </div>
 
-          <div className="md:col-span-1 space-y-8">
+          <div className="lg:col-span-1 space-y-8">
             <Card>
               <CardHeader>
                 <CardTitle className="font-headline">Pickup Location</CardTitle>
