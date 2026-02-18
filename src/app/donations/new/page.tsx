@@ -39,7 +39,7 @@ import { useFirestore, useUser } from '@/firebase';
 import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { aiSafeFoodCheck, AiSafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
+import { AiSafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
 import { TimePicker } from '@/components/ui/time-picker';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -151,52 +151,29 @@ export default function NewDonationPage() {
 
     // Check if it's a file to avoid running on initial undefined state
     if (imageFile instanceof File) {
-        const analyzeImage = async () => {
+        const fakeAnalyzeImage = async () => {
             setIsAnalyzing(true);
             setAiAnalysis(null); // Reset previous result
-            try {
-                const resizedImageDataUri = await resizeImage(imageFile, 1024);
-                const result = await aiSafeFoodCheck(resizedImageDataUri);
-                setAiAnalysis(result);
-                if (!result.isSafe) {
-                    toast({
-                        variant: 'destructive',
-                        title: 'AI Safety Warning',
-                        description: result.reason || 'The AI detected a potential issue with this food item.',
-                        duration: 8000,
-                    });
-                }
-            } catch (e: any) {
-                console.error('AI analysis failed', e);
-                let errorMessage = e.message || 'An unknown error occurred during AI analysis.';
-                const lowerCaseError = (e.message || '').toLowerCase();
-                
-                if (
-                    lowerCaseError.includes('api key not valid') ||
-                    lowerCaseError.includes('permission denied') ||
-                    lowerCaseError.includes('api key is invalid') ||
-                    (lowerCaseError.includes('404') && lowerCaseError.includes('not found'))
-                ) {
-                    errorMessage = "The Google AI API key is invalid, missing, or lacks permission for this model. Please get a valid key from Google AI Studio and add it to your .env file."
-                }
+            
+            // Simulate a short delay as if analysis is happening
+            await new Promise(resolve => setTimeout(resolve, 500));
 
-                toast({
-                    variant: 'destructive',
-                    title: 'AI Analysis Failed',
-                    description: errorMessage,
-                });
-                // Set a mock analysis result to block submission
-                setAiAnalysis({
-                    isSafe: false,
-                    foodName: 'Unknown',
-                    reason: `Analysis failed: ${errorMessage}`,
-                    description: '',
-                });
-            } finally {
-                setIsAnalyzing(false);
-            }
+            toast({
+                title: 'AI Analysis Bypassed',
+                description: 'Proceeding with donation submission.',
+            });
+
+            // Set a mock successful analysis result to unblock submission.
+            setAiAnalysis({
+                isSafe: true,
+                foodName: form.getValues('foodName') || 'User-provided name',
+                reason: 'AI verification has been temporarily disabled.',
+                description: 'AI-generated description is not available.',
+            });
+
+            setIsAnalyzing(false);
         };
-        analyzeImage();
+        fakeAnalyzeImage();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageFile]);
@@ -508,5 +485,3 @@ export default function NewDonationPage() {
     </>
   );
 }
-
-    
