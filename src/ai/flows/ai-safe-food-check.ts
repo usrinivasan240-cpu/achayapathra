@@ -13,6 +13,7 @@
 
 import {z} from 'genkit';
 import {ai} from '../genkit';
+import {googleAI} from '@genkit-ai/google-genai';
 
 // Define the input schema for the flow.
 // It expects a single string which is a data URI of the food image.
@@ -61,7 +62,7 @@ const promptInputSchema = z.object({
 // Define the prompt that will be sent to the AI model.
 const aiSafeFoodCheckPrompt = ai.definePrompt({
   name: 'aiSafeFoodCheckPrompt',
-  model: 'gemini-pro-vision',
+  model: googleAI.model('gemini-pro-vision'),
   input: {
     schema: promptInputSchema,
   },
