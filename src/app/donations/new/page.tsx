@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { CalendarIcon, Loader2, MapPin } from 'lucide-react';
+import { CalendarIcon, Loader2, MapPin, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -39,8 +39,9 @@ import { useFirestore, useUser } from '@/firebase';
 import { addDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { aiSafeFoodCheck } from '@/ai/flows/ai-safe-food-check';
+import { aiSafeFoodCheck, AiSafeFoodCheckOutput } from '@/ai/flows/ai-safe-food-check';
 import { TimePicker } from '@/components/ui/time-picker';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -78,6 +79,8 @@ export default function NewDonationPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGettingLocation, setIsGettingLocation] = React.useState(false);
   const [coords, setCoords] = React.useState<LocationCoords>(null);
+  const [aiAnalysis, setAiAnalysis] = React.useState<AiSafeFoodCheckOutput | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   
   const { toast } = useToast();
   const firestore = useFirestore();
@@ -93,6 +96,65 @@ export default function NewDonationPage() {
       cookedTime: new Date(),
     },
   });
+
+  const imageFile = form.watch('image');
+
+  const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  React.useEffect(() => {
+    // Clear analysis if image is removed
+    if (!imageFile) {
+        setAiAnalysis(null);
+        return;
+    }
+
+    // Check if it's a file to avoid running on initial undefined state
+    if (imageFile instanceof File) {
+        const analyzeImage = async () => {
+            setIsAnalyzing(true);
+            setAiAnalysis(null); // Reset previous result
+            try {
+                const imageDataUri = await fileToDataUri(imageFile);
+                const result = await aiSafeFoodCheck(imageDataUri);
+                setAiAnalysis(result);
+                if (!result.isSafe) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'AI Safety Warning',
+                        description: result.reason || 'The AI detected a potential issue with this food item.',
+                        duration: 8000,
+                    });
+                }
+            } catch (e) {
+                console.error('AI analysis failed', e);
+                toast({
+                    variant: 'destructive',
+                    title: 'AI Analysis Failed',
+                    description: 'Could not analyze the food image. Please try another image.',
+                });
+                // Set a mock analysis result to block submission
+                setAiAnalysis({
+                    isSafe: false,
+                    foodName: 'Unknown',
+                    reason: 'AI analysis could not be performed.',
+                    description: '',
+                });
+            } finally {
+                setIsAnalyzing(false);
+            }
+        };
+        analyzeImage();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageFile]);
+
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -129,21 +191,21 @@ export default function NewDonationPage() {
     );
   };
 
-  const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!firestore || !user) {
         toast({
             variant: 'destructive',
             title: 'Error',
             description: 'You must be logged in to create a donation.'
+        });
+        return;
+    }
+
+    if (!aiAnalysis || !aiAnalysis.isSafe) {
+        toast({
+            variant: 'destructive',
+            title: 'Submission Blocked',
+            description: 'Cannot submit donation due to AI safety check failure.'
         });
         return;
     }
@@ -154,16 +216,7 @@ export default function NewDonationPage() {
         const imageFile = values.image as File;
         const imageDataUri = await fileToDataUri(imageFile);
 
-        let aiImageAnalysis = 'AI analysis could not be performed.';
-        try {
-          const aiResult = await aiSafeFoodCheck(imageDataUri);
-          const safetyStatus = aiResult.isSafe ? 'Looks Safe' : 'Potential Issue';
-          // Construct a more detailed, multi-line analysis string.
-          aiImageAnalysis = `Identification: ${aiResult.foodName}\nSafety: ${safetyStatus} - ${aiResult.reason}\nNote: ${aiResult.description}`;
-        } catch (e) {
-          console.error("AI check failed", e);
-        }
-
+        const aiImageAnalysis = `Identification: ${aiAnalysis.foodName}\nSafety: ${aiAnalysis.isSafe ? 'Looks Safe' : 'Potential Issue'} - ${aiAnalysis.reason}\nNote: ${aiAnalysis.description}`;
 
         const donationData = {
             donorId: user.uid,
@@ -206,6 +259,8 @@ export default function NewDonationPage() {
         setIsSubmitting(false);
     }
   }
+  
+  const isSubmitDisabled = isSubmitting || isAnalyzing || !aiAnalysis?.isSafe;
 
   return (
     <>
@@ -379,10 +434,25 @@ export default function NewDonationPage() {
                         accept={{ 'image/*': ['.jpeg', '.jpg', '.png', '.webp'] }}
                         maxSize={MAX_FILE_SIZE}
                       />
+                      {isAnalyzing && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>Analyzing image with AI...</span>
+                        </div>
+                      )}
+                      {aiAnalysis && (
+                        <Alert variant={aiAnalysis.isSafe ? 'default' : 'destructive'} className='bg-opacity-20'>
+                            {aiAnalysis.isSafe ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
+                            <AlertTitle>AI Safety Analysis</AlertTitle>
+                            <AlertDescription>
+                                {aiAnalysis.isSafe ? `Looks Safe: The AI identified this as ${aiAnalysis.foodName}.` : `Potential Issue: ${aiAnalysis.reason}`}
+                            </AlertDescription>
+                        </Alert>
+                      )}
                     </div>
                 </div>
 
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitDisabled}>
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {isSubmitting ? 'Submitting...' : 'Submit Donation'}
                 </Button>
@@ -394,3 +464,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
