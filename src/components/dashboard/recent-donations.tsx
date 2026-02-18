@@ -52,16 +52,16 @@ export function RecentDonations() {
   return (
     <div className="space-y-8">
       {recentDonations.map((donation) => (
-        <div className="flex items-center" key={donation.id}>
-          <Avatar className="h-9 w-9">
+        <div className="flex items-center gap-4" key={donation.id}>
+          <Avatar className="h-9 w-9 flex-shrink-0">
             <AvatarImage src={donation.donor?.photoURL} alt={donation.donor?.name} />
             <AvatarFallback>{donation.donor?.name?.substring(0, 2) || 'DN'}</AvatarFallback>
           </Avatar>
-          <div className="ml-4 space-y-1">
-            <p className="text-sm font-medium leading-none">{donation.donor?.name || 'Anonymous'}</p>
-            <p className="text-sm text-muted-foreground">{donation.donor?.email || 'No email'}</p>
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="truncate text-sm font-medium leading-none">{donation.donor?.name || 'Anonymous'}</p>
+            <p className="truncate text-sm text-muted-foreground">{donation.donor?.email || 'No email'}</p>
           </div>
-          <div className="ml-auto font-medium">
+          <div className="truncate text-right font-medium">
             {donation.foodName}
           </div>
         </div>
