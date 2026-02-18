@@ -194,7 +194,7 @@ export default function DonationDetailsPage() {
                     </AlertDescription>
                   </Alert>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                   <div className="flex items-start gap-3">
                     <Package className="h-5 w-5 text-primary mt-1" />
                     <div>
