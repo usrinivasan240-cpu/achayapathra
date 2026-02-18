@@ -61,7 +61,7 @@ const promptInputSchema = z.object({
 // Define the prompt that will be sent to the AI model.
 const aiSafeFoodCheckPrompt = ai.definePrompt({
   name: 'aiSafeFoodCheckPrompt',
-  model: 'gemini-1.5-flash',
+  model: 'gemini-pro',
   input: {
     schema: promptInputSchema,
   },
