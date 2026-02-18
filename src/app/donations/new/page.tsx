@@ -56,11 +56,11 @@ const formSchema = z.object({
   image: z.any()
     .refine((file): file is File => file instanceof File, 'Image is required.')
     .refine(
-      (file) => file.size <= MAX_FILE_SIZE,
+      (file) => !(file instanceof File) || file.size <= MAX_FILE_SIZE,
       `Max file size is 5MB.`
     )
     .refine(
-      (file) => file.type.startsWith('image/'),
+      (file) => !(file instanceof File) || file.type.startsWith('image/'),
       'Only image files are accepted. Please upload a JPG, PNG, or WEBP.'
     ),
 }).refine(data => data.expiryTime > data.cookedTime, {
