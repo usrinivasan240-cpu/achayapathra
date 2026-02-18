@@ -169,9 +169,17 @@ export default function NewDonationPage() {
             } catch (e: any) {
                 console.error('AI analysis failed', e);
                 let errorMessage = e.message || 'An unknown error occurred during AI analysis.';
-                if (errorMessage.includes('API key not valid') || errorMessage.includes('permission')) {
-                    errorMessage = "The Google AI API key is invalid or missing. Please get a valid key from Google AI Studio and add it to your .env file."
+                const lowerCaseError = (e.message || '').toLowerCase();
+                
+                if (
+                    lowerCaseError.includes('api key not valid') ||
+                    lowerCaseError.includes('permission denied') ||
+                    lowerCaseError.includes('api key is invalid') ||
+                    (lowerCaseError.includes('404') && lowerCaseError.includes('not found'))
+                ) {
+                    errorMessage = "The Google AI API key is invalid, missing, or lacks permission for this model. Please get a valid key from Google AI Studio and add it to your .env file."
                 }
+
                 toast({
                     variant: 'destructive',
                     title: 'AI Analysis Failed',
