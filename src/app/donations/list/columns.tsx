@@ -89,8 +89,6 @@ export const columns = (options: {
     id: 'actions',
     cell: ({ row }) => {
       const donation = row.original;
-      const isOwner = options.currentUser?.uid === donation.donorId;
-      const canRemove = isOwner || options.isAdmin;
 
       return (
         <DropdownMenu>
@@ -127,7 +125,7 @@ export const columns = (options: {
                 Mark as Available
                 </DropdownMenuItem>
             )}
-            {options.onRemove && canRemove && (
+            {options.onRemove && (
               <>
                 <DropdownMenuSeparator />
                  <DropdownMenuItem
