@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to analyze a food image for identification and safety.
@@ -61,7 +62,7 @@ const promptInputSchema = z.object({
 // Define the prompt that will be sent to the AI model.
 const aiSafeFoodCheckPrompt = ai.definePrompt({
   name: 'aiSafeFoodCheckPrompt',
-  model: 'gemini-pro',
+  model: 'gemini-1.5-flash',
   input: {
     schema: promptInputSchema,
   },
@@ -102,3 +103,4 @@ const aiSafeFoodCheckFlow = ai.defineFlow(
     return output;
   }
 );
+    
