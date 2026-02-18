@@ -168,7 +168,10 @@ export default function NewDonationPage() {
                 }
             } catch (e: any) {
                 console.error('AI analysis failed', e);
-                const errorMessage = e.message || 'An unknown error occurred during AI analysis.';
+                let errorMessage = e.message || 'An unknown error occurred during AI analysis.';
+                if (errorMessage.includes('API key not valid') || errorMessage.includes('permission')) {
+                    errorMessage = "The Google AI API key is invalid or missing. Please get a valid key from Google AI Studio and add it to your .env file."
+                }
                 toast({
                     variant: 'destructive',
                     title: 'AI Analysis Failed',
