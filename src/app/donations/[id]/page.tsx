@@ -93,7 +93,7 @@ export default function DonationDetailsPage() {
       });
   };
 
-  const toDate = (timestamp: Timestamp | undefined) => {
+  const toDate = (timestamp: any): Date | undefined => {
     return timestamp instanceof Timestamp ? timestamp.toDate() : undefined;
   };
 
@@ -140,7 +140,7 @@ export default function DonationDetailsPage() {
     return `https://www.google.com/maps/dir/?api=1&destination=${donation.lat},${donation.lng}`;
   };
 
-  const isAiSafe = donation.aiImageAnalysis?.toLowerCase().includes('safe');
+  const isAiSafe = donation.aiImageAnalysis?.isSafe;
   const cookedTime = toDate(donation.cookedTime);
   const expiryTime = toDate(donation.expiryTime);
 
@@ -180,7 +180,7 @@ export default function DonationDetailsPage() {
                 {donation.aiImageAnalysis && (
                   <Alert
                     variant={isAiSafe ? 'default' : 'destructive'}
-                    className="mb-6 bg-opacity-20"
+                    className="mb-6"
                   >
                     {isAiSafe ? (
                       <ShieldCheck className="h-4 w-4" />
@@ -188,12 +188,23 @@ export default function DonationDetailsPage() {
                       <ShieldAlert className="h-4 w-4" />
                     )}
                     <AlertTitle>AI Food Safety Analysis</AlertTitle>
-                    <AlertDescription className="whitespace-pre-wrap">
-                      {donation.aiImageAnalysis}
+                    <AlertDescription asChild>
+                       <div className="space-y-3 mt-2">
+                            <p>
+                                <span className="font-semibold">Identification:</span> {donation.aiImageAnalysis.foodName}
+                            </p>
+                            <p>
+                                <span className="font-semibold">Assessment:</span> {donation.aiImageAnalysis.reason}
+                            </p>
+                            <Separator className="my-2" />
+                            <p className="text-xs italic text-muted-foreground">
+                                <span className="font-semibold not-italic">Fun Fact:</span> {donation.aiImageAnalysis.description}
+                            </p>
+                        </div>
                     </AlertDescription>
                   </Alert>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-sm">
                   <div className="flex items-start gap-3">
                     <Package className="h-5 w-5 text-primary mt-1" />
                     <div>

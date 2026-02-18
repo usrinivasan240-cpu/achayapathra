@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview An AI flow to analyze a food image for identification and safety.
@@ -70,13 +69,18 @@ const aiSafeFoodCheckPrompt = ai.definePrompt({
     schema: AiSafeFoodCheckOutputSchema,
   },
   // The updated prompt instructs the AI to perform a more detailed analysis.
-  prompt: `You are a food expert and encyclopedia. Analyze the provided image.
-1. Identify the food item. Be specific if possible (e.g., "Vegetable Samosa" instead of just "Samosa").
-2. Visually assess its safety. Look for mold, spoilage, or discoloration.
-3. Provide a brief reason for your safety assessment.
-4. Provide a short, interesting encyclopedic description or fact about the food.
+  prompt: `You are an expert food safety inspector and a culinary historian. Your task is to analyze the provided image of a food item.
+    
+**Analysis Steps:**
+1.  **Identify the Food:** Clearly and specifically identify the food item in the image. If it's a dish, name it (e.g., "Chicken Biryani," not just "rice"). If it's a baked good, be specific (e.g., "Chocolate Croissant").
+2.  **Conduct a Safety Assessment:** Meticulously examine the image for any signs of spoilage, such as mold, unusual discoloration, wilting, or drying. Based on this visual evidence, determine if the food appears safe for consumption.
+3.  **Provide a Clear Rationale:** In the 'reason' field, state your conclusion clearly. Start with "Looks safe to eat" or "Caution advised". Then, provide a brief, one-sentence explanation for your assessment. For example: "Looks safe to eat because it appears fresh and has no visible signs of spoilage." or "Caution advised due to some discoloration on the edges."
+4.  **Share a Culinary Fact:** In the 'description' field, provide a single, interesting, and concise encyclopedic fact about the identified food, its history, or its ingredients.
 
-Image: {{media url=photoDataUri}}`,
+Return the analysis in the specified JSON format.
+
+**Image for Analysis:**
+{{media url=photoDataUri}}`,
 });
 
 // Define the Genkit flow.

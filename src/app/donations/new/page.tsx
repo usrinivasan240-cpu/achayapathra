@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -57,12 +56,12 @@ const formSchema = z.object({
   image: z.any()
     .refine((file): file is File => file instanceof File, 'Image is required.')
     .refine(
-      (file) => !file || file.size <= MAX_FILE_SIZE,
+      (file) => file.size <= MAX_FILE_SIZE,
       `Max file size is 5MB.`
     )
     .refine(
-      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
-      '.jpg, .jpeg, .png and .webp files are accepted.'
+      (file) => file.type.startsWith('image/'),
+      'Only image files are accepted. Please upload a JPG, PNG, or WEBP.'
     ),
 }).refine(data => data.expiryTime > data.cookedTime, {
   message: 'Expiry date and time must be after cooked time.',
@@ -217,8 +216,6 @@ export default function NewDonationPage() {
         const imageFile = values.image as File;
         const imageDataUri = await fileToDataUri(imageFile);
 
-        const aiImageAnalysis = `Identification: ${aiAnalysis.foodName}\nSafety: ${aiAnalysis.isSafe ? 'Looks Safe' : 'Potential Issue'} - ${aiAnalysis.reason}\nNote: ${aiAnalysis.description}`;
-
         const donationData = {
             donorId: user.uid,
             foodName: values.foodName,
@@ -238,7 +235,7 @@ export default function NewDonationPage() {
                 photoURL: user.photoURL || '',
             },
             imageURL: imageDataUri,
-            aiImageAnalysis,
+            aiImageAnalysis: aiAnalysis,
         };
 
         await addDoc(collection(firestore, 'donations'), donationData);

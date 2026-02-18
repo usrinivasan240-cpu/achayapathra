@@ -32,6 +32,11 @@ export type Donation = {
   lat?: number;
   lng?: number;
   imageURL: string;
-  aiImageAnalysis?: string;
+  aiImageAnalysis?: {
+    foodName: string;
+    isSafe: boolean;
+    reason: string;
+    description: string;
+  };
   claimedBy?: string;
 };
