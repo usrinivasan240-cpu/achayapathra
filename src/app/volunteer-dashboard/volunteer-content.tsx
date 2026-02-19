@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -101,17 +100,41 @@ export function VolunteerContent() {
     setIsUpdating(false);
   }, []);
 
-  const handleLocationError = useCallback((error: GeolocationPositionError) => {
-    setIsUpdating(false);
-    if (!location) { // Only show error toast if location was never found
+  const handleLocationError = useCallback(
+    (error: GeolocationPositionError) => {
+      setIsUpdating(false);
+
+      let description =
+        'Could not retrieve your location. Please ensure you have granted location permissions in your browser settings.';
+
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          description =
+            'Location access was denied. Please enable it in your browser settings to find nearby tasks.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          description =
+            "Your location could not be determined at this time. Please check your device's location settings.";
+          break;
+        case error.TIMEOUT:
+          description =
+            'The request to get your location timed out. Please try again.';
+          break;
+      }
+
+      // Only show a toast if we haven't successfully gotten a location yet.
+      // This prevents spamming toasts if live tracking fails intermittently.
+      if (!location) {
         toast({
-            variant: 'destructive',
-            title: 'Geolocation Error',
-            description: 'Could not retrieve your location. Please ensure you have granted location permissions.',
+          variant: 'destructive',
+          title: 'Geolocation Error',
+          description,
         });
-    }
-    console.error('Geolocation error:', error);
-  }, [location, toast]);
+      }
+      console.error('Geolocation error:', error);
+    },
+    [location, toast]
+  );
 
   const startWatchingLocation = useCallback(() => {
     if (typeof window === 'undefined' || !navigator.geolocation) {
@@ -130,7 +153,7 @@ export function VolunteerContent() {
     watchIdRef.current = navigator.geolocation.watchPosition(
       handleLocationSuccess,
       handleLocationError,
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // Increased timeout
     );
   }, [handleLocationSuccess, handleLocationError, stopWatchingLocation, toast]);
 
@@ -143,7 +166,11 @@ export function VolunteerContent() {
         return;
     }
     setIsUpdating(true);
-    navigator.geolocation.getCurrentPosition(handleLocationSuccess, handleLocationError);
+    navigator.geolocation.getCurrentPosition(
+        handleLocationSuccess, 
+        handleLocationError, 
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   }, [handleLocationSuccess, handleLocationError, toast]);
 
 
