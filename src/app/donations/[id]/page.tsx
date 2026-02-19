@@ -188,7 +188,7 @@ export default function DonationDetailsPage() {
                       <ShieldAlert className="h-4 w-4" />
                     )}
                     <AlertTitle>AI Food Safety Analysis</AlertTitle>
-                    <AlertDescription asChild>
+                    <AlertDescription>
                        <div className="space-y-3 mt-2">
                             <p>
                                 <span className="font-semibold">Identification:</span> {donation.aiImageAnalysis.foodName}
