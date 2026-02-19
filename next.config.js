@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    allowedDevOrigins: [
+      '9000-firebase-studio-1761850401608.cluster-zumahodzirciuujpqvsniawo3o.cloudworkstations.dev',
+    ],
+  },
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -14,7 +19,7 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'lh3.googleusercontent.com',
-      }
+      },
     ],
   },
 };
