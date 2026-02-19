@@ -203,14 +203,26 @@ export default function NewDonationPage() {
       },
       (error) => {
         setIsGettingLocation(false);
+        let description = 'Could not retrieve your location. Please ensure you have granted location permissions.';
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                description = "Location access was denied. Please enable it in your browser settings.";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                description = "Your location could not be determined at this time.";
+                break;
+            case error.TIMEOUT:
+                description = "The request to get your location timed out.";
+                break;
+        }
         toast({
           variant: 'destructive',
           title: 'Geolocation Error',
-          description:
-            'Could not retrieve your location. Please ensure you have granted location permissions.',
+          description: description,
         });
         console.error('Geolocation error:', error);
-      }
+      },
+      { timeout: 10000, enableHighAccuracy: true }
     );
   };
 
@@ -374,9 +386,9 @@ export default function NewDonationPage() {
                             <FormControl>
                                 <Input placeholder="e.g., 123 Main St, Anytown" {...field} />
                             </FormControl>
-                            <Button type="button" variant="outline" size="icon" onClick={handleUseCurrentLocation} disabled={isGettingLocation}>
-                                {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
-                                <span className="sr-only">Use Current Location</span>
+                            <Button type="button" variant="outline" onClick={handleUseCurrentLocation} disabled={isGettingLocation}>
+                                {isGettingLocation ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MapPin className="mr-2 h-4 w-4" />}
+                                Use Location
                             </Button>
                            </div>
                           <FormMessage />
@@ -485,3 +497,5 @@ export default function NewDonationPage() {
     </>
   );
 }
+
+    
