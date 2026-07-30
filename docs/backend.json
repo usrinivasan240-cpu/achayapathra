@@ -1,0 +1,93 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user (Donor, Receiver, Volunteer, NGO, Admin).",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["donor", "receiver", "volunteer", "ngo", "admin"] },
+        "points": { "type": "number" },
+        "location": { "type": "string" },
+        "photoURL": { "type": "string" }
+      },
+      "required": ["id", "email", "role"]
+    },
+    "Donation": {
+      "title": "Donation",
+      "type": "object",
+      "description": "Represents a food donation.",
+      "properties": {
+        "id": { "type": "string" },
+        "donorId": { "type": "string" },
+        "foodName": { "type": "string" },
+        "foodType": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Available", "Claimed", "Picked Up", "Delivered"] },
+        "expiryTime": { "type": "string", "format": "date-time" },
+        "location": { "type": "string" },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "trackingId": { "type": "string" },
+        "quantity": { "type": "string" },
+        "ai_matches": { "type": "array", "items": { "type": "object" } }
+      },
+      "required": ["id", "donorId", "foodName", "status", "expiryTime"]
+    },
+    "NGODemand": {
+      "title": "NGO Demand",
+      "type": "object",
+      "description": "Represents an NGO's food requirement.",
+      "properties": {
+        "id": { "type": "string" },
+        "ngoId": { "type": "string" },
+        "ngoName": { "type": "string" },
+        "foodType": { "type": "string" },
+        "requiredQuantity": { "type": "string" },
+        "urgency": { "type": "string", "enum": ["Low", "Medium", "High", "Critical"] },
+        "minShelfLifeHours": { "type": "number" },
+        "location": { "type": "string" },
+        "status": { "type": "string", "enum": ["Active", "Fulfilled", "Cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ngoId", "foodType", "status"]
+    },
+    "HungerZone": {
+      "title": "Hunger Zone",
+      "type": "object",
+      "description": "Represents a regional zone with hunger risk analytics.",
+      "properties": {
+        "id": { "type": "string" },
+        "zone_name": { "type": "string" },
+        "hunger_risk_score": { "type": "number" },
+        "weekly_request_count": { "type": "number" },
+        "last_30_days_growth_rate": { "type": "number" }
+      }
+    },
+    "Feedback": {
+      "title": "Feedback",
+      "type": "object",
+      "description": "User suggestions and ideas.",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "auth": {
+    "providers": ["password"]
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": { "$ref": "#/entities/User" }, "description": "User profiles" },
+    "/donations/{donationId}": { "schema": { "$ref": "#/entities/Donation" }, "description": "Donations" },
+    "/ngo_demands/{demandId}": { "schema": { "$ref": "#/entities/NGODemand" }, "description": "NGO requirement requests" },
+    "/hunger_zones/{zoneId}": { "schema": { "$ref": "#/entities/HungerZone" }, "description": "Regional hunger risk analytics" },
+    "/system_settings/global": { "schema": { "type": "object" }, "description": "Global app settings" },
+    "/roles_admin/{userId}": { "schema": { "type": "object" }, "description": "Administrative role assignments" },
+    "/feedback/{feedbackId}": { "schema": { "$ref": "#/entities/Feedback" }, "description": "Community suggestions" }
+  }
+}

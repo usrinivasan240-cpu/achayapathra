@@ -1,0 +1,71 @@
+
+'use client';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import React from 'react';
+import { Loader2 } from 'lucide-react';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { Donation } from '@/lib/types';
+
+
+export function RecentDonations() {
+  const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
+
+  const recentDonationsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(
+        collection(firestore, 'donations'), 
+        orderBy('createdAt', 'desc'), 
+        limit(5)
+    );
+  }, [firestore, user]);
+
+  const { data: recentDonations, isLoading: donationsLoading } = useCollection<Donation>(recentDonationsQuery);
+
+  const isLoading = isUserLoading || donationsLoading;
+
+  if (isLoading) {
+    return (
+        <div className="flex justify-center items-center h-40">
+            <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+    )
+  }
+
+  if (!user) {
+    return (
+        <div className="flex justify-center items-center h-40">
+            <p className="text-sm text-muted-foreground">Sign in to view recent donations.</p>
+        </div>
+    )
+  }
+
+  if (!recentDonations || recentDonations.length === 0) {
+    return (
+        <div className="flex justify-center items-center h-40">
+            <p className="text-sm text-muted-foreground">No recent donations.</p>
+        </div>
+    )
+  }
+
+  return (
+    <div className="space-y-8">
+      {recentDonations.map((donation) => (
+        <div className="flex items-center gap-4" key={donation.id}>
+          <Avatar className="h-9 w-9 flex-shrink-0">
+            <AvatarImage src={donation.donor?.photoURL} alt={donation.donor?.name} />
+            <AvatarFallback>{donation.donor?.name?.substring(0, 2) || 'DN'}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="truncate text-sm font-medium leading-none">{donation.donor?.name || 'Anonymous'}</p>
+            <p className="truncate text-sm text-muted-foreground">{donation.donor?.email || 'No email'}</p>
+          </div>
+          <div className="truncate text-right font-medium">
+            {donation.foodName}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
