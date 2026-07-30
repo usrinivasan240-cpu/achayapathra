@@ -89,7 +89,7 @@ export default function DashboardPage() {
 
     allDonations.forEach(donation => {
       if (donation.createdAt) {
-        const date = donation.createdAt.toDate ? donation.createdAt.toDate() : new Date(donation.createdAt);
+        const date = (donation.createdAt as any).toDate ? (donation.createdAt as any).toDate() : new Date(donation.createdAt as any);
         const month = date.getMonth();
         const entry = last7Months.find(m => m.month === month);
         if (entry) entry.total += 1;
