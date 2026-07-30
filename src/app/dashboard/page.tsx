@@ -23,16 +23,6 @@ const Overview = dynamic(() => import('../../components/dashboard/overview'), {
   loading: () => <div className="flex items-center justify-center h-[200px] md:h-[350px]"><Loader2 className="h-8 w-8 animate-spin" /></div>
 });
 
-const staticOverviewData = [
-  { name: 'Jan', total: 1200 },
-  { name: 'Feb', total: 2100 },
-  { name: 'Mar', total: 1800 },
-  { name: 'Apr', total: 2400 },
-  { name: 'May', total: 2900 },
-  { name: 'Jun', total: 3200 },
-  { name: 'Jul', total: 2800 },
-];
-
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -65,10 +55,48 @@ export default function DashboardPage() {
     const rescued = allDonations.filter(d => d.status === 'Delivered').length;
     const totalKg = allDonations.reduce((acc, d) => acc + (d.quantity_kg || 0.5), 0);
     return {
-      efficiency: (rescued / (allDonations.length || 1)) * 100,
-      co2: totalKg * 2.5, // 1kg = 2.5kg CO2
-      deliveryTime: 22 // Average simulated
+      efficiency: allDonations.length > 0 ? (rescued / allDonations.length) * 100 : 0,
+      co2: totalKg * 2.5,
+      deliveryTime: allDonations.length > 0 ? 22 : 0
     };
+  }, [allDonations]);
+
+  const chartData = React.useMemo(() => {
+    if (!allDonations || allDonations.length === 0) {
+      return [
+        { name: 'Jan', total: 0 },
+        { name: 'Feb', total: 0 },
+        { name: 'Mar', total: 0 },
+        { name: 'Apr', total: 0 },
+        { name: 'May', total: 0 },
+        { name: 'Jun', total: 0 },
+        { name: 'Jul', total: 0 },
+      ];
+    }
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentMonth = new Date().getMonth();
+    const last7Months = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const monthIndex = (currentMonth - i + 12) % 12;
+      last7Months.push({
+        name: monthNames[monthIndex],
+        month: monthIndex,
+        total: 0
+      });
+    }
+
+    allDonations.forEach(donation => {
+      if (donation.createdAt) {
+        const date = donation.createdAt.toDate ? donation.createdAt.toDate() : new Date(donation.createdAt);
+        const month = date.getMonth();
+        const entry = last7Months.find(m => m.month === month);
+        if (entry) entry.total += 1;
+      }
+    });
+
+    return last7Months.map(m => ({ name: m.name, total: m.total }));
   }, [allDonations]);
 
   if (isLoading) {
@@ -139,7 +167,7 @@ export default function DashboardPage() {
               <CardDescription className="text-xs">{t('dashboard.trendsDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="p-2 md:pl-2">
-              <Overview data={staticOverviewData} />
+              <Overview data={chartData} />
             </CardContent>
           </Card>
           <Card className="shadow-sm">

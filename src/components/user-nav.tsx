@@ -34,7 +34,7 @@ export function UserNav() {
         if (!firestore || !user) return null;
         return doc(firestore, 'users', user.uid);
       }, [firestore, user]);
-      const { data: userProfile } = useDoc<UserProfile>(userDocRef);
+      const { data: userProfile, isLoading: profileLoading } = useDoc<UserProfile>(userDocRef);
 
     const handleSignOut = async () => {
         if (auth) {
@@ -43,7 +43,7 @@ export function UserNav() {
         }
     };
     
-    if (isUserLoading) {
+    if (isUserLoading || profileLoading) {
         return (
             <div className="flex items-center space-x-4">
                  <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
@@ -51,7 +51,7 @@ export function UserNav() {
         );
     }
     
-    if (!user || !userProfile) {
+    if (!user) {
         return (
             <Link href="/">
                 <Button>Sign In</Button>
