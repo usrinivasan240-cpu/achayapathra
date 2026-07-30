@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
+import { QRCodeSVG } from 'qrcode.react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import {
   Search,
   MapPin,
@@ -64,12 +67,22 @@ const STATUS_TO_STEP: Record<string, number> = {
 function generateGPSRoute(donation: Donation): Array<{ lat: number; lng: number; label: string }> {
   const startLat = donation.lat || 13.08;
   const startLng = donation.lng || 80.27;
+  const endLat = startLat - 0.025 + Math.random() * 0.01;
+  const endLng = startLng + 0.04 + Math.random() * 0.01;
+  const midLat1 = startLat - 0.005;
+  const midLng1 = startLng + 0.01;
+  const midLat2 = startLat - 0.012;
+  const midLng2 = startLng + 0.022;
+  const midLat3 = startLat - 0.019;
+  const midLng3 = startLng + 0.033;
   return [
     { lat: startLat, lng: startLng, label: 'Pickup Point' },
-    { lat: startLat + 0.008, lng: startLng + 0.012, label: 'En Route - Main Road' },
-    { lat: startLat + 0.015, lng: startLng + 0.025, label: 'Highway Junction' },
-    { lat: startLat + 0.022, lng: startLng + 0.038, label: 'Near Destination Area' },
-    { lat: startLat + 0.030, lng: startLng + 0.050, label: 'Destination' },
+    { lat: midLat1, lng: midLng1, label: 'Main Road' },
+    { lat: midLat1 - 0.002, lng: midLng1 + 0.005, label: 'Bus Stop Junction' },
+    { lat: midLat2, lng: midLng2, label: 'Highway Entry' },
+    { lat: midLat2 + 0.001, lng: midLng2 + 0.004, label: 'Toll Plaza' },
+    { lat: midLat3, lng: midLng3, label: 'Near Destination Area' },
+    { lat: endLat, lng: endLng, label: 'Destination' },
   ];
 }
 
@@ -244,7 +257,7 @@ export default function TrackingPage() {
         {selectedDonation && (
           <>
             {/* Tracking Header */}
-            <Card className="overflow-hidden border-orange-200">
+            <Card id="tracking-certificate-area" className="overflow-hidden border-orange-200">
               <div className="bg-gradient-to-r from-orange-600 to-orange-500 p-4 md:p-6 text-white">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div className="space-y-1">
@@ -444,61 +457,56 @@ export default function TrackingPage() {
 
                       {/* Route line */}
                       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 200">
-                        <polyline
-                          points={gpsRoute
-                            .map(
-                              (p, i) =>
-                                `${50 + (i * 70)},${160 - (i * 25)}`
-                            )
-                            .join(' ')}
-                          fill="none"
-                          stroke="#ea580c"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          strokeDasharray="8,4"
+                        <defs>
+                          <linearGradient id="routeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#ea580c" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#ea580c" stopOpacity="1" />
+                          </linearGradient>
+                        </defs>
+                        {/* Background route */}
+                        <path
+                          d={`M 40,170 C 80,165 90,150 120,140 C 150,130 160,115 190,105 C 220,95 240,85 260,75 C 280,65 300,55 340,40 C 355,35 365,28 380,20`}
+                          fill="none" stroke="#fed7aa" strokeWidth="4" strokeLinecap="round"
                         />
-                        {/* Completed route */}
-                        <polyline
-                          points={gpsRoute
-                            .slice(0, gpsIndex + 1)
-                            .map(
-                              (p, i) =>
-                                `${50 + (i * 70)},${160 - (i * 25)}`
-                            )
-                            .join(' ')}
-                          fill="none"
-                          stroke="#ea580c"
-                          strokeWidth="3"
-                          strokeLinecap="round"
+                        {/* Active route */}
+                        <path
+                          d={`M 40,170 C 80,165 90,150 120,140 C 150,130 160,115 190,105 C 220,95 240,85 260,75 C 280,65 300,55 340,40 C 355,35 365,28 380,20`}
+                          fill="none" stroke="url(#routeGrad)" strokeWidth="3" strokeLinecap="round"
+                          strokeDasharray="2000" strokeDashoffset={2000 - (gpsIndex / (gpsRoute.length - 1)) * 2000}
+                          style={{ transition: 'stroke-dashoffset 1s ease' }}
                         />
                       </svg>
 
                       {/* Location markers */}
-                      {gpsRoute.map((point, i) => (
-                        <div
-                          key={i}
-                          className="absolute"
-                          style={{
-                            left: `${12 + i * 17.5}%`,
-                            top: `${80 - i * 12}%`,
-                          }}
-                        >
-                          {i === gpsIndex ? (
-                            <div className="relative">
-                              <div className="w-5 h-5 bg-orange-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center animate-bounce">
-                                <Navigation className="h-2.5 w-2.5 text-white" />
+                      {gpsRoute.map((point, i) => {
+                        const t = i / (gpsRoute.length - 1);
+                        const cx = 40 + t * 340;
+                        const curveY = 170 - t * 150 + Math.sin(t * Math.PI) * -20;
+                        const markerLeft = `${(cx / 400) * 100}%`;
+                        const markerTop = `${(curveY / 200) * 100}%`;
+                        return (
+                          <div
+                            key={i}
+                            className="absolute"
+                            style={{ left: markerLeft, top: markerTop, transform: 'translate(-50%, -50%)' }}
+                          >
+                            {i === gpsIndex ? (
+                              <div className="relative">
+                                <div className="w-5 h-5 bg-orange-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center animate-bounce">
+                                  <Navigation className="h-2.5 w-2.5 text-white" />
+                                </div>
+                                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-orange-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                                  {point.label}
+                                </div>
                               </div>
-                              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-orange-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
-                                {point.label}
-                              </div>
-                            </div>
-                          ) : i < gpsIndex ? (
-                            <div className="w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow" />
-                          ) : (
-                            <div className="w-2.5 h-2.5 bg-orange-200 rounded-full border-2 border-white" />
-                          )}
-                        </div>
-                      ))}
+                            ) : i < gpsIndex ? (
+                              <div className="w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow" />
+                            ) : (
+                              <div className="w-2.5 h-2.5 bg-orange-200 rounded-full border-2 border-white" />
+                            )}
+                          </div>
+                        );
+                      })}
 
                       {/* Distance / Speed info overlay */}
                       <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur rounded-lg px-3 py-1.5 shadow border border-orange-100">
@@ -554,11 +562,10 @@ export default function TrackingPage() {
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {/* Pickup photo */}
                       <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-dashed border-orange-200 bg-orange-50">
-                        <Image
-                          src={selectedDonation.imageURL || 'https://picsum.photos/seed/food/400/300'}
+                        <img
+                          src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=400&fit=crop"
                           alt="Donation pickup photo"
-                          fill
-                          className="object-cover"
+                          className="w-full h-full object-cover"
                         />
                         <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2">
                           <p className="text-[9px] text-white font-bold">PICKUP</p>
@@ -568,11 +575,10 @@ export default function TrackingPage() {
                       <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-dashed border-orange-200 bg-orange-50">
                         {selectedDonation.status === 'Delivered' || photoVerified ? (
                           <>
-                            <Image
-                              src={`https://picsum.photos/seed/delivery${selectedDonation.id}/400/300`}
+                            <img
+                              src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=400&h=400&fit=crop"
                               alt="Delivery confirmation"
-                              fill
-                              className="object-cover"
+                              className="w-full h-full object-cover"
                             />
                             <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2">
                               <p className="text-[9px] text-white font-bold">DELIVERY</p>
@@ -702,44 +708,14 @@ export default function TrackingPage() {
                   </CardHeader>
                   <CardContent className="p-4 md:p-6 pt-0">
                     <div className="text-center space-y-3">
-                      {/* QR Code visual */}
-                      <div className="w-40 h-40 mx-auto bg-white border-2 border-orange-200 rounded-xl p-3 shadow-sm">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          {/* QR Code pattern (simplified visual) */}
-                          <rect x="5" y="5" width="25" height="25" fill="#ea580c" rx="2" />
-                          <rect x="8" y="8" width="19" height="19" fill="white" rx="1" />
-                          <rect x="11" y="11" width="13" height="13" fill="#ea580c" rx="1" />
-
-                          <rect x="70" y="5" width="25" height="25" fill="#ea580c" rx="2" />
-                          <rect x="73" y="8" width="19" height="19" fill="white" rx="1" />
-                          <rect x="76" y="11" width="13" height="13" fill="#ea580c" rx="1" />
-
-                          <rect x="5" y="70" width="25" height="25" fill="#ea580c" rx="2" />
-                          <rect x="8" y="73" width="19" height="19" fill="white" rx="1" />
-                          <rect x="11" y="76" width="13" height="13" fill="#ea580c" rx="1" />
-
-                          {/* Data pattern */}
-                          {Array.from({ length: 8 }).map((_, row) =>
-                            Array.from({ length: 8 }).map((_, col) => {
-                              const filled = (row + col) % 3 !== 0;
-                              if (filled && row > 2 && col > 2) {
-                                return (
-                                  <rect
-                                    key={`${row}-${col}`}
-                                    x={33 + col * 4}
-                                    y={33 + row * 4}
-                                    width="3"
-                                    height="3"
-                                    fill="#ea580c"
-                                    opacity={Math.random() > 0.3 ? 1 : 0.3}
-                                    rx="0.5"
-                                  />
-                                );
-                              }
-                              return null;
-                            })
-                          )}
-                        </svg>
+                      <div className="w-40 h-40 mx-auto bg-white border-2 border-orange-200 rounded-xl p-3 shadow-sm flex items-center justify-center">
+                        <QRCodeSVG
+                          value={`https://achayapathra.vercel.app/tracking?id=${selectedDonation.trackingId || selectedDonation.id}`}
+                          size={120}
+                          bgColor="#ffffff"
+                          fgColor="#ea580c"
+                          level="M"
+                        />
                       </div>
                       <div className="space-y-1">
                         <p className="text-[10px] font-bold uppercase text-orange-600 tracking-wider">
@@ -772,6 +748,21 @@ export default function TrackingPage() {
                   <Button
                     variant="outline"
                     className="w-full h-11 border-orange-300 text-orange-600 hover:bg-orange-50 font-bold"
+                    onClick={async () => {
+                      const el = document.getElementById('tracking-certificate-area');
+                      if (!el) return;
+                      try {
+                        const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff' });
+                        const imgData = canvas.toDataURL('image/png');
+                        const pdf = new jsPDF('l', 'mm', 'a4');
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                        pdf.save(`certificate-${selectedDonation.trackingId || selectedDonation.id}.pdf`);
+                      } catch {
+                        alert('Certificate download requires the page to be fully loaded. Please try again.');
+                      }
+                    }}
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Download Certificate

@@ -16,6 +16,9 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { QRCodeSVG } from 'qrcode.react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import {
   Award,
   Download,
@@ -114,7 +117,7 @@ function CertificateCard({
   const isValid = validUntil ? validUntil > new Date() : true;
 
   return (
-    <Card className="group relative overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300 bg-white/70 backdrop-blur-sm hover:-translate-y-1">
+    <Card id={`cert-card-${cert.id}`} className="group relative overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300 bg-white/70 backdrop-blur-sm hover:-translate-y-1">
       <div className={`absolute top-0 left-0 right-0 h-1 ${config.bg} bg-gradient-to-r`} />
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
@@ -174,7 +177,21 @@ function CertificateCard({
         <Button
           size="sm"
           className="flex-1 h-8 text-xs font-semibold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-sm"
-          onClick={() => alert(`Downloading PDF for ${cert.id}...`)}
+          onClick={async () => {
+            const certEl = document.getElementById(`cert-card-${cert.id}`);
+            if (!certEl) { alert('Please open certificate preview first.'); return; }
+            try {
+              const canvas = await html2canvas(certEl, { scale: 2, backgroundColor: '#ffffff' });
+              const imgData = canvas.toDataURL('image/png');
+              const pdf = new jsPDF('l', 'mm', 'a4');
+              const pdfWidth = pdf.internal.pageSize.getWidth();
+              const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+              pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+              pdf.save(`${cert.id}-certificate.pdf`);
+            } catch {
+              alert('Failed to generate PDF. Please try again.');
+            }
+          }}
         >
           <Download className="h-3.5 w-3.5 mr-1.5" />
           PDF
@@ -208,7 +225,7 @@ function CertificatePreviewDialog({
           <DialogDescription>Certificate preview</DialogDescription>
         </DialogHeader>
 
-        <div className="relative bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 p-1">
+        <div id="certificate-preview-content" className="relative bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 p-1">
           <div className="bg-white rounded-lg m-1 p-8 relative overflow-hidden">
             {/* Decorative corners */}
             <div className="absolute top-0 left-0 w-20 h-20 border-t-4 border-l-4 border-orange-300 rounded-tl-lg" />
@@ -272,11 +289,14 @@ function CertificatePreviewDialog({
               {/* QR Code */}
               <div className="flex items-center justify-center gap-6 pt-4 border-t border-dashed border-orange-200">
                 <div className="text-center space-y-1">
-                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 mx-auto">
-                    <div className="text-center">
-                      <QrCode className="h-8 w-8 text-gray-400 mx-auto" />
-                      <p className="text-[7px] text-gray-400 mt-0.5 font-mono">{cert.qrCode.slice(0, 12)}</p>
-                    </div>
+                  <div className="w-20 h-20 bg-white rounded-lg flex items-center justify-center border border-gray-200 mx-auto">
+                    <QRCodeSVG
+                      value={`https://achayapathra.vercel.app/qr-verification?code=${cert.qrCode}`}
+                      size={64}
+                      bgColor="#ffffff"
+                      fgColor="#1F2937"
+                      level="M"
+                    />
                   </div>
                   <p className="text-[9px] text-gray-400 uppercase tracking-wider font-semibold">Scan to Verify</p>
                 </div>
@@ -309,14 +329,28 @@ function CertificatePreviewDialog({
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => alert('Opening print dialog...')}
+            onClick={() => window.print()}
           >
             <Printer className="h-4 w-4 mr-2" />
             Print
           </Button>
           <Button
             className="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
-            onClick={() => alert(`Downloading PDF for ${cert.id}...`)}
+            onClick={async () => {
+              const el = document.getElementById('certificate-preview-content');
+              if (!el) return;
+              try {
+                const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff' });
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('l', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`${cert.id}-certificate.pdf`);
+              } catch {
+                alert('Failed to generate PDF. Please try again.');
+              }
+            }}
           >
             <Download className="h-4 w-4 mr-2" />
             Download PDF

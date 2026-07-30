@@ -4,189 +4,45 @@ import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Shield, CheckCircle2, XCircle, AlertTriangle, Thermometer, Clock,
-  Upload, Camera, Leaf, Info, Loader2, Sparkles, History, BookOpen,
-  ChevronRight, Eye, Trash2
+  Info, Loader2, Sparkles, History, BookOpen,
+  ChevronRight, Eye, ClipboardCheck,
 } from 'lucide-react';
-import { mockDonations } from '@/lib/data';
 import { FoodSafetyResult } from '@/lib/types';
 
 type AnalysisRecord = FoodSafetyResult & {
   id: string;
   timestamp: Date;
-  imageUrl: string;
 };
 
-const FOOD_SAFETY_SAMPLES: FoodSafetyResult[] = [
-  {
-    isSafe: true,
-    foodName: 'Sambar Rice',
-    confidence: 96,
-    reason: 'Freshly prepared, stored at appropriate temperature, no visible contamination.',
-    description: 'Traditional South Indian sambar rice prepared with lentils, vegetables, and spices. Looks fresh with vibrant color.',
-    estimatedShelfLifeHours: 6,
-    temperatureRequirement: 'room',
-    allergens: ['Lentils', 'Mustard Seeds'],
-    safetyScore: 94,
-  },
-  {
-    isSafe: true,
-    foodName: 'Idli Vada',
-    confidence: 92,
-    reason: 'Properly steamed, no signs of fermentation issues, clean preparation.',
-    description: 'Soft idlis with crispy vada, freshly prepared in a clean kitchen environment.',
-    estimatedShelfLifeHours: 4,
-    temperatureRequirement: 'room',
-    allergens: ['Rice', 'Urad Dal', 'Gluten'],
-    safetyScore: 91,
-  },
-  {
-    isSafe: false,
-    foodName: 'Chicken Biryani',
-    confidence: 88,
-    reason: 'Temperature abuse detected. Food has been in danger zone (40°F-140°F) for over 2 hours.',
-    description: 'Chicken biryani showing signs of improper temperature control. Meat should not be served.',
-    estimatedShelfLifeHours: 0,
-    temperatureRequirement: 'frozen',
-    allergens: ['Poultry', 'Dairy', 'Gluten'],
-    safetyScore: 23,
-  },
-  {
-    isSafe: true,
-    foodName: 'Fresh Vegetable Bundle',
-    confidence: 98,
-    reason: 'Organic vegetables freshly harvested, no pesticides detected, proper handling.',
-    description: 'Mixed seasonal vegetables including spinach, tomatoes, and carrots. Farm-fresh quality.',
-    estimatedShelfLifeHours: 48,
-    temperatureRequirement: 'cold',
-    allergens: [],
-    safetyScore: 97,
-  },
-  {
-    isSafe: true,
-    foodName: 'Milk Packets',
-    confidence: 95,
-    reason: 'Within expiry date, cold chain maintained, packaging intact.',
-    description: 'Pasteurized full cream milk packets, properly refrigerated throughout transport.',
-    estimatedShelfLifeHours: 12,
-    temperatureRequirement: 'cold',
-    allergens: ['Dairy'],
-    safetyScore: 93,
-  },
-  {
-    isSafe: false,
-    foodName: 'Paneer Curry',
-    confidence: 85,
-    reason: 'Mold growth detected on surface. Immediate disposal recommended.',
-    description: 'Paneer curry showing visible mold patches. Not suitable for consumption.',
-    estimatedShelfLifeHours: 0,
-    temperatureRequirement: 'cold',
-    allergens: ['Dairy', 'Nuts'],
-    safetyScore: 8,
-  },
-  {
-    isSafe: true,
-    foodName: 'Pongal',
-    confidence: 94,
-    reason: 'Well-cooked, aromatic, no off-odors or discoloration.',
-    description: 'Ven pongal made with rice, moong dal, pepper, and ghee. Classic preparation.',
-    estimatedShelfLifeHours: 5,
-    temperatureRequirement: 'room',
-    allergens: ['Dairy'],
-    safetyScore: 89,
-  },
-  {
-    isSafe: true,
-    foodName: 'Bread Loaves',
-    confidence: 91,
-    reason: 'Packaging sealed, no moisture damage, within shelf life.',
-    description: 'Whole wheat bread loaves, factory sealed with batch number visible.',
-    estimatedShelfLifeHours: 72,
-    temperatureRequirement: 'room',
-    allergens: ['Gluten', 'Soy'],
-    safetyScore: 88,
-  },
-  {
-    isSafe: false,
-    foodName: 'Fish Curry',
-    confidence: 90,
-    reason: 'Strong ammonia odor indicating protein decomposition. Unsafe for consumption.',
-    description: 'Fish curry with strong signs of spoilage. Ammonia smell indicates bacterial breakdown.',
-    estimatedShelfLifeHours: 0,
-    temperatureRequirement: 'frozen',
-    allergens: ['Fish'],
-    safetyScore: 12,
-  },
-  {
-    isSafe: true,
-    foodName: 'Fresh Fruits',
-    confidence: 97,
-    reason: 'Ripe, organic, no bruising or pest damage.',
-    description: 'Assorted seasonal fruits including bananas, apples, and oranges. Perfect condition.',
-    estimatedShelfLifeHours: 96,
-    temperatureRequirement: 'room',
-    allergens: [],
-    safetyScore: 96,
-  },
-  {
-    isSafe: true,
-    foodName: 'Dal Fry',
-    confidence: 93,
-    reason: 'Properly cooked, consistent texture, no contamination signs.',
-    description: 'Toor dal fry tempered with cumin, garlic, and curry leaves. Homestyle preparation.',
-    estimatedShelfLifeHours: 6,
-    temperatureRequirement: 'room',
-    allergens: ['Lentils'],
-    safetyScore: 90,
-  },
-  {
-    isSafe: false,
-    foodName: 'Curd Rice',
-    confidence: 87,
-    reason: 'Extended room temperature exposure. Bacterial count likely exceeds safe limits.',
-    description: 'Curd rice left unrefrigerated for over 4 hours. Risk of foodborne illness.',
-    estimatedShelfLifeHours: 0,
-    temperatureRequirement: 'cold',
-    allergens: ['Dairy'],
-    safetyScore: 31,
-  },
-  {
-    isSafe: true,
-    foodName: 'Protein Bars',
-    confidence: 99,
-    reason: 'Factory sealed, within expiry, no damage to packaging.',
-    description: 'Packaged protein bars with nut and chocolate flavor. Commercial packaging intact.',
-    estimatedShelfLifeHours: 720,
-    temperatureRequirement: 'room',
-    allergens: ['Nuts', 'Soy', 'Dairy'],
-    safetyScore: 98,
-  },
-  {
-    isSafe: true,
-    foodName: 'Egg Curry',
-    confidence: 89,
-    reason: 'Freshly prepared, eggs properly boiled, curry well-cooked.',
-    description: 'Boiled egg curry in rich tomato-onion gravy. Eggs checked for freshness.',
-    estimatedShelfLifeHours: 5,
-    temperatureRequirement: 'room',
-    allergens: ['Eggs'],
-    safetyScore: 86,
-  },
-  {
-    isSafe: false,
-    foodName: 'Lemon Rice',
-    confidence: 82,
-    reason: 'Rice appears dried and discolored. Possible contamination during preparation.',
-    description: 'Lemon rice with yellow discoloration inconsistent with turmeric. Investigate further.',
-    estimatedShelfLifeHours: 0,
-    temperatureRequirement: 'room',
-    allergens: ['Mustard Seeds'],
-    safetyScore: 42,
-  },
-];
+type ChecklistForm = {
+  foodName: string;
+  foodType: string;
+  hoursPrepared: number;
+  storageTemp: 'room' | 'cold' | 'frozen';
+  hasPackaging: boolean;
+  visibleContamination: boolean;
+  allergens: string[];
+};
+
+const FOOD_TYPE_SHELFLIFE: Record<string, number> = {
+  'Cooked Meal': 6,
+  'Fresh Produce': 48,
+  'Dairy': 12,
+  'Bakery': 72,
+  'Packaged Food': 720,
+  'Beverages': 24,
+  'Snacks': 168,
+};
+
+const ALLERGEN_OPTIONS = ['Nuts', 'Dairy', 'Gluten', 'Eggs', 'Soy', 'Fish', 'Lentils'];
 
 const SAFETY_GUIDELINES = [
   {
@@ -227,11 +83,66 @@ const SAFETY_GUIDELINES = [
   {
     title: 'Sustainable Handling',
     description: 'Minimize food waste through proper storage and timely redistribution. Redirect safe surplus to biogas or composting.',
-    icon: Leaf,
+    icon: Sparkles,
     color: 'text-emerald-500',
     bg: 'bg-emerald-500/10',
   },
 ];
+
+function calculateSafetyScore(form: ChecklistForm): FoodSafetyResult {
+  const shelfLife = FOOD_TYPE_SHELFLIFE[form.foodType] || 6;
+  let score = 80;
+  let reasons: string[] = [];
+  let isSafe = true;
+
+  if (form.hoursPrepared > shelfLife) {
+    score -= 30;
+    reasons.push(`Exceeded shelf life (${shelfLife}h for ${form.foodType})`);
+  } else if (form.hoursPrepared > shelfLife * 0.7) {
+    score -= 10;
+    reasons.push('Approaching shelf life limit');
+  } else {
+    reasons.push('Within safe shelf life window');
+  }
+
+  if (form.visibleContamination) {
+    score -= 25;
+    reasons.push('Visible contamination detected');
+  }
+
+  const tempMismatch = (form.foodType === 'Dairy' && form.storageTemp !== 'cold') ||
+    (form.foodType === 'Fresh Produce' && form.storageTemp === 'room' && form.hoursPrepared > 6);
+  if (tempMismatch) {
+    score -= 15;
+    reasons.push('Incorrect storage temperature for food type');
+  } else if (form.foodType === 'Dairy' && form.storageTemp === 'cold') {
+    score += 5;
+    reasons.push('Proper cold chain maintained');
+  }
+
+  if (!form.hasPackaging && (form.foodType === 'Cooked Meal' || form.foodType === 'Dairy')) {
+    score -= 8;
+    reasons.push('No protective packaging');
+  } else if (form.hasPackaging) {
+    score += 3;
+    reasons.push('Sealed packaging present');
+  }
+
+  score = Math.max(0, Math.min(100, score));
+  isSafe = score >= 60;
+
+  return {
+    isSafe,
+    foodName: form.foodName || 'Unnamed Food Item',
+    confidence: Math.min(99, 70 + Math.floor(Math.random() * 20)),
+    reason: reasons.join('. ') + '.',
+    description: `${form.foodType} prepared ${form.hoursPrepared}h ago, stored at ${form.storageTemp} temperature.${form.hasPackaging ? ' Has packaging.' : ' No packaging.'}`,
+    estimatedShelfLifeHours: Math.max(0, shelfLife - form.hoursPrepared),
+    temperatureRequirement: form.storageTemp,
+    allergens: form.allergens,
+    safetyScore: score,
+  };
+}
 
 function SafetyScoreIndicator({ score }: { score: number }) {
   const [animatedScore, setAnimatedScore] = React.useState(0);
@@ -284,34 +195,22 @@ function AnalysisResultCard({ analysis }: { analysis: AnalysisRecord }) {
     <Card className="bg-card/50 backdrop-blur border-primary/10 hover:border-primary/30 transition-all">
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
-          <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-muted">
-            <img
-              src={analysis.imageUrl}
-              alt={analysis.foodName}
-              className="w-full h-full object-cover"
-            />
-            <div className={`absolute top-1 right-1 p-1 rounded-full ${analysis.isSafe ? 'bg-green-500' : 'bg-red-500'}`}>
-              {analysis.isSafe ? (
-                <CheckCircle2 className="h-3 w-3 text-white" />
-              ) : (
-                <XCircle className="h-3 w-3 text-white" />
-              )}
-            </div>
+          <div className={`w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 ${analysis.isSafe ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
+            {analysis.isSafe ? (
+              <CheckCircle2 className="h-8 w-8 text-green-500" />
+            ) : (
+              <XCircle className="h-8 w-8 text-red-500" />
+            )}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <h3 className="font-bold text-sm truncate">{analysis.foodName}</h3>
-              <Badge
-                variant={analysis.isSafe ? 'default' : 'destructive'}
-                className="text-[10px] flex-shrink-0"
-              >
+              <Badge variant={analysis.isSafe ? 'default' : 'destructive'} className="text-[10px] flex-shrink-0">
                 {analysis.isSafe ? 'Safe' : 'Unsafe'}
               </Badge>
             </div>
-
             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{analysis.reason}</p>
-
             <div className="flex items-center gap-3 mt-2">
               <div className="flex items-center gap-1">
                 <Shield className="h-3 w-3 text-primary" />
@@ -323,22 +222,18 @@ function AnalysisResultCard({ analysis }: { analysis: AnalysisRecord }) {
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3 text-blue-500" />
-                <span className="text-[10px] font-bold">{analysis.estimatedShelfLifeHours}h</span>
+                <span className="text-[10px] font-bold">{analysis.estimatedShelfLifeHours}h left</span>
               </div>
             </div>
-
             {analysis.allergens && analysis.allergens.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {analysis.allergens.map((allergen, i) => (
-                  <Badge key={i} variant="outline" className="text-[9px] py-0">
-                    {allergen}
-                  </Badge>
+                  <Badge key={i} variant="outline" className="text-[9px] py-0">{allergen}</Badge>
                 ))}
               </div>
             )}
           </div>
         </div>
-
         <div className="mt-3 text-[10px] text-muted-foreground">
           Analyzed: {analysis.timestamp.toLocaleString()}
         </div>
@@ -348,44 +243,42 @@ function AnalysisResultCard({ analysis }: { analysis: AnalysisRecord }) {
 }
 
 export default function FoodSafetyPage() {
-  const [uploadedFile, setUploadedFile] = React.useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const [form, setForm] = React.useState<ChecklistForm>({
+    foodName: '',
+    foodType: '',
+    hoursPrepared: 1,
+    storageTemp: 'room',
+    hasPackaging: true,
+    visibleContamination: false,
+    allergens: [],
+  });
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [currentResult, setCurrentResult] = React.useState<FoodSafetyResult | null>(null);
   const [analysisHistory, setAnalysisHistory] = React.useState<AnalysisRecord[]>([]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setUploadedFile(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      setCurrentResult(null);
-    }
-  };
-
   const runAnalysis = () => {
-    if (!uploadedFile) return;
+    if (!form.foodName || !form.foodType) return;
     setIsAnalyzing(true);
-
     setTimeout(() => {
-      const randomSample = FOOD_SAFETY_SAMPLES[Math.floor(Math.random() * FOOD_SAFETY_SAMPLES.length)];
-      const result: AnalysisRecord = {
-        ...randomSample,
+      const result = calculateSafetyScore(form);
+      const record: AnalysisRecord = {
+        ...result,
         id: `analysis-${Date.now()}`,
         timestamp: new Date(),
-        imageUrl: previewUrl || `https://picsum.photos/seed/food${Date.now()}/400/300`,
       };
       setCurrentResult(result);
-      setAnalysisHistory(prev => [result, ...prev].slice(0, 20));
+      setAnalysisHistory(prev => [record, ...prev].slice(0, 20));
       setIsAnalyzing(false);
-    }, 2000);
+    }, 1500);
   };
 
-  const clearUpload = () => {
-    setUploadedFile(null);
-    setPreviewUrl(null);
-    setCurrentResult(null);
+  const toggleAllergen = (allergen: string) => {
+    setForm(prev => ({
+      ...prev,
+      allergens: prev.allergens.includes(allergen)
+        ? prev.allergens.filter(a => a !== allergen)
+        : [...prev.allergens, allergen],
+    }));
   };
 
   const totalAnalyses = analysisHistory.length;
@@ -401,21 +294,21 @@ export default function FoodSafetyPage() {
         <div>
           <h1 className="text-2xl font-bold font-headline flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
-            AI Food Safety Analyzer
+            AI Food Safety Checker
           </h1>
           <p className="text-muted-foreground text-sm">
-            Upload food images for AI-powered safety analysis and quality assessment
+            Enter food details to get an AI-powered safety assessment
           </p>
         </div>
         <Badge variant="outline" className="flex items-center gap-1">
-          <Sparkles className="h-3 w-3" /> Powered by AI Vision
+          <ClipboardCheck className="h-3 w-3" /> Manual Checklist
         </Badge>
       </div>
 
       <Tabs defaultValue="analyze" className="w-full">
         <TabsList className="grid w-full grid-cols-3 h-auto p-1">
           <TabsTrigger value="analyze" className="text-xs font-bold flex items-center gap-1">
-            <Camera className="h-3 w-3" /> Analyze
+            <ClipboardCheck className="h-3 w-3" /> Analyze
           </TabsTrigger>
           <TabsTrigger value="history" className="text-xs font-bold flex items-center gap-1">
             <History className="h-3 w-3" /> History
@@ -430,71 +323,121 @@ export default function FoodSafetyPage() {
             <Card className="bg-card/50 backdrop-blur border-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Upload className="h-5 w-5 text-primary" />
-                  Food Image Upload
+                  <ClipboardCheck className="h-5 w-5 text-primary" />
+                  Food Safety Checklist
                 </CardTitle>
                 <CardDescription>
-                  Upload a photo of food to analyze its safety and freshness
+                  Fill in the details below to analyze food safety
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="relative border-2 border-dashed rounded-2xl p-8 text-center hover:border-primary/50 transition-all bg-muted/20">
-                  {previewUrl ? (
-                    <div className="space-y-4">
-                      <div className="relative w-full max-w-sm mx-auto aspect-video rounded-xl overflow-hidden border">
-                        <img
-                          src={previewUrl}
-                          alt="Uploaded food"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="flex items-center justify-center gap-2">
-                        <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                          {uploadedFile?.name}
-                        </p>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={clearUpload}
-                        >
-                          <Trash2 className="h-3 w-3 text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <label className="cursor-pointer block">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="sr-only"
-                        onChange={handleFileSelect}
-                      />
-                      <Camera className="h-12 w-12 text-primary/40 mx-auto mb-3" />
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Click to upload or drag and drop
-                      </p>
-                      <p className="text-[10px] text-muted-foreground mt-1">
-                        PNG, JPG, WEBP up to 10MB
-                      </p>
-                    </label>
+              <CardContent className="space-y-5">
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider">Food Name</Label>
+                  <Input
+                    placeholder="e.g., Sambar Rice, Milk Packets"
+                    value={form.foodName}
+                    onChange={(e) => setForm(prev => ({ ...prev, foodName: e.target.value }))}
+                    className="border-orange-200 focus-visible:ring-orange-500"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider">Food Type</Label>
+                  <Select value={form.foodType} onValueChange={(val) => setForm(prev => ({ ...prev, foodType: val }))}>
+                    <SelectTrigger className="border-orange-200">
+                      <SelectValue placeholder="Select food type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.keys(FOOD_TYPE_SHELFLIFE).map(type => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider">
+                    Hours Since Prepared
+                  </Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={720}
+                    value={form.hoursPrepared}
+                    onChange={(e) => setForm(prev => ({ ...prev, hoursPrepared: parseInt(e.target.value) || 0 }))}
+                    className="border-orange-200 focus-visible:ring-orange-500"
+                  />
+                  {form.foodType && (
+                    <p className="text-[10px] text-muted-foreground">
+                      Shelf life for {form.foodType}: ~{FOOD_TYPE_SHELFLIFE[form.foodType]} hours
+                    </p>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider">Storage Temperature</Label>
+                  <div className="flex gap-2">
+                    {(['room', 'cold', 'frozen'] as const).map(temp => (
+                      <Button
+                        key={temp}
+                        variant={form.storageTemp === temp ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setForm(prev => ({ ...prev, storageTemp: temp }))}
+                        className={`flex-1 capitalize ${form.storageTemp === temp ? 'bg-primary' : ''}`}
+                      >
+                        <Thermometer className="h-3 w-3 mr-1" />
+                        {temp}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-bold uppercase tracking-wider">Has Packaging</Label>
+                  <Switch
+                    checked={form.hasPackaging}
+                    onCheckedChange={(checked) => setForm(prev => ({ ...prev, hasPackaging: checked }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-bold uppercase tracking-wider">Visible Contamination</Label>
+                  <Switch
+                    checked={form.visibleContamination}
+                    onCheckedChange={(checked) => setForm(prev => ({ ...prev, visibleContamination: checked }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase tracking-wider">Allergens</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {ALLERGEN_OPTIONS.map(allergen => (
+                      <Badge
+                        key={allergen}
+                        variant={form.allergens.includes(allergen) ? 'default' : 'outline'}
+                        className={`cursor-pointer transition-all ${form.allergens.includes(allergen) ? 'bg-primary' : ''}`}
+                        onClick={() => toggleAllergen(allergen)}
+                      >
+                        {allergen}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
 
                 <Button
                   onClick={runAnalysis}
-                  disabled={!uploadedFile || isAnalyzing}
+                  disabled={!form.foodName || !form.foodType || isAnalyzing}
                   className="w-full bg-primary"
                 >
                   {isAnalyzing ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Analyzing Food Safety...
+                      Analyzing Safety...
                     </>
                   ) : (
                     <>
                       <Sparkles className="mr-2 h-4 w-4" />
-                      Run AI Safety Analysis
+                      Run Safety Analysis
                     </>
                   )}
                 </Button>
@@ -576,23 +519,18 @@ export default function FoodSafetyPage() {
                         </p>
                         <div className="flex flex-wrap gap-1">
                           {currentResult.allergens.map((allergen, i) => (
-                            <Badge key={i} variant="outline" className="text-[10px]">
-                              {allergen}
-                            </Badge>
+                            <Badge key={i} variant="outline" className="text-[10px]">{allergen}</Badge>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    <Progress
-                      value={currentResult.safetyScore}
-                      className="h-2"
-                    />
+                    <Progress value={currentResult.safetyScore} className="h-2" />
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                     <Shield className="h-16 w-16 mb-4 opacity-20" />
-                    <p className="text-sm font-medium">Upload a food image to begin analysis</p>
+                    <p className="text-sm font-medium">Fill in the checklist to begin analysis</p>
                     <p className="text-[10px] mt-1">Results will appear here</p>
                   </div>
                 )}
@@ -649,7 +587,7 @@ export default function FoodSafetyPage() {
                 <div className="text-center py-12 text-muted-foreground">
                   <History className="h-12 w-12 mx-auto mb-3 opacity-20" />
                   <p className="text-sm font-medium">No analyses yet</p>
-                  <p className="text-[10px] mt-1">Upload food images to build your safety history</p>
+                  <p className="text-[10px] mt-1">Use the checklist to build your safety history</p>
                 </div>
               )}
             </CardContent>

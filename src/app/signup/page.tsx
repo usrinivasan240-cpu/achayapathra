@@ -118,6 +118,23 @@ export default function SignUpPage() {
         createdAt: new Date().toISOString(),
       });
 
+      // Send email notification to admin
+      try {
+        await fetch('/api/notify-registration', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: values.name,
+            email: values.email,
+            role: values.role,
+            phone: values.phone,
+            timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+          }),
+        });
+      } catch (notifErr) {
+        console.error('Notification failed (non-critical):', notifErr);
+      }
+
       router.push('/dashboard');
     } catch (error: any) {
       console.error('Sign up error:', error);

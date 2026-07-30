@@ -51,7 +51,11 @@
     "recharts": "^2.12.7",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "qrcode.react": "^3.1.0",
+    "jspdf": "^2.5.1",
+    "html2canvas": "^1.4.1",
+    "nodemailer": "^6.9.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.12",
@@ -61,6 +65,7 @@
     "eslint-config-next": "14.2.5",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@types/nodemailer": "^6.4.0"
   }
 }

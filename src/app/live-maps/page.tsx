@@ -68,52 +68,64 @@ function latLngToSvg(lat: number, lng: number): { x: number; y: number } {
   return { x, y };
 }
 
-const TN_OUTLINE_PATH = `M 310 15 L 345 20 L 370 35 L 395 28 L 415 40 L 430 55
-  L 445 48 L 460 60 L 470 80 L 475 100 L 468 120 L 478 135 L 490 130
-  L 500 145 L 492 160 L 480 165 L 488 185 L 478 200 L 465 210 L 470 230
-  L 460 245 L 450 255 L 455 270 L 445 285 L 435 295 L 430 315 L 420 330
-  L 425 350 L 415 365 L 405 380 L 395 390 L 385 410 L 390 430 L 380 445
-  L 370 460 L 360 475 L 350 485 L 340 500 L 330 510 L 315 520 L 300 535
-  L 285 545 L 270 555 L 255 565 L 240 575 L 225 580 L 210 590 L 195 595
-  L 180 600 L 165 608 L 150 612 L 135 618 L 125 625 L 115 615 L 100 610
-  L 90 600 L 80 590 L 70 575 L 60 560 L 55 545 L 45 530 L 40 515
-  L 35 500 L 25 480 L 20 460 L 18 440 L 15 420 L 12 400 L 10 380
-  L 8 360 L 6 340 L 5 320 L 8 300 L 12 280 L 10 260 L 15 240
-  L 20 220 L 28 200 L 35 180 L 45 165 L 55 150 L 68 135 L 80 120
-  L 95 108 L 110 95 L 125 85 L 140 78 L 160 70 L 180 60 L 200 52
-  L 220 45 L 240 40 L 260 35 L 280 28 L 295 20 Z`;
+const TN_OUTLINE_PATH = [
+  'M 57 298', 'L 74 278', 'L 83 257', 'L 92 237', 'L 101 217',
+  'L 119 207', 'L 137 202', 'L 154 197', 'L 172 196', 'L 190 194',
+  'L 208 190', 'L 225 184', 'L 243 176', 'L 260 166', 'L 278 154',
+  'L 296 143', 'L 313 131', 'L 331 120', 'L 349 110', 'L 366 100',
+  'L 384 94', 'L 393 94', 'L 402 100', 'L 410 108', 'L 416 118',
+  'L 419 128', 'L 419 138', 'L 417 148', 'L 413 158', 'L 410 168',
+  'L 410 188', 'L 410 208', 'L 406 218', 'L 401 228', 'L 397 238',
+  'L 393 248', 'L 390 258', 'L 387 268', 'L 384 278', 'L 382 288',
+  'L 380 298', 'L 378 308', 'L 377 318', 'L 377 328', 'L 378 338',
+  'L 380 348', 'L 382 358', 'L 383 368', 'L 382 378', 'L 379 388',
+  'L 375 398', 'L 370 408', 'L 364 418', 'L 358 428', 'L 351 438',
+  'L 343 448', 'L 335 458', 'L 326 468', 'L 317 476', 'L 308 484',
+  'L 299 491', 'L 290 498', 'L 280 506', 'L 270 514', 'L 260 522',
+  'L 250 530', 'L 240 540', 'L 232 548', 'L 225 557', 'L 219 566',
+  'L 213 575', 'L 207 584', 'L 201 592', 'L 194 600', 'L 187 608',
+  'L 181 616', 'L 176 624', 'L 172 632', 'L 170 640', 'L 170 646',
+  'L 165 648', 'L 158 646', 'L 151 642', 'L 144 637', 'L 137 630',
+  'L 131 622', 'L 128 614', 'L 128 604', 'L 130 594', 'L 134 584',
+  'L 139 574', 'L 143 564', 'L 145 554', 'L 145 543', 'L 142 533',
+  'L 137 523', 'L 131 513', 'L 126 503', 'L 121 493', 'L 119 483',
+  'L 117 473', 'L 115 463', 'L 113 453', 'L 110 443', 'L 106 433',
+  'L 103 423', 'L 101 413', 'L 101 403', 'L 101 393', 'L 101 383',
+  'L 100 373', 'L 98 363', 'L 95 353', 'L 92 343', 'L 88 333',
+  'L 83 323', 'L 78 313', 'L 70 305', 'L 61 300', 'L 57 298 Z',
+].join(' ');
 
 const ZONE_PATHS: { path: string; city: string }[] = [
-  { path: 'M 415 80 L 455 80 L 455 130 L 415 130 Z', city: 'Chennai' },
-  { path: 'M 160 120 L 210 120 L 210 185 L 160 185 Z', city: 'Coimbatore' },
-  { path: 'M 230 310 L 280 310 L 280 375 L 230 375 Z', city: 'Madurai' },
-  { path: 'M 300 180 L 350 180 L 350 245 L 300 245 Z', city: 'Tiruchirappalli' },
-  { path: 'M 270 200 L 310 200 L 310 260 L 270 260 Z', city: 'Salem' },
-  { path: 'M 170 390 L 215 390 L 215 450 L 170 450 Z', city: 'Tirunelveli' },
-  { path: 'M 205 175 L 245 175 L 245 230 L 205 230 Z', city: 'Erode' },
-  { path: 'M 370 170 L 410 170 L 410 225 L 370 225 Z', city: 'Vellore' },
-  { path: 'M 240 430 L 285 430 L 285 490 L 240 490 Z', city: 'Thoothukudi' },
-  { path: 'M 215 285 L 260 285 L 260 340 L 215 340 Z', city: 'Dindigul' },
-  { path: 'M 350 310 L 395 310 L 395 365 L 350 365 Z', city: 'Thanjavur' },
-  { path: 'M 305 410 L 345 410 L 345 465 L 305 465 Z', city: 'Ramanathapuram' },
-  { path: 'M 380 120 L 415 120 L 415 170 L 380 170 Z', city: 'Krishnagiri' },
-  { path: 'M 290 145 L 325 145 L 325 195 L 290 195 Z', city: 'Namakkal' },
-  { path: 'M 275 225 L 310 225 L 310 275 L 275 275 Z', city: 'Karur' },
-  { path: 'M 130 95 L 170 95 L 170 145 L 130 145 Z', city: 'Nilgiris' },
-  { path: 'M 395 140 L 435 140 L 435 190 L 395 190 Z', city: 'Kancheepuram' },
-  { path: 'M 175 365 L 215 365 L 215 415 L 175 415 Z', city: 'Virudhunagar' },
-  { path: 'M 195 280 L 230 280 L 230 330 L 195 330 Z', city: 'Theni' },
-  { path: 'M 345 145 L 380 145 L 380 195 L 345 195 Z', city: 'Dharmapuri' },
-  { path: 'M 320 270 L 355 270 L 355 320 L 320 320 Z', city: 'Perambalur' },
-  { path: 'M 330 300 L 365 300 L 365 350 L 330 350 Z', city: 'Ariyalur' },
-  { path: 'M 360 340 L 400 340 L 400 395 L 360 395 Z', city: 'Cuddalore' },
-  { path: 'M 370 370 L 410 370 L 410 420 L 370 420 Z', city: 'Nagapattinam' },
-  { path: 'M 410 175 L 450 175 L 450 230 L 410 230 Z', city: 'Tiruvallur' },
-  { path: 'M 195 480 L 235 480 L 235 535 L 195 535 Z', city: 'Kanyakumari' },
-  { path: 'M 200 340 L 240 340 L 240 390 L 200 390 Z', city: 'Sivaganga' },
-  { path: 'M 340 225 L 380 225 L 380 280 L 340 280 Z', city: 'Tiruvannamalai' },
-  { path: 'M 310 380 L 355 380 L 355 435 L 310 435 Z', city: 'Villupuram' },
-  { path: 'M 260 345 L 300 345 L 300 400 L 260 400 Z', city: 'Pudukkottai' },
+  { path: 'M 396 108 L 436 108 L 436 148 L 396 148 Z', city: 'Chennai' },
+  { path: 'M 106 329 L 146 329 L 146 369 L 106 369 Z', city: 'Coimbatore' },
+  { path: 'M 207 439 L 247 439 L 247 479 L 207 479 Z', city: 'Madurai' },
+  { path: 'M 258 350 L 298 350 L 298 390 L 258 390 Z', city: 'Tiruchirappalli' },
+  { path: 'M 210 262 L 250 262 L 250 302 L 210 302 Z', city: 'Salem' },
+  { path: 'M 175 565 L 215 565 L 215 605 L 175 605 Z', city: 'Tirunelveli' },
+  { path: 'M 172 295 L 212 295 L 212 335 L 172 335 Z', city: 'Erode' },
+  { path: 'M 296 125 L 336 125 L 336 165 L 296 165 Z', city: 'Vellore' },
+  { path: 'M 208 557 L 248 557 L 248 597 L 208 597 Z', city: 'Thoothukudi' },
+  { path: 'M 194 397 L 234 397 L 234 437 L 194 437 Z', city: 'Dindigul' },
+  { path: 'M 296 351 L 336 351 L 336 391 L 296 391 Z', city: 'Thanjavur' },
+  { path: 'M 270 499 L 310 499 L 310 539 L 270 539 Z', city: 'Ramanathapuram' },
+  { path: 'M 216 172 L 256 172 L 256 212 L 216 212 Z', city: 'Krishnagiri' },
+  { path: 'M 211 307 L 251 307 L 251 347 L 211 347 Z', city: 'Namakkal' },
+  { path: 'M 203 334 L 243 334 L 243 374 L 203 374 Z', city: 'Karur' },
+  { path: 'M 75 288 L 115 288 L 115 328 L 75 328 Z', city: 'Nilgiris' },
+  { path: 'M 347 134 L 387 134 L 387 174 L 347 174 Z', city: 'Kancheepuram' },
+  { path: 'M 193 476 L 233 476 L 233 516 L 193 516 Z', city: 'Virudhunagar' },
+  { path: 'M 151 433 L 191 433 L 191 473 L 151 473 Z', city: 'Theni' },
+  { path: 'M 217 215 L 257 215 L 257 255 L 217 255 Z', city: 'Dharmapuri' },
+  { path: 'M 273 408 L 313 408 L 313 448 L 273 448 Z', city: 'Perambalur' },
+  { path: 'M 291 320 L 331 320 L 331 360 L 291 360 Z', city: 'Ariyalur' },
+  { path: 'M 353 254 L 393 254 L 393 294 L 353 294 Z', city: 'Cuddalore' },
+  { path: 'M 360 352 L 400 352 L 400 392 L 360 392 Z', city: 'Nagapattinam' },
+  { path: 'M 366 103 L 406 103 L 406 143 L 366 143 Z', city: 'Tiruvallur' },
+  { path: 'M 156 627 L 196 627 L 196 667 L 156 667 Z', city: 'Kanyakumari' },
+  { path: 'M 244 446 L 284 446 L 284 486 L 244 486 Z', city: 'Sivaganga' },
+  { path: 'M 291 205 L 331 205 L 331 245 L 291 245 Z', city: 'Tiruvannamalai' },
+  { path: 'M 328 235 L 368 235 L 368 275 L 328 275 Z', city: 'Villupuram' },
+  { path: 'M 267 396 L 307 396 L 307 436 L 267 436 Z', city: 'Pudukkottai' },
 ];
 
 function getRiskColor(score: number): string {
