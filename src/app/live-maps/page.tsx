@@ -539,7 +539,7 @@ export default function LiveMapsPage() {
                       {/* NGOs */}
                       {showNGOs &&
                         mockNGOs.slice(0, 50).map((ngo) => {
-                          const pos = latLngToSvg(ngo.lat, ngo.lng);
+                          const pos = latLngToSvg(ngo.lat ?? 0, ngo.lng ?? 0);
                           return (
                             <g
                               key={ngo.id}
@@ -573,7 +573,7 @@ export default function LiveMapsPage() {
                       {/* Volunteers */}
                       {showVolunteers &&
                         volunteers.map((vol) => {
-                          const pos = latLngToSvg(vol.lat, vol.lng);
+                          const pos = latLngToSvg(vol.lat ?? 0, vol.lng ?? 0);
                           return (
                             <g key={vol.id}>
                               <circle
