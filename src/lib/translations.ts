@@ -21,11 +21,29 @@ export const translations = {
       gifts: "Gifts",
       find: "Find",
       dash: "Dash",
-      team: "Achayapathra Team"
+      team: "Achayapathra Team",
+      corporateDashboard: "Corporate Dashboard",
+      governmentDashboard: "Government Dashboard",
+      aiInsights: "AI Insights Hub",
+      foodSafety: "Food Safety AI",
+      carbonDashboard: "Carbon Dashboard",
+      donationTracking: "Donation Tracking",
+      liveMaps: "Live Maps",
+      qrVerification: "QR Verification",
+      notifications: "Notifications",
+      certificates: "Certificates",
+      rewards: "Rewards & Gamification",
+      emergency: "Emergency Centre",
+      complaints: "Complaint System",
+      adminPanel: "Admin Panel",
+      revenueDashboard: "Revenue Dashboard",
+      publicImpact: "Public Impact",
+      volunteerProfile: "Volunteer Profile",
+      futureIntelligence: "Future Intelligence"
     },
     header: {
       emergency: "Emergency Mode Active",
-      tagline: "Transforming surplus into structured social impact",
+      tagline: "India's AI-Powered Circular Food Economy Platform",
       title: "Achayapathra"
     },
     common: {
@@ -37,7 +55,20 @@ export const translations = {
       loading: "Loading...",
       submit: "Submit",
       success: "Success",
-      error: "Error"
+      error: "Error",
+      search: "Search",
+      filter: "Filter",
+      export: "Export",
+      download: "Download",
+      view: "View",
+      edit: "Edit",
+      delete: "Delete",
+      save: "Save",
+      cancel: "Cancel",
+      confirm: "Confirm",
+      back: "Back",
+      next: "Next",
+      previous: "Previous"
     },
     dashboard: {
       title: "Intelligence Dashboard",
@@ -52,7 +83,13 @@ export const translations = {
       trends: "Hunger Redistribution Trends",
       trendsDesc: "Monthly food sharing impact visualized.",
       feed: "Intelligence Feed",
-      feedDesc: "Latest community redistribution tasks."
+      feedDesc: "Latest community redistribution tasks.",
+      totalDonations: "Total Donations",
+      totalMeals: "Meals Served",
+      activeNGOs: "Active NGOs",
+      activeVolunteers: "Active Volunteers",
+      carbonSaved: "Carbon Saved",
+      circularEconomy: "Circular Economy"
     },
     donations: {
       allTitle: "All Donations",
@@ -74,7 +111,12 @@ export const translations = {
       confirmRemoveTitle: "Are you absolutely sure?",
       confirmRemoveDesc: "This action cannot be undone. This will permanently delete this donation record from our servers.",
       cancel: "Cancel",
-      continue: "Continue"
+      continue: "Continue",
+      tracking: "Tracking",
+      safety: "Food Safety",
+      circularEconomy: "Circular Economy",
+      biogas: "Biogas Plant",
+      fertilizer: "Fertilizer Centre"
     },
     receiver: {
       title: "Available Donations",
@@ -103,9 +145,72 @@ export const translations = {
       ngos: "Top NGOs Served",
       volunteers: "Top Volunteers",
       cities: "City Impact Ranking",
+      corporates: "Top Corporate Partners",
       pts: "pts",
       meals: "meals",
       kg: "kg"
+    },
+    ngo: {
+      portal: "NGO Demand Center",
+      requirements: "Requirement Center",
+      smartMatches: "Smart Matches",
+      myDemands: "My Demands",
+      newRequirement: "New Requirement",
+      inventory: "Inventory",
+      storage: "Storage",
+      analytics: "Analytics",
+      reports: "Reports",
+      certificates: "Certificates",
+      volunteerTracking: "Volunteer Tracking"
+    },
+    corporate: {
+      dashboard: "Corporate Dashboard",
+      csr: "CSR Activities",
+      esg: "ESG Score",
+      branches: "Branch Locations",
+      employees: "Employee Participation",
+      carbon: "Carbon Offset",
+      certificates: "CSR Certificates",
+      budget: "CSR Budget"
+    },
+    government: {
+      dashboard: "Government Dashboard",
+      collector: "District Collector",
+      district: "District Level",
+      taluk: "Taluk Level",
+      ward: "Ward Level",
+      municipality: "Municipality",
+      heatmaps: "Hunger Heatmaps",
+      foodWaste: "Food Waste Analytics",
+      carbon: "Carbon Dashboard",
+      emergency: "Emergency Response",
+      analytics: "Analytics",
+      reports: "Reports"
+    },
+    ai: {
+      smartMatching: "AI Smart Matching",
+      foodSafety: "Food Safety AI",
+      demandPrediction: "Demand Prediction",
+      carbonCalculator: "Carbon Calculator",
+      emergencyPrediction: "Emergency Prediction",
+      volunteerOptimization: "Volunteer Optimization",
+      recommendations: "AI Recommendations",
+      insightsHub: "AI Intelligence Hub"
+    },
+    circular: {
+      donation: "Food Donation",
+      safetyCheck: "Safety Verification",
+      matching: "AI Matching",
+      ngo: "NGO Acceptance",
+      volunteer: "Volunteer Assignment",
+      navigation: "Route Navigation",
+      delivery: "Delivery Complete",
+      impact: "Impact Recorded",
+      redirect: "Food Redirected",
+      biogas: "Biogas Plant",
+      fertilizer: "Fertilizer Centre",
+      renewable: "Renewable Energy",
+      circularEconomy: "Circular Economy"
     }
   },
   ta: {
@@ -126,11 +231,29 @@ export const translations = {
       gifts: "பரிசுகள்",
       find: "தேடல்",
       dash: "தகவல்",
-      team: "அட்சயபாத்திர குழு"
+      team: "அட்சயபாத்திர குழு",
+      corporateDashboard: "நிறுவன தகவல் பலகை",
+      governmentDashboard: "அரசு தகவல் பலகை",
+      aiInsights: "AI நுண்ணறிவு மையம்",
+      foodSafety: "உணவு பாதுகாப்பு AI",
+      carbonDashboard: "கார்பன் தகவல் பலகை",
+      donationTracking: "நன்கொடை கண்காணிப்பு",
+      liveMaps: "நேரடி வரைபடம்",
+      qrVerification: "QR சரிபார்ப்பு",
+      notifications: "அறிவிப்புகள்",
+      certificates: "சான்றிதழ்கள்",
+      rewards: "வெகுமதிகள் & விளையாட்டுமயமாக்கல்",
+      emergency: "அவசர மையம்",
+      complaints: "புகார் அமைப்பு",
+      adminPanel: "நிர்வாக பேனல்",
+      revenueDashboard: "வருவாய் தகவல் பலகை",
+      publicImpact: "பொது தாக்கம்",
+      volunteerProfile: "தன்னார்வலர் சுயவிவரம்",
+      futureIntelligence: "எதிர்கால நுண்ணறிவு"
     },
     header: {
       emergency: "அவசர நிலை",
-      tagline: "உபரி உணவை சமூக மாற்றமாக மாற்றுதல்",
+      tagline: "இந்தியாவின் AI-இயங்கும் சுழற்சி உணவு பொருளாதார தளம்",
       title: "அட்சயபாத்திர"
     },
     common: {
@@ -142,7 +265,20 @@ export const translations = {
       loading: "ஏற்றுகிறது...",
       submit: "சமர்ப்பி",
       success: "வெற்றி",
-      error: "பிழை"
+      error: "பிழை",
+      search: "தேடல்",
+      filter: "வடிகட்டு",
+      export: "ஏற்றுமதி",
+      download: "பதிவிறக்கம்",
+      view: "பார்க்க",
+      edit: "திருத்து",
+      delete: "நீக்கு",
+      save: "சேமி",
+      cancel: "ரத்து செய்",
+      confirm: "உறுதிப்படுத்து",
+      back: "பின்",
+      next: "அடுத்து",
+      previous: "முந்தைய"
     },
     dashboard: {
       title: "புத்திசாலித்தன தகவல் பலகை",
@@ -157,7 +293,13 @@ export const translations = {
       trends: "பசி மறுபகிர்வு போக்குகள்",
       trendsDesc: "மாதாந்திர உணவுப் பகிர்வு தாக்கம்.",
       feed: "புத்திசாலித்தன ஊட்டம்",
-      feedDesc: "சமீபத்திய சமூக மறுபகிர்வு பணிகள்."
+      feedDesc: "சமீபத்திய சமூக மறுபகிர்வு பணிகள்.",
+      totalDonations: "மொத்த நன்கொடைகள்",
+      totalMeals: "பரிமாறப்பட்ட உணவுகள்",
+      activeNGOs: "செயலில் உள்ள தொண்டு நிறுவனங்கள்",
+      activeVolunteers: "செயலில் உள்ள தன்னார்வலர்கள்",
+      carbonSaved: "சேமிக்கப்பட்ட கார்பன்",
+      circularEconomy: "சுழற்சி பொருளாதாரம்"
     },
     donations: {
       allTitle: "அனைத்து நன்கொடைகள்",
@@ -179,7 +321,12 @@ export const translations = {
       confirmRemoveTitle: "நிச்சயமாக நீக்க வேண்டுமா?",
       confirmRemoveDesc: "இந்தச் செயலை மாற்ற முடியாது. இது எங்கள் சேவையகங்களிலிருந்து இந்த நன்கொடை பதிவை நிரந்தரமாக நீக்கும்.",
       cancel: "ரத்து செய்",
-      continue: "தொடரவும்"
+      continue: "தொடரவும்",
+      tracking: "கண்காணிப்பு",
+      safety: "உணவு பாதுகாப்பு",
+      circularEconomy: "சுழற்சி பொருளாதாரம்",
+      biogas: "உயிர்வாயு தொழிற்சாலை",
+      fertilizer: "உர மையம்"
     },
     receiver: {
       title: "கிடைக்கும் நன்கொடைகள்",
@@ -208,9 +355,72 @@ export const translations = {
       ngos: "சிறந்த தொண்டு நிறுவனங்கள்",
       volunteers: "சிறந்த தன்னார்வலர்கள்",
       cities: "நகர தாக்க தரவரிசை",
+      corporates: "சிறந்த நிறுவன கூட்டாளர்கள்",
       pts: "புள்ளிகள்",
       meals: "உணவுகள்",
       kg: "கி.கி"
+    },
+    ngo: {
+      portal: "தொண்டு நிறுவன தேவை மையம்",
+      requirements: "தேவை மையம்",
+      smartMatches: "புத்திசாலி பொருத்தங்கள்",
+      myDemands: "என் தேவைகள்",
+      newRequirement: "புதிய தேவை",
+      inventory: "சரக்கு",
+      storage: "சேமிப்பகம்",
+      analytics: "பகுப்பாய்வு",
+      reports: "அறிக்கைகள்",
+      certificates: "சான்றிதழ்கள்",
+      volunteerTracking: "தன்னார்வலர் கண்காணிப்பு"
+    },
+    corporate: {
+      dashboard: "நிறுவன தகவல் பலகை",
+      csr: "CSR செயல்பாடுகள்",
+      esg: "ESG மதிப்பெண்",
+      branches: "கிளை இடங்கள்",
+      employees: "ஊழியர் பங்கேற்பு",
+      carbon: "கார்பன் ஈடுசெய்தல்",
+      certificates: "CSR சான்றிதழ்கள்",
+      budget: "CSR நிதி"
+    },
+    government: {
+      dashboard: "அரசு தகவல் பலகை",
+      collector: "மாவட்ட ஆட்சியர்",
+      district: "மாவட்ட நிலை",
+      taluk: "தாலுகா நிலை",
+      ward: "வார்டு நிலை",
+      municipality: "நகராட்சி",
+      heatmaps: "பசி வெப்ப வரைபடம்",
+      foodWaste: "உணவு கழிவு பகுப்பாய்வு",
+      carbon: "கார்பன் தகவல் பலகை",
+      emergency: "அவசர பதில்",
+      analytics: "பகுப்பாய்வு",
+      reports: "அறிக்கைகள்"
+    },
+    ai: {
+      smartMatching: "AI புத்திசாலி பொருத்தம்",
+      foodSafety: "உணவு பாதுகாப்பு AI",
+      demandPrediction: "தேவை கணிப்பு",
+      carbonCalculator: "கார்பன் கணிப்பான்",
+      emergencyPrediction: "அவசர கணிப்பு",
+      volunteerOptimization: "தன்னார்வலர் மேம்படுத்தல்",
+      recommendations: "AI பரிந்துரைகள்",
+      insightsHub: "AI நுண்ணறிவு மையம்"
+    },
+    circular: {
+      donation: "உணவு நன்கொடை",
+      safetyCheck: "பாதுகாப்பு சரிபார்ப்பு",
+      matching: "AI பொருத்தம்",
+      NGO: "தொண்டு நிறுவன ஏற்பு",
+      volunteer: "தன்னார்வலர் நியமனம்",
+      navigation: "வழிசெலுத்தல்",
+      delivery: "விநியோகம் நிறைவு",
+      impact: "தாக்கம் பதிவு",
+      redirect: "உணவு திருப்பி விடப்பட்டது",
+      biogas: "உயிர்வாயு தொழிற்சாலை",
+      fertilizer: "உர மையம்",
+      renewable: "புதுப்பிக்கத்தக்க ஆற்றல்",
+      circularEconomy: "சுழற்சி பொருளாதாரம்"
     }
   }
 };

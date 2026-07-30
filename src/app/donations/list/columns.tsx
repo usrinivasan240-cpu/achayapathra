@@ -23,7 +23,11 @@ const statusVariantMap: { [key in Donation['status']]: 'default' | 'secondary' |
     Claimed: 'secondary',
     Delivered: 'outline',
     'Picked Up': 'outline',
-    Pending: 'destructive'
+    Pending: 'destructive',
+    Expired: 'destructive',
+    Redirected: 'secondary',
+    Biogas: 'secondary',
+    Fertilizer: 'secondary'
 };
 
 

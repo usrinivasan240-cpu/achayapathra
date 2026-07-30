@@ -19,7 +19,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, isUserLoading } = useUser();
 
-  const isPublicPage = ['/', '/signup'].includes(pathname);
+  const isPublicPage = ['/', '/signup', '/public-impact'].includes(pathname);
 
   // Centralized redirect logic
   useEffect(() => {
