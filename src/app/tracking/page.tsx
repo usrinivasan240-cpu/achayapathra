@@ -30,6 +30,7 @@ import {
 import { mockDonations } from '@/lib/data';
 import { Donation } from '@/lib/types';
 import { Header } from '@/components/layout/header';
+import { PremiumCertificate, generateCertificateData } from '@/components/certificates/premium-certificate';
 import {
   Card,
   CardContent,
@@ -749,6 +750,24 @@ export default function TrackingPage() {
                     variant="outline"
                     className="w-full h-11 border-orange-300 text-orange-600 hover:bg-orange-50 font-bold"
                     onClick={async () => {
+                      const certData = generateCertificateData(
+                        selectedDonation.donor.id || 'donor-001',
+                        selectedDonation.donor.name,
+                        'donor',
+                        `Food Donation: ${selectedDonation.foodType}`,
+                        {
+                          mealsServed: Math.floor((selectedDonation.quantity_kg || 10) / 0.5),
+                          foodRescuedKg: selectedDonation.quantity_kg || 10,
+                          peopleBenefited: Math.floor((selectedDonation.quantity_kg || 10) / 0.5),
+                          carbonSavedKg: selectedDonation.carbon_saved_kg || 0,
+                        },
+                        {
+                          donationId: selectedDonation.id,
+                          foodName: selectedDonation.foodType,
+                          quantity: selectedDonation.quantity,
+                          recipientId: selectedDonation.ngoId,
+                        }
+                      );
                       const el = document.getElementById('tracking-certificate-area');
                       if (!el) return;
                       try {
@@ -758,7 +777,7 @@ export default function TrackingPage() {
                         const pdfWidth = pdf.internal.pageSize.getWidth();
                         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
                         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                        pdf.save(`certificate-${selectedDonation.trackingId || selectedDonation.id}.pdf`);
+                        pdf.save(`Achayapathra-Certificate-${selectedDonation.trackingId || selectedDonation.id}.pdf`);
                       } catch {
                         alert('Certificate download requires the page to be fully loaded. Please try again.');
                       }

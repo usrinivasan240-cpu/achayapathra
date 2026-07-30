@@ -51,6 +51,7 @@ import {
 } from 'lucide-react';
 import { mockCertificates, mockDonations, mockNGOs } from '@/lib/data';
 import { Certificate } from '@/lib/types';
+import { useUser } from '@/firebase/provider';
 
 const CERT_TYPE_CONFIG: Record<
   string,
@@ -81,7 +82,7 @@ const LEVEL_COLORS: Record<string, string> = {
   diamond: '#06B6D4',
 };
 
-function generateDemoCertificateData(cert: Certificate): CertificateData {
+function generateDemoCertificateData(cert: Certificate, userName?: string, userId?: string): CertificateData {
   const impact = {
     mealsServed: Math.floor(Math.random() * 500) + 50,
     foodRescuedKg: Math.floor(Math.random() * 200) + 20,
@@ -93,7 +94,8 @@ function generateDemoCertificateData(cert: Certificate): CertificateData {
   };
   return {
     id: cert.id,
-    recipientName: cert.userName,
+    recipientName: userName || cert.userName,
+    recipientId: userId || cert.userId,
     role: cert.type,
     title: cert.title,
     description: cert.description,
@@ -111,16 +113,20 @@ function generateDemoCertificateData(cert: Certificate): CertificateData {
 function CertificateCard({
   cert,
   onPreview,
+  userName,
+  userId,
 }: {
   cert: Certificate;
   onPreview: (cert: Certificate) => void;
+  userName?: string;
+  userId?: string;
 }) {
   const config = CERT_TYPE_CONFIG[cert.type] || CERT_TYPE_CONFIG.achievement;
   const TypeIcon = config.icon;
   const issuedDate = cert.issuedDate?.toDate?.() ?? new Date();
   const validUntil = cert.validUntil?.toDate?.() ?? null;
   const isValid = validUntil ? validUntil > new Date() : true;
-  const certData = generateDemoCertificateData(cert);
+  const certData = generateDemoCertificateData(cert, userName, userId);
   const LevelIcon = LEVEL_ICONS[certData.level] || Trophy;
   const levelColor = LEVEL_COLORS[certData.level] || '#EAB308';
 
@@ -285,6 +291,7 @@ function VerifySection() {
 }
 
 export default function CertificatesPage() {
+  const user = useUser();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [typeFilter, setTypeFilter] = React.useState<string>('all');
   const [previewCert, setPreviewCert] = React.useState<Certificate | null>(null);
@@ -424,7 +431,13 @@ export default function CertificatesPage() {
             {filteredCertificates.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredCertificates.map((cert) => (
-                  <CertificateCard key={cert.id} cert={cert} onPreview={handlePreview} />
+                  <CertificateCard
+                    key={cert.id}
+                    cert={cert}
+                    onPreview={handlePreview}
+                    userName={user?.user?.displayName || user?.user?.email?.split('@')[0] || cert.userName}
+                    userId={user?.user?.uid || cert.userId}
+                  />
                 ))}
               </div>
             ) : (
@@ -461,7 +474,11 @@ export default function CertificatesPage() {
           {previewCert && (
             <div className="p-4 pt-0">
               <PremiumCertificate
-                data={generateDemoCertificateData(previewCert)}
+                data={generateDemoCertificateData(
+                  previewCert,
+                  user?.user?.displayName || user?.user?.email?.split('@')[0] || previewCert.userName,
+                  user?.user?.uid || previewCert.userId
+                )}
                 showActions={true}
                 isPreview={true}
               />
