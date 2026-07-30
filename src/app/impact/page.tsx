@@ -115,7 +115,7 @@ export default function ImpactPage() {
         
         <div className="relative h-[200px] md:h-[300px] w-full">
           <Image
-            src="https://picsum.photos/seed/impact-awareness/1920/1080"
+            src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1920&q=80"
             alt="Humanitarian impact visualization"
             fill
             className="object-cover brightness-[0.4]"
