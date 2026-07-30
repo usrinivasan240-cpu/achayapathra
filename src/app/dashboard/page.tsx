@@ -76,7 +76,7 @@ export default function DashboardPage() {
 
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentMonth = new Date().getMonth();
-    const last7Months = [];
+    const last7Months: { name: string; month: number; total: number }[] = [];
     
     for (let i = 6; i >= 0; i--) {
       const monthIndex = (currentMonth - i + 12) % 12;
