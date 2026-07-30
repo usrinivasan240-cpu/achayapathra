@@ -15,13 +15,15 @@ import { Progress } from '@/components/ui/progress';
 import dynamic from 'next/dynamic';
 import { useAdmin } from '@/hooks/useAdmin';
 
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false });
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false });
-const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false });
-const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false });
-const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
-const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false });
+import type { ResponsiveContainerProps, LineChartProps, LineProps, XAxisProps, YAxisProps, TooltipProps, CartesianGridProps } from 'recharts';
+
+const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer) as Promise<React.ComponentType<ResponsiveContainerProps>>, { ssr: false });
+const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart) as Promise<React.ComponentType<LineChartProps>>, { ssr: false });
+const Line = dynamic(() => import('recharts').then(mod => mod.Line) as Promise<React.ComponentType<LineProps>>, { ssr: false });
+const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis) as Promise<React.ComponentType<XAxisProps>>, { ssr: false });
+const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis) as Promise<React.ComponentType<YAxisProps>>, { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip) as Promise<React.ComponentType<TooltipProps>>, { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid) as Promise<React.ComponentType<CartesianGridProps>>, { ssr: false });
 
 const TAMIL_NADU_STATIC_ZONES = [
   { id: 'tn-1', zone_name: 'Chennai Central', hunger_risk_score: 88, weekly_request_count: 1450, last_30_days_growth_rate: 12.4 },
