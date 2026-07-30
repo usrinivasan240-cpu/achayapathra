@@ -63,7 +63,7 @@ const generateSmartMatches = (): SmartMatchResult[] => {
   return matches.sort((a, b) => b.matchScore - a.matchScore).slice(0, 30);
 };
 
-export function AISmartMatchPanel() {
+function AISmartMatchPanel() {
   const [matches, setMatches] = React.useState<SmartMatchResult[]>([]);
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [selectedMatch, setSelectedMatch] = React.useState<SmartMatchResult | null>(null);
@@ -159,7 +159,7 @@ export function AISmartMatchPanel() {
   );
 }
 
-export function DemandPredictionPanel() {
+function DemandPredictionPanel() {
   return (
     <Card className="border-primary/20 shadow-sm">
       <CardHeader className="bg-gradient-to-r from-blue-500/5 to-blue-500/10">
@@ -213,7 +213,7 @@ export function DemandPredictionPanel() {
   );
 }
 
-export function CarbonCalculatorWidget() {
+function CarbonCalculatorWidget() {
   const totalCO2 = mockPlatformAnalytics.totalCO2Saved;
   const totalMeals = mockPlatformAnalytics.totalMealsServed;
   const treesEquivalent = Math.round(totalCO2 / 21.77);
@@ -261,7 +261,7 @@ export function CarbonCalculatorWidget() {
   );
 }
 
-export function EmergencyPredictionPanel() {
+function EmergencyPredictionPanel() {
   const [activeEmergencies, setActiveEmergencies] = React.useState(3);
 
   return (
@@ -316,7 +316,7 @@ export function EmergencyPredictionPanel() {
   );
 }
 
-export function VolunteerOptimizationPanel() {
+function VolunteerOptimizationPanel() {
   const volunteers = [
     { name: 'Arjun Kumar', zone: 'Chennai', trips: 12, efficiency: 94, status: 'active' },
     { name: 'Priya Selvan', zone: 'Madurai', trips: 8, efficiency: 89, status: 'active' },
@@ -364,7 +364,7 @@ export function VolunteerOptimizationPanel() {
   );
 }
 
-export function RecommendationEngine() {
+function RecommendationEngine() {
   const recommendations = [
     { title: 'Increase Chennai coverage', description: 'Add 5 more volunteers to reduce ETA by 12%', impact: 'High', icon: Target },
     { title: 'Redirect surplus to biogas', description: '120kg expiring food can generate 45kWh energy', impact: 'Medium', icon: Leaf },
