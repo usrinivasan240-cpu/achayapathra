@@ -75,31 +75,22 @@ export function getCertificateLevel(points: number): CertificateLevel {
 function TamilNaduEmblem({ size = 48 }: { size?: number }) {
   return (
     <svg viewBox="0 0 100 120" width={size} height={size * 1.2} fill="none">
-      {/* Temple Tower (Srivilliputhur Andal) */}
       <rect x="20" y="10" width="60" height="8" rx="1" fill="#1E3A8A" />
       <rect x="25" y="18" width="50" height="6" rx="1" fill="#F97316" />
       <rect x="30" y="24" width="40" height="5" rx="1" fill="#1E3A8A" />
-      {/* Main tower body */}
       <path d="M28 29 L72 29 L68 75 L32 75 Z" fill="#1E3A8A" />
       <rect x="35" y="32" width="30" height="3" rx="1" fill="#F97316" opacity="0.8" />
       <rect x="38" y="37" width="24" height="2" rx="1" fill="#F97316" opacity="0.6" />
       <rect x="40" y="41" width="20" height="2" rx="1" fill="#F97316" opacity="0.5" />
-      {/* Windows/Doors */}
       <rect x="42" y="50" width="16" height="20" rx="8" fill="#F97316" />
       <rect x="44" y="52" width="12" height="16" rx="6" fill="#1E3A8A" />
       <rect x="46" y="54" width="8" height="12" rx="4" fill="#F97316" opacity="0.6" />
-      {/* Flag */}
       <line x1="50" y1="2" x2="50" y2="12" stroke="#1E3A8A" strokeWidth="1.5" />
       <path d="M50 2 L62 6 L50 10 Z" fill="#FF6B35" />
-      {/* Base platform */}
       <rect x="15" y="75" width="70" height="8" rx="2" fill="#1E3A8A" />
       <rect x="10" y="83" width="80" height="6" rx="2" fill="#F97316" />
       <rect x="8" y="89" width="84" height="8" rx="2" fill="#1E3A8A" />
-      {/* Tamil text area */}
       <rect x="20" y="100" width="60" height="14" rx="3" fill="#FFFBEB" stroke="#1E3A8A" strokeWidth="1" />
-      <text x="50" y="110" textAnchor="middle" fontSize="7" fontWeight="bold" fill="#1E3A8A" fontFamily="sans-serif">
-        தமிழ்நாடு அரசு
-      </text>
     </svg>
   );
 }
@@ -121,16 +112,32 @@ export function PremiumCertificate({
   const hash = generateHash(`${data.id}-${data.recipientName}-${data.issuedDate.toISOString()}`);
   const verificationUrl = `https://achayapathra.vercel.app/qr-verification?code=${data.qrCode}`;
 
-  const exportPDF = async () => {
-    if (!certRef.current) return;
-    setIsExporting(true);
+  const captureElement = async (): Promise<HTMLCanvasElement | null> => {
+    const el = certRef.current;
+    if (!el) return null;
+    await new Promise((r) => setTimeout(r, 500));
     try {
-      const canvas = await html2canvas(certRef.current, {
-        scale: 3,
+      return await html2canvas(el, {
+        scale: 2,
         backgroundColor: '#ffffff',
         useCORS: true,
         logging: false,
+        allowTaint: true,
+        removeContainer: true,
+        imageTimeout: 10000,
+        windowWidth: el.scrollWidth,
+        windowHeight: el.scrollHeight,
       });
+    } catch {
+      return null;
+    }
+  };
+
+  const exportPDF = async () => {
+    setIsExporting(true);
+    try {
+      const canvas = await captureElement();
+      if (!canvas) { alert('PDF generation failed. Using Print instead.'); window.print(); setIsExporting(false); return; }
       const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -139,21 +146,25 @@ export function PremiumCertificate({
       pdf.save(`Achayapathra-Certificate-${data.id}.pdf`);
     } catch (err) {
       console.error('PDF export failed:', err);
+      window.print();
     }
     setIsExporting(false);
   };
 
   const exportPNG = async () => {
-    if (!certRef.current) return;
     setIsExporting(true);
     try {
-      const canvas = await html2canvas(certRef.current, { scale: 3, backgroundColor: '#ffffff', useCORS: true, logging: false });
+      const canvas = await captureElement();
+      if (!canvas) { alert('PNG generation failed. Using Print instead.'); window.print(); setIsExporting(false); return; }
       const link = document.createElement('a');
       link.download = `Achayapathra-Certificate-${data.id}.png`;
       link.href = canvas.toDataURL('image/png', 1.0);
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (err) {
       console.error('PNG export failed:', err);
+      window.print();
     }
     setIsExporting(false);
   };
@@ -247,6 +258,9 @@ export function PremiumCertificate({
               <div className="text-left">
                 <p className="text-[8px] sm:text-[9px] font-bold tracking-wider" style={{ color: '#1E3A8A', fontFamily: 'Poppins, sans-serif' }}>
                   GOVERNMENT OF TAMIL NADU
+                </p>
+                <p className="text-[7px] sm:text-[8px] font-semibold" style={{ color: '#1E3A8A' }}>
+                  தமிழ்நாடு அரசு
                 </p>
                 <p className="text-[7px] sm:text-[8px] text-muted-foreground">
                   In Recognition of Social Service
